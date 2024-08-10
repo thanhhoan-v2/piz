@@ -29,7 +29,7 @@
 			"@services/*": ["./services/*"],
 			"@providers/*": ["./providers/*"],
 			"@hooks/*": ["./hooks/*"],
-			"@radix-ui/*": ["./non-existent-folder/*"]
+			"@schemas/*": ["./schemas/*"]
 		}
 	},
 	"include": [

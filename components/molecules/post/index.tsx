@@ -1,7 +1,6 @@
-type PostProps = {
-	user_name: string
-}
-export default function Post({ user_name }: PostProps) {
+import type { PostProps } from "@schemas/post"
+
+export default function Post({}: PostProps) {
 	return (
 		<>
 			<div />
