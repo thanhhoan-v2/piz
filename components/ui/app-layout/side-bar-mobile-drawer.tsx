@@ -8,8 +8,8 @@ import {
 	DrawerTitle,
 	Textarea,
 } from "@components/ui/common";
+import { Avatar, AvatarFallback } from "@components/ui/common/avatar";
 import { cn } from "@utils/cn";
-import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react";
 import React from "react";
 

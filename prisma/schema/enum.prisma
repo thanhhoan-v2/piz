@@ -1,0 +1,69 @@
+enum AttachmentFormat {
+  AUDIO
+  IMAGE
+  VIDEO
+
+  @@schema("public")
+}
+
+enum AttachmentType {
+  POST
+  COMMENT
+
+  @@schema("public")
+}
+
+enum ContentType {
+  POST
+  COMMENT
+
+  @@schema("public")
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+
+  @@schema("public")
+}
+
+enum NotificationType {
+  FOLLOW
+  FOLLOW_SUGGEST
+  TAG
+  COMMENT
+  REACT
+
+  @@schema("public")
+}
+
+enum PostVisibility {
+  PUBLIC
+  FRIENDS_ONLY
+  JUST_ME
+
+  @@schema("public")
+}
+
+enum PrivacyMode {
+  PUBLIC
+  PRIVATE
+
+  @@schema("public")
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+
+  @@schema("public")
+}
+
+enum ReportType {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+
+  @@schema("public")
+}
