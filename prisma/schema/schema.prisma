@@ -1,0 +1,251 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters", "fullTextIndex", "fullTextSearch", "multiSchema", "postgresqlExtensions", "prismaSchemaFolder"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["public"]
+}
+
+model AppUser {
+  id                                              String         @id @db.Uuid
+  email                                           String         @unique
+  full_name                                       String         @unique
+  user_name                                       String         @unique
+  user_password                                   String
+  avatar_url                                      String?
+  bio                                             String?
+  is_active                                       Boolean?       @default(false)
+  privacy_mode                                    privacy_mode?  @default(PUBLIC)
+  created_at                                      DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?      @db.Timestamptz(6)
+  is_deleted                                      Boolean?       @default(false)
+  comment                                         Comment[]
+  post                                            Post[]
+  reaction                                        Reaction[]
+  report                                          Report[]
+  PostAction_PostAction_receiver_idToapp_user     PostAction[]   @relation("PostAction_receiver_idToapp_user")
+  PostAction_PostAction_user_idToapp_user         PostAction[]   @relation("PostAction_user_idToapp_user")
+  block_block_blocked_idToapp_user                Block[]        @relation("block_blocked_idToapp_user")
+  block_block_blocker_idToapp_user                Block[]        @relation("block_blocker_idToapp_user")
+  follow_follow_followee_idToapp_user             Follow[]       @relation("follow_followee_idToapp_user")
+  follow_follow_follower_idToapp_user             Follow[]       @relation("follow_follower_idToapp_user")
+  notification_notification_receiver_idToapp_user Notification[] @relation("notification_receiver_idToapp_user")
+  notification_notification_sender_idToapp_user   Notification[] @relation("notification_sender_idToapp_user")
+  shared_post_shared_post_receiver_idToapp_user   SharedPost[]   @relation("shared_post_receiver_idToapp_user")
+  shared_post_shared_post_sender_idToapp_user     SharedPost[]   @relation("shared_post_sender_idToapp_user")
+  tag_tag_tagged_idToapp_user                     Tag[]          @relation("tag_tagged_idToapp_user")
+  tag_tag_tagger_idToapp_user                     Tag[]          @relation("tag_tagger_idToapp_user")
+  PostAction                                      PostAction[]
+
+  @@map("app_user")
+  @@schema("public")
+}
+
+model Attachment {
+  id              Int                @id @default(autoincrement())
+  post_id         Int                @default(autoincrement())
+  comment_id      Int                @default(autoincrement())
+  storage_url     String
+  sound_duration  String?
+  attachment_type attachment_type?
+  format          attachment_format?
+  is_deleted      Boolean?           @default(false)
+  content_type    content_type?
+  created_at      DateTime?          @default(now()) @db.Timestamptz(6)
+  comment         Comment            @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post            Post               @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("attachment")
+  @@schema("public")
+}
+
+model Block {
+  id                                  Int       @id @default(autoincrement())
+  blocker_id                          String?   @db.Uuid
+  blocked_id                          String?   @db.Uuid
+  created_at                          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                          DateTime? @db.Timestamptz(6)
+  app_user_block_blocked_idToapp_user AppUser?  @relation("block_blocked_idToapp_user", fields: [blocked_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_block_blocker_idToapp_user AppUser?  @relation("block_blocker_idToapp_user", fields: [blocker_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("block")
+  @@schema("public")
+}
+
+model Comment {
+  id            Int            @id @default(autoincrement())
+  user_id       String?        @db.Uuid
+  post_id       Int            @default(autoincrement())
+  parent_id     Int            @default(autoincrement())
+  content       String
+  degree        Int?           @default(0)
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?      @db.Timestamptz(6)
+  is_deleted    Boolean?       @default(false)
+  attachment    Attachment[]
+  comment       Comment        @relation("commentTocomment", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_comment Comment[]      @relation("commentTocomment")
+  post          Post           @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user      AppUser?       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notification  Notification[]
+  reaction      Reaction[]
+  report        Report[]
+  tag           Tag[]
+
+  @@map("comment")
+  @@schema("public")
+}
+
+model Follow {
+  id                                    Int            @id @default(autoincrement())
+  follower_id                           String?        @db.Uuid
+  followee_id                           String?        @db.Uuid
+  request_status                        follow_status? @default(PENDING)
+  followed_at                           DateTime?      @default(now()) @db.Timestamptz(6)
+  accepted_at                           DateTime?      @db.Timestamptz(6)
+  app_user_follow_followee_idToapp_user AppUser?       @relation("follow_followee_idToapp_user", fields: [followee_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_follow_follower_idToapp_user AppUser?       @relation("follow_follower_idToapp_user", fields: [follower_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([follower_id, followee_id])
+  @@map("follow")
+  @@schema("public")
+}
+
+model Notification {
+  id                                          Int                @id @default(autoincrement())
+  sender_id                                   String?            @db.Uuid
+  receiver_id                                 String?            @db.Uuid
+  post_id                                     Int                @default(autoincrement())
+  comment_id                                  Int                @default(autoincrement())
+  reaction_id                                 Int                @default(autoincrement())
+  tag_id                                      Int                @default(autoincrement())
+  notification_type                           notification_type?
+  created_at                                  DateTime?          @default(now()) @db.Timestamptz(6)
+  is_read                                     Boolean?           @default(false)
+  comment                                     Comment            @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post                                        Post               @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reaction                                    Reaction           @relation(fields: [reaction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_notification_receiver_idToapp_user AppUser?           @relation("notification_receiver_idToapp_user", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_notification_sender_idToapp_user   AppUser?           @relation("notification_sender_idToapp_user", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tag                                         Tag                @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("notification")
+  @@schema("public")
+}
+
+model Post {
+  id           Int              @id @default(autoincrement())
+  user_id      String?          @db.Uuid
+  content      String
+  no_shares    Int?             @default(0)
+  visibility   post_visibility? @default(PUBLIC)
+  created_at   DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime?        @db.Timestamptz(6)
+  is_deleted   Boolean?         @default(false)
+  attachment   Attachment[]
+  comment      Comment[]
+  notification Notification[]
+  app_user     AppUser?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post_action  PostAction[]
+  reaction     Reaction[]
+  report       Report[]
+  shared_post  SharedPost[]
+  tag          Tag[]
+
+  @@map("post")
+  @@schema("public")
+}
+
+model PostAction {
+  id                                         Int               @id @default(autoincrement())
+  user_id                                    String?           @db.Uuid
+  receiver_id                                String?           @db.Uuid
+  post_id                                    Int               @default(autoincrement())
+  is_deleted                                 Boolean?          @default(false)
+  action                                     post_action_type?
+  post                                       Post              @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_post_action_receiver_idToapp_user AppUser?          @relation("PostAction_receiver_idToapp_user", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_post_action_user_idToapp_user     AppUser?          @relation("PostAction_user_idToapp_user", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  AppUser   AppUser? @relation(fields: [appUserId], references: [id])
+  appUserId String?  @db.Uuid
+
+  @@map("post_action")
+  @@schema("public")
+}
+
+model Reaction {
+  id            Int            @id @default(autoincrement())
+  user_id       String?        @db.Uuid
+  post_id       Int            @default(autoincrement())
+  comment_id    Int            @default(autoincrement())
+  reaction_type reaction_type?
+  is_deleted    Boolean?       @default(false)
+  content_type  content_type?
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?      @db.Timestamptz(6)
+  notification  Notification[]
+  comment       Comment        @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post          Post           @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user      AppUser?       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, comment_id, content_type], map: "unique_comment_reaction")
+  @@unique([user_id, post_id, content_type], map: "unique_post_reaction")
+  @@map("reaction")
+  @@schema("public")
+}
+
+model Report {
+  id           Int           @id @default(autoincrement())
+  reporter_id  String?       @db.Uuid
+  post_id      Int           @default(autoincrement())
+  comment_id   Int           @default(autoincrement())
+  report_type  report_type?
+  content      String?
+  content_type content_type?
+  created_at   DateTime?     @default(now()) @db.Timestamptz(6)
+  comment      Comment       @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post         Post          @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user     AppUser?      @relation(fields: [reporter_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("report")
+  @@schema("public")
+}
+
+model SharedPost {
+  id                                         Int       @id @default(autoincrement())
+  sender_id                                  String?   @db.Uuid
+  receiver_id                                String?   @db.Uuid
+  post_id                                    Int       @default(autoincrement())
+  created_at                                 DateTime? @default(now()) @db.Timestamptz(6)
+  is_deleted                                 Boolean?  @default(false)
+  post                                       Post      @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_shared_post_receiver_idToapp_user AppUser?  @relation("shared_post_receiver_idToapp_user", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_shared_post_sender_idToapp_user   AppUser?  @relation("shared_post_sender_idToapp_user", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("shared_post")
+  @@schema("public")
+}
+
+model Tag {
+  id                               Int            @id @default(autoincrement())
+  tagger_id                        String?        @db.Uuid
+  tagged_id                        String?        @db.Uuid
+  post_id                          Int            @default(autoincrement())
+  comment_id                       Int            @default(autoincrement())
+  content_type                     content_type?
+  id_deleted                       Boolean?       @default(false)
+  created_at                       DateTime?      @default(now()) @db.Timestamptz(6)
+  notification                     Notification[]
+  comment                          Comment        @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post                             Post           @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_tag_tagged_idToapp_user AppUser?       @relation("tag_tagged_idToapp_user", fields: [tagged_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_tag_tagger_idToapp_user AppUser?       @relation("tag_tagger_idToapp_user", fields: [tagger_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("tag")
+  @@schema("public")
+}

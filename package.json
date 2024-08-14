@@ -3,7 +3,13 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
-		"start": "next start"
+		"start": "next start",
+		"db:pull": "npx prisma db pull",
+		"db:push": "npx prisma db push",
+		"db:migrate": "npx prisma migrate dev",
+		"db:reset": "npx prisma migrate reset",
+		"db:status": "npx prisma migrate status",
+		"db:studio": "npx prisma studio"
 	},
 	"dependencies": {
 		"next": "latest",

@@ -1,4 +1,4 @@
-enum AttachmentFormat {
+enum attachment_format {
   AUDIO
   IMAGE
   VIDEO
@@ -6,21 +6,21 @@ enum AttachmentFormat {
   @@schema("public")
 }
 
-enum AttachmentType {
+enum attachment_type {
   POST
   COMMENT
 
   @@schema("public")
 }
 
-enum ContentType {
+enum content_type {
   POST
   COMMENT
 
   @@schema("public")
 }
 
-enum FollowStatus {
+enum follow_status {
   PENDING
   ACCEPTED
   REJECTED
@@ -28,7 +28,7 @@ enum FollowStatus {
   @@schema("public")
 }
 
-enum NotificationType {
+enum notification_type {
   FOLLOW
   FOLLOW_SUGGEST
   TAG
@@ -38,7 +38,14 @@ enum NotificationType {
   @@schema("public")
 }
 
-enum PostVisibility {
+enum post_action_type {
+  SAVE
+  IGNORE
+
+  @@schema("public")
+}
+
+enum post_visibility {
   PUBLIC
   FRIENDS_ONLY
   JUST_ME
@@ -46,21 +53,21 @@ enum PostVisibility {
   @@schema("public")
 }
 
-enum PrivacyMode {
+enum privacy_mode {
   PUBLIC
   PRIVATE
 
   @@schema("public")
 }
 
-enum ReactionType {
+enum reaction_type {
   LIKE
   DISLIKE
 
   @@schema("public")
 }
 
-enum ReportType {
+enum report_type {
   SPAM
   HARASSMENT
   INAPPROPRIATE
