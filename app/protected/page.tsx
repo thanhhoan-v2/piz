@@ -1,16 +1,16 @@
-import AuthButton from "@components/auth/auth-button";
-import { createClient } from "@utils/supabase/server";
+import { ROUTE } from "@constants/route";
+import { createSupabaseClientWithCookies } from "@utils/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function ProtectedPage() {
-	const supabase = createClient();
+	const supabase = createSupabaseClientWithCookies();
 
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
 
 	if (!user) {
-		return redirect("/login");
+		return redirect(ROUTE.SIGN_IN);
 	}
 
 	return (
@@ -22,7 +22,7 @@ export default async function ProtectedPage() {
 				</div>
 				<nav className="flex h-16 w-full justify-center border-b border-b-foreground/10">
 					<div className="flex w-full max-w-4xl items-center justify-between p-3 text-sm">
-						<AuthButton />
+						{/* <AuthButton /> */}
 					</div>
 				</nav>
 			</div>

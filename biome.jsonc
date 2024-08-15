@@ -17,7 +17,7 @@
 			"bracketSpacing": true,
 			"jsxQuoteStyle": "double",
 			"quoteProperties": "asNeeded",
-			"semicolons": "always",
+			"semicolons": "asNeeded",
 			"trailingCommas": "all"
 		}
 	},
@@ -28,6 +28,14 @@
 		"formatter": {
 			"trailingCommas": "none"
 		}
+	},
+	"css": {
+		"formatter": {
+			"enabled": true
+		},
+    "linter": {
+      "enabled": true
+    }
 	},
 	"linter": {
 		"enabled": true,
@@ -85,4 +93,3 @@
 		}
 	}
 }
-
