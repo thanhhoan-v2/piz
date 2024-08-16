@@ -9,25 +9,26 @@ export const signUp = async (formData: FormData) => {
 	const origin = headers().get("origin")
 	const email = formData.get("email") as string
 	const password = formData.get("password") as string
-	const username = formData.get("username") as string
+	const user_name = formData.get("user_name") as string
 	const first_name = formData.get("first_name") as string
 	const last_name = formData.get("last_name") as string
 
 	const { error } = await supabase.auth.signUp({
 		email,
-		password,
+		password, // hashed password
 		options: {
-			emailRedirectTo: `${origin}/auth/callback`,
+			emailRedirectTo: `${origin}/callback`,
 			data: {
-				user_name: username,
+				user_name: user_name,
 				full_name: `${first_name} ${last_name}`,
+				password: password, // for development only
 			},
 		},
 	})
 
 	if (error) {
-		const redirectUrl = `${"/sign-in" as Route}?type=signup&message=${error.message}`
-
+		console.error("Sign-up error:", error)
+		const redirectUrl = `${"/sign-up" as Route}?message=${error.message}`
 		return redirect(redirectUrl)
 	}
 

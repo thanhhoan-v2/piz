@@ -3,12 +3,12 @@ import "@styles/globals.css"
 import { AppLayout } from "@components/templates"
 import { ThemeProvider } from "@providers/theme-provider"
 
-const geist_sans = localFont({
+const geistSans = localFont({
 	src: "../assets/fonts/GeistVF.woff",
 	variable: "--font-geist-sans",
 })
 
-const geist_mono = localFont({
+const geistMono = localFont({
 	src: "../assets/fonts/GeistMonoVF.woff",
 	variable: "--font-geist-mono",
 })
@@ -32,7 +32,7 @@ export default function RootLayout({
 		<html
 			lang="en"
 			suppressHydrationWarning={true}
-			className={`${geist_sans.variable}${geist_mono.variable}`}
+			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background">
 				<ThemeProvider
@@ -41,7 +41,6 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					{/* <LoadingScreen duration={600} /> */}
 					<AppLayout>{children}</AppLayout>
 				</ThemeProvider>
 			</body>
