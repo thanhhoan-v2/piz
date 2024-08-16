@@ -29,7 +29,8 @@
 			"@services/*": ["./services/*"],
 			"@providers/*": ["./providers/*"],
 			"@hooks/*": ["./hooks/*"],
-			"@schemas/*": ["./schemas/*"]
+			"@schemas/*": ["./schemas/*"],
+			"@prisma/*": ["./prisma/*"]
 		}
 	},
 	"include": [

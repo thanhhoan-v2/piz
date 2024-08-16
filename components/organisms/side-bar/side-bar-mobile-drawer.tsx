@@ -53,8 +53,6 @@ export default function SideBarMobileDrawer({
 		}
 	}, [value])
 
-	console.log(user)
-
 	return (
 		<>
 			<Drawer open={isOpen} onOpenChange={setOpen}>

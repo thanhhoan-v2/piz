@@ -1,0 +1,76 @@
+enum attachmentFormat {
+  AUDIO
+  IMAGE
+  VIDEO
+
+  @@map("attachment_format")
+}
+
+enum attachmentType {
+  POST
+  COMMENT
+
+  @@map("attachment_type")
+}
+
+enum contentType {
+  POST
+  COMMENT
+
+  @@map("content_type")
+}
+
+enum followStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+
+  @@map("follow_status")
+}
+
+enum notificationType {
+  FOLLOW
+  FOLLOW_SUGGEST
+  TAG
+  COMMENT
+  REACT
+
+  @@map("notification_type")
+}
+
+enum postActionType {
+  SAVE
+  IGNORE
+
+  @@map("post_action_type")
+}
+
+enum postVisibility {
+  PUBLIC
+  FRIENDS_ONLY
+  JUST_ME
+
+  @@map("post_visibility")
+}
+
+enum privacyMode {
+  PUBLIC
+  PRIVATE
+
+  @@map("privacy_mode")
+}
+
+enum reactionType {
+  LIKE
+  DISLIKE
+
+  @@map("reaction_type")
+}
+
+enum reportType {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+
+  @@map("report_type")
+}

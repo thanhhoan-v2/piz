@@ -20,7 +20,7 @@ const AppLayout = async ({
 			<div className="">
 				<SideBar />
 
-				<main className="mt-3 tablet:mr-[100px] mobile_s:ml-0 tablet:ml-[200px] tablet:max-h-[60vh] flex-1 rounded-tl-2xl rounded-tr-2xl bg-background-item p-4 ">
+				<main className="mt-3 tablet:mr-[100px] mobile_s:ml-0 tablet:ml-[200px] tablet:max-h-[60vh] flex-1 rounded-tl-2xl rounded-tr-2xl">
 					{children}
 				</main>
 			</div>

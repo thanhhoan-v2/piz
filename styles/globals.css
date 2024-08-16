@@ -80,6 +80,11 @@
 	align-items: center;
 }
 
+.flex-y-center {
+	display: flex;
+	align-items: center;
+}
+
 .flex-between {
 	display: flex;
 	align-items: center;
