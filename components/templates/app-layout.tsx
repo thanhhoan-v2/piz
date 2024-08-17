@@ -17,10 +17,10 @@ const AppLayout = async ({
 		<div className="flex w-full flex-col text-foreground transition-colors duration-300">
 			<HeaderBar />
 
-			<div className="">
+			<div>
 				<SideBar />
 
-				<main className="mt-3 tablet:mr-[100px] mobile_s:ml-0 tablet:ml-[200px] tablet:max-h-[60vh] flex-1 rounded-tl-2xl rounded-tr-2xl">
+				<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
 					{children}
 				</main>
 			</div>

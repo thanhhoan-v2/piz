@@ -1,25 +1,15 @@
 import Post from "@components/molecules/post"
-import { ROUTE } from "@constants/route"
-import { Prisma } from "@prisma/functions/client"
-import { createSupabaseClientWithCookies } from "@utils/supabase/server"
-import { redirect } from "next/navigation"
+import { getAllPosts } from "@prisma/functions/post"
+import { isSignedIn } from "@supabase/functions/isSignedIn"
 
 export default async function HomePage() {
-	const supabase = createSupabaseClientWithCookies()
+	isSignedIn()
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
-
-	if (!user) {
-		return redirect(ROUTE.SIGN_IN)
-	}
-
-	const posts = await Prisma.post.findMany()
+	const posts = await getAllPosts()
 
 	return (
 		<>
-			<div className="grid gap-6">
+			<div>
 				{posts.map(
 					({
 						id,
@@ -27,7 +17,6 @@ export default async function HomePage() {
 						userName,
 						userAvatarUrl,
 						content,
-						noShares,
 						visibility,
 						createdAt,
 						updatedAt,
@@ -40,7 +29,6 @@ export default async function HomePage() {
 							userName={userName}
 							userAvatarUrl={userAvatarUrl}
 							content={content}
-							noShares={noShares}
 							visibility={visibility}
 							createdAt={createdAt}
 							updatedAt={updatedAt}

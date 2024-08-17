@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as unknown as {
 // Checks if globalForPrisma.prisma already exists
 // If it does, it reuses that instance
 // Otherwise, it creates a new instance of PrismaClient
-export const Prisma = globalForPrisma.prisma || new PrismaClient()
+export const prisma = globalForPrisma.prisma || new PrismaClient()
 
 if (process.env.NODE_ENV !== "production")
-	globalForPrisma.prisma = Prisma
+	globalForPrisma.prisma = prisma

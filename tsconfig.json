@@ -30,7 +30,8 @@
 			"@providers/*": ["./providers/*"],
 			"@hooks/*": ["./hooks/*"],
 			"@schemas/*": ["./schemas/*"],
-			"@prisma/*": ["./prisma/*"]
+			"@prisma/*": ["./prisma/*"],
+			"@supabase/*": ["./supabase/*"]
 		}
 	},
 	"include": [

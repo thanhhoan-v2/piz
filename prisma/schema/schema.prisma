@@ -10,138 +10,159 @@ datasource db {
 }
 
 model AppUser {
-  id                    String         @id @map("id") @db.Uuid
-  email                 String         @unique @map("email")
-  fullName              String         @unique @map("full_name")
-  userName              String         @map("user_name")
-  avatarUrl             String?        @map("avatar_url")
-  bio                   String?        @map("bio")
-  isActive              Boolean?       @default(false) @map("is_active")
-  privacyMode           privacyMode?   @default(PUBLIC) @map("privacy_mode")
-  createdAt             DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
-  updatedAt             DateTime?      @map("updated_at") @db.Timestamptz(6)
-  isDeleted             Boolean?       @default(false) @map("is_deleted")
-  password              String         @map("password")
-  comments              Comment[]
-  followedUsers         Follow[]       @relation("Follow_followee_idToAppUser")
-  followers             Follow[]       @relation("Follow_follower_idToAppUser")
-  receivedNotifications Notification[] @relation("Notification_receiver_idToAppUser")
-  sentNotifications     Notification[] @relation("Notification_sender_idToAppUser")
-  posts                 Post[]
-  reactions             Reaction[]
-
-  @@map("app_user")
+  id                                            String             @id @map("id") @db.Uuid
+  email                                         String             @unique @map("email")
+  fullName                                      String             @unique @map("full_name")
+  userName                                      String             @unique @map("user_name")
+  password                                      String             @map("password")
+  avatarUrl                                     String?            @unique @map("avatar_url")
+  bio                                           String?            @map("bio")
+  isActive                                      Boolean?           @default(false) @map("is_active")
+  privacyMode                                   PrivacyMode?       @default(PUBLIC) @map("privacy_mode")
+  createdAt                                     DateTime           @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                     DateTime?          @map("updated_at") @db.Timestamptz(6)
+  isDeleted                                     Boolean?           @default(false) @map("is_deleted")
+  block_block_blocked_idToapp_user              block[]            @relation("block_blocked_idToapp_user")
+  block_block_blocker_idToapp_user              block[]            @relation("block_blocker_idToapp_user")
+  comments                                      Comment[]
+  comment_reaction                              comment_reaction[]
+  followedUsers                                 Follow[]           @relation("Follow_followee_idToAppUser")
+  followers                                     Follow[]           @relation("Follow_follower_idToAppUser")
+  receivedNotifications                         Notification[]     @relation("Notification_receiver_idToAppUser")
+  sentNotifications                             Notification[]     @relation("Notification_sender_idToAppUser")
+  post_post_user_avatar_urlToapp_user           Post[]             @relation("post_user_avatar_urlToapp_user")
+  posts                                         Post[]
+  post_post_user_nameToapp_user                 Post[]             @relation("post_user_nameToapp_user")
+  post_action_post_action_receiver_idToapp_user post_action[]      @relation("post_action_receiver_idToapp_user")
+  post_action_post_action_user_idToapp_user     post_action[]      @relation("post_action_user_idToapp_user")
+  post_reaction                                 PostReaction[]
+  report                                        report[]
+  share_share_receiver_idToapp_user             Share[]            @relation("share_receiver_idToapp_user")
+  share_share_sender_idToapp_user               Share[]            @relation("share_sender_idToapp_user")
+  tag_tag_tagged_idToapp_user                   tag[]              @relation("tag_tagged_idToapp_user")
+  tag_tag_tagger_idToapp_user                   tag[]              @relation("tag_tagger_idToapp_user")
 }
 
 model Attachment {
   id             Int               @id @default(autoincrement()) @map("id")
-  postId         Int               @map("post_id")
-  commentId      Int               @map("comment_id")
+  postId         Int               @default(autoincrement()) @map("post_id")
+  commentId      Int               @default(autoincrement()) @map("comment_id")
   storageUrl     String            @map("storage_url")
   soundDuration  String?           @map("sound_duration")
-  attachmentType attachmentType?   @map("attachment_type")
-  format         attachmentFormat? @map("format")
+  attachmentType AttachmentType?   @map("attachment_type")
+  format         AttachmentFormat? @map("format")
   isDeleted      Boolean?          @default(false) @map("is_deleted")
-  contentType    contentType?      @map("content_type")
-  createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  contentType    ContentType?      @map("content_type")
+  createdAt      DateTime          @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
   comment        Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   post           Post              @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@map("attachment")
 }
 
 model Comment {
-  id            Int            @id @default(autoincrement()) @map("id")
-  userId        String?        @map("user_id") @db.Uuid
-  postId        Int            @map("post_id")
-  parentId      Int            @map("parent_id")
-  content       String         @map("content")
-  degree        Int?           @default(0) @map("degree")
-  createdAt     DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime?      @map("updated_at") @db.Timestamptz(6)
-  isDeleted     Boolean?       @default(false) @map("is_deleted")
-  attachments   Attachment[]
-  parentComment Comment        @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  replies       Comment[]      @relation("CommentToComment")
-  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user          AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  notifications Notification[]
-  reactions     Reaction[]
-
-  @@map("comment")
+  id               Int                @id @default(autoincrement()) @map("id")
+  userId           String?            @map("user_id") @db.Uuid
+  postId           Int                @default(autoincrement()) @map("post_id")
+  degree           Int?               @default(0) @map("degree")
+  parentId         Int                @default(autoincrement()) @map("parent_id")
+  content          String             @map("content")
+  createdAt        DateTime           @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?          @map("updated_at") @db.Timestamptz(6)
+  isDeleted        Boolean?           @default(false) @map("is_deleted")
+  attachments      Attachment[]
+  parentComment    Comment            @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  replies          Comment[]          @relation("CommentToComment")
+  post             Post               @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user             AppUser?           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  comment_reaction comment_reaction[]
+  notifications    Notification[]
+  report           report[]
+  share            Share[]
+  tag              tag[]
 }
 
 model Follow {
   id            Int           @id @default(autoincrement()) @map("id")
   followerId    String?       @map("follower_id") @db.Uuid
   followeeId    String?       @map("followee_id") @db.Uuid
-  requestStatus followStatus? @default(PENDING) @map("request_status")
-  followedAt    DateTime?     @default(now()) @map("followed_at") @db.Timestamptz(6)
+  requestStatus FollowStatus? @default(PENDING) @map("request_status")
+  followedAt    DateTime?     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("followed_at") @db.Timestamptz(6)
   acceptedAt    DateTime?     @map("accepted_at") @db.Timestamptz(6)
   followee      AppUser?      @relation("Follow_followee_idToAppUser", fields: [followeeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   follower      AppUser?      @relation("Follow_follower_idToAppUser", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([followerId, followeeId])
-  @@map("follow")
 }
 
 model Notification {
-  id               Int               @id @default(autoincrement()) @map("id")
-  senderId         String?           @map("sender_id") @db.Uuid
-  receiverId       String?           @map("receiver_id") @db.Uuid
-  postId           Int               @map("post_id")
-  commentId        Int               @map("comment_id")
-  reactionId       Int               @map("reaction_id")
-  tagId            Int               @map("tag_id")
-  notificationType notificationType? @map("notification_type")
-  createdAt        DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
-  isRead           Boolean?          @default(false) @map("is_read")
-  comment          Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post             Post              @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  reaction         Reaction          @relation(fields: [reactionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  receiver         AppUser?          @relation("Notification_receiver_idToAppUser", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  sender           AppUser?          @relation("Notification_sender_idToAppUser", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@map("notification")
+  id                  Int               @id @default(autoincrement()) @map("id")
+  senderId            String?           @map("sender_id") @db.Uuid
+  receiverId          String?           @map("receiver_id") @db.Uuid
+  postId              Int               @default(autoincrement()) @map("post_id")
+  commentId           Int               @default(autoincrement()) @map("comment_id")
+  post_reaction_id    Int               @default(autoincrement())
+  comment_reaction_id Int               @default(autoincrement())
+  tagId               Int               @default(autoincrement()) @map("tag_id")
+  notificationType    NotificationType? @map("notification_type")
+  createdAt           DateTime          @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  isRead              Boolean?          @default(false) @map("is_read")
+  comment             Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  comment_reaction    comment_reaction  @relation(fields: [comment_reaction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post                Post              @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post_reaction       PostReaction      @relation(fields: [post_reaction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  receiver            AppUser?          @relation("Notification_receiver_idToAppUser", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sender              AppUser?          @relation("Notification_sender_idToAppUser", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tag                 tag               @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model Post {
-  id            Int             @id @unique @default(autoincrement()) @map("id")
-  userId        String          @map("user_id") @db.Uuid
-  content       String          @map("content")
-  noShares      Int?            @default(0) @map("no_shares")
-  visibility    postVisibility? @default(PUBLIC) @map("visibility")
-  createdAt     DateTime        @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime?       @map("updated_at") @db.Timestamptz(6)
-  isDeleted     Boolean?        @default(false) @map("is_deleted")
-  userName      String          @default("") @map("user_name")
-  userAvatarUrl String?         @map("user_avatar_url")
-  attachments   Attachment[]
-  comments      Comment[]
-  notifications Notification[]
-  user          AppUser         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  reactions     Reaction[]
-
-  @@map("post")
+  id                                      Int             @id @default(autoincrement()) @map("id")
+  userId                                  String?         @map("user_id") @db.Uuid
+  userName                                String?         @map("user_name")
+  userAvatarUrl                           String?         @map("user_avatar_url")
+  visibility                              PostVisibility? @default(PUBLIC) @map("visibility")
+  content                                 String          @map("content")
+  createdAt                               DateTime        @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  updatedAt                               DateTime?       @map("updated_at") @db.Timestamptz(6)
+  isDeleted                               Boolean?        @default(false) @map("is_deleted")
+  attachments                             Attachment[]
+  comments                                Comment[]
+  notifications                           Notification[]
+  app_user_post_user_avatar_urlToapp_user AppUser?        @relation("post_user_avatar_urlToapp_user", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
+  user                                    AppUser?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_post_user_nameToapp_user       AppUser?        @relation("post_user_nameToapp_user", fields: [userName], references: [userName], onDelete: NoAction, onUpdate: NoAction)
+  post_action                             post_action[]
+  post_reaction                           PostReaction[]
+  report                                  report[]
+  share                                   Share[]
+  tag                                     tag[]
 }
 
-model Reaction {
-  /// Reaction ID
-  id           Int            @id @default(autoincrement()) @map("id")
-  /// Person who reacted
-  userId       String?        @map("user_id") @db.Uuid
-  /// Reacted post
-  postId       Int            @map("post_id")
-  /// Reacted comment
-  commentId    Int            @map("comment_id")
-  /// Type of reaction
-  reactionType reactionType?  @map("reaction_type")
-  /// When it was created
-  createdAt    DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
-  notification Notification[]
-  comment      Comment        @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user         AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model Share {
+  id                                   Int          @id @default(autoincrement())
+  senderId                             String?      @db.Uuid
+  receiverId                           String?      @db.Uuid
+  postId                               Int          @default(autoincrement())
+  commentId                            Int          @default(autoincrement())
+  contentType                          ContentType?
+  createdAt                            DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  isDeleted                            Boolean?     @default(false)
+  comment                              Comment      @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post                                 Post         @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_share_receiver_idToapp_user AppUser?     @relation("share_receiver_idToapp_user", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_share_sender_idToapp_user   AppUser?     @relation("share_sender_idToapp_user", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
 
-  @@map("reaction")
+model PostReaction {
+  id           Int            @id @default(autoincrement())
+  userId       String?        @db.Uuid
+  postId       Int            @default(autoincrement())
+  reactionType ReactionType?
+  isDeleted    Boolean?       @default(false)
+  createdAt    DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  updatedAt    DateTime?      @db.Timestamptz(6)
+  notification Notification[]
+  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  appUser      AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, postId], map: "unique_post_reaction")
 }
