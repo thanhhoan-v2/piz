@@ -31,7 +31,8 @@
 			"@hooks/*": ["./hooks/*"],
 			"@schemas/*": ["./schemas/*"],
 			"@prisma/*": ["./prisma/*"],
-			"@supabase/*": ["./supabase/*"]
+			"@supabase/*": ["./supabase/*"],
+			"@stores/*": ["./stores/*"]
 		}
 	},
 	"include": [

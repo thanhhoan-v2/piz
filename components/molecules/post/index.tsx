@@ -10,6 +10,7 @@ import { getPostInfo } from "@prisma/functions/post"
 import type { PostProps } from "@prisma/global"
 import { cn } from "@utils/cn"
 import {
+	CircleUser,
 	Ellipsis,
 	Forward,
 	Heart,
@@ -29,9 +30,11 @@ export default async function Post({
 	updatedAt,
 	isDeleted,
 }: PostProps) {
+	// Get the number of loves, hates, comments
 	const { noLoves, noHates, noComments, noShares } =
 		await getPostInfo(id)
 
+	// If post is deleted, return null
 	if (isDeleted) return null
 
 	return (
@@ -39,13 +42,17 @@ export default async function Post({
 			<div className="mb-2 flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3">
 				<div className="flex justify-between">
 					<div className="flex items-start gap-3">
-						<Avatar className="h-12 w-12">
-							<AvatarImage
-								src={userAvatarUrl ?? ""}
-								alt="User Avatar"
-							/>
-							<AvatarFallback>PIZ</AvatarFallback>
-						</Avatar>
+						{userAvatarUrl ? (
+							<Avatar className="h-12 w-12">
+								<AvatarImage
+									src={userAvatarUrl ?? ""}
+									alt="User Avatar"
+								/>
+								<AvatarFallback>PIZ</AvatarFallback>
+							</Avatar>
+						) : (
+							<CircleUser />
+						)}
 
 						<div className="flex flex-col gap-2">
 							<div>

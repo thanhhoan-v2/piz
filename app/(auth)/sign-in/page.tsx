@@ -1,3 +1,4 @@
+import { signIn } from "@app/(auth)/sign-in/actions"
 import {
 	Card,
 	CardContent,
@@ -9,7 +10,6 @@ import {
 import { Input } from "@components/atoms/input"
 import { Label } from "@components/atoms/label"
 import { SubmitButton } from "@components/molecules/button/submit-button"
-import { signIn } from "@services/auth/sign-in"
 import { TriangleAlert } from "lucide-react"
 import Link from "next/link"
 

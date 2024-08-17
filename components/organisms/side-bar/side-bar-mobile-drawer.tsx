@@ -11,7 +11,7 @@ import {
 	DrawerTrigger,
 } from "@components/atoms/drawer"
 import { Textarea } from "@components/atoms/textarea"
-import useFetchUser from "@hooks/useFetchUser"
+import { useUserStore } from "@stores/user-store"
 import { cn } from "@utils/cn"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
@@ -27,7 +27,8 @@ export default function SideBarMobileDrawer({
 }) {
 	const [value, setValue] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
-	const { user, loading, error } = useFetchUser()
+
+	const userName = useUserStore((state) => state.userName)
 
 	const mid_threshold = 500
 	const last_threshold = 550
@@ -75,9 +76,7 @@ export default function SideBarMobileDrawer({
 						</Avatar>
 
 						<div className="flex w-full flex-col gap-2">
-							<Badge className="w-fit">
-								{user?.user_metadata?.user_name}
-							</Badge>
+							<Badge className="w-fit">{userName}</Badge>
 
 							{/* form */}
 							<div className="w-full flex-start flex-col gap-2">

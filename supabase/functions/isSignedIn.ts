@@ -1,15 +1,18 @@
-import { ROUTE } from "@constants/route"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
+import type { Route } from "next"
 import { redirect } from "next/navigation"
 
-const supabase = createSupabaseClientWithCookies()
+export const isSignedInWithRedirect = async () => {
+	const supabase = createSupabaseClientWithCookies()
 
-export const isSignedIn = async () => {
 	const {
 		data: { user },
+		error,
 	} = await supabase.auth.getUser()
 
-	if (!user) {
-		return redirect(ROUTE.SIGN_IN)
-	}
+	if (!user || error)
+		// If user is not signed in, redirect to sign in page
+		redirect("/sign-in" as Route)
+
+	return user
 }

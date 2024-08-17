@@ -1,10 +1,7 @@
 import Post from "@components/molecules/post"
 import { getAllPosts } from "@prisma/functions/post"
-import { isSignedIn } from "@supabase/functions/isSignedIn"
 
 export default async function HomePage() {
-	isSignedIn()
-
 	const posts = await getAllPosts()
 
 	return (

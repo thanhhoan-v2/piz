@@ -11,6 +11,7 @@ import {
 import { ThemeToggle } from "@components/molecules/toggle/theme-toggle"
 import { ROUTE } from "@constants/route"
 import { signOut } from "@services/auth/sign-out"
+import { useUserStore } from "@stores/user-store"
 import { cn } from "@utils/cn"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import { useTheme } from "next-themes"
@@ -40,10 +41,13 @@ export default function HeaderBarMenu() {
 		theme === "dark" ? "dark-common" : "light-common",
 	)
 
+	const reset = useUserStore((state) => state.reset)
+
 	const handleSignOut = async () => {
+		console.log("signing out...")
 		try {
+			reset()
 			await signOut()
-			router.push(ROUTE.SIGN_IN)
 		} catch (error) {
 			console.error("An error occurred during sign out", error)
 		}
