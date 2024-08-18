@@ -5,9 +5,12 @@ import {
 } from "@components/atoms/avatar"
 import { Badge } from "@components/atoms/badge"
 import { Button } from "@components/atoms/button"
+import PostItem, {
+	type PostItemType,
+} from "@components/molecules/post/post-item"
 import { ROUTE } from "@constants/route"
 import { getPostInfo } from "@prisma/functions/post"
-import type { PostProps } from "@prisma/global"
+import type { PostProps, ReactionType } from "@prisma/global"
 import { cn } from "@utils/cn"
 import {
 	CircleUser,
@@ -22,6 +25,7 @@ import Link from "next/link"
 
 export default async function Post({
 	id,
+	userId,
 	userName,
 	userAvatarUrl,
 	content,
@@ -33,6 +37,13 @@ export default async function Post({
 	// Get the number of loves, hates, comments
 	const { noLoves, noHates, noComments, noShares } =
 		await getPostInfo(id)
+
+	const postItems = [
+		{ type: "love", icon: <Heart />, count: noLoves },
+		{ type: "hate", icon: <HeartOff />, count: noHates },
+		{ type: "comment", icon: <MessageSquare />, count: noComments },
+		{ type: "share", icon: <Forward />, count: noShares },
+	]
 
 	// If post is deleted, return null
 	if (isDeleted) return null
@@ -77,28 +88,23 @@ export default async function Post({
 						</div>
 					</div>
 
-					<div>
+					<Button variant="ghost">
 						<Ellipsis />
-					</div>
+					</Button>
 				</div>
 
 				<div className="mx-2 my-4 flex gap-2">
-					<Button variant="ghost" className="flex gap-2">
-						<Heart />
-						<span>{noLoves}</span>
-					</Button>
-					<Button variant="ghost" className="flex gap-2">
-						<HeartOff />
-						<span>{noHates}</span>
-					</Button>
-					<Button variant="ghost" className="flex gap-2">
-						<MessageSquare />
-						<span>{noComments}</span>
-					</Button>
-					<Button variant="ghost" className="flex gap-2">
-						<Forward />
-						<span>{noShares}</span>
-					</Button>
+					{postItems.map(({ type, icon, count }) => (
+						<PostItem
+							key={type}
+							type={type as PostItemType}
+							icon={icon}
+							count={count}
+							userId={userId}
+							postId={id}
+							reactionType={type.toUpperCase() as ReactionType}
+						/>
+					))}
 				</div>
 			</div>
 		</>

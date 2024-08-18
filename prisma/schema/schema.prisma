@@ -116,7 +116,7 @@ model Notification {
 
 model Post {
   id                                      Int             @id @default(autoincrement()) @map("id")
-  userId                                  String?         @map("user_id") @db.Uuid
+  userId                                  String          @map("user_id") @db.Uuid
   userName                                String?         @map("user_name")
   userAvatarUrl                           String?         @map("user_avatar_url")
   visibility                              PostVisibility? @default(PUBLIC) @map("visibility")
