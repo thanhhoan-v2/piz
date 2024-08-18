@@ -16,7 +16,7 @@ import Link from "next/link"
 export default function SignInPage({
 	searchParams,
 }: {
-	searchParams: { type: string; message: string }
+	searchParams?: { type: string; message: string }
 }) {
 	return (
 		<Card className="w-full max-w-sm border-none">

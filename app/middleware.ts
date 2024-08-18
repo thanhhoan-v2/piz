@@ -1,18 +1,19 @@
-import { authenticate } from "auth-provider"
-import { type NextRequest, NextResponse } from "next/server"
+import { updateSession } from "@utils/supabase/middleware"
+import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
-	const isAuthenticated = authenticate(request)
-
-	// If the user is authenticated, continue as normal
-	if (isAuthenticated) {
-		return NextResponse.next()
-	}
-
-	// Redirect to login page if not authenticated
-	return NextResponse.redirect(new URL("/login", request.url))
+export async function middleware(request: NextRequest) {
+	return updateSession(request)
 }
 
 export const config = {
-	matcher: "/dashboard/:path*",
+	matcher: [
+		/*
+		 * Match all request paths except:
+		 * - _next/static (static files)
+		 * - _next/image (image optimization files)
+		 * - favicon.ico (favicon file)
+		 * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+		 */
+		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+	],
 }

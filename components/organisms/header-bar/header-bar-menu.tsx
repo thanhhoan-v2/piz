@@ -16,7 +16,6 @@ import { cn } from "@utils/cn"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 
 const iconClass = "mr-2 h-4 w-4"
 
@@ -35,7 +34,7 @@ const items = [
 
 export default function HeaderBarMenu() {
 	const { theme, setTheme } = useTheme()
-	const router = useRouter()
+	const isSignedIn = useUserStore((state) => state.isSignedIn)
 	const dropdownMenuItemClass = cn(
 		"cursor-pointer",
 		theme === "dark" ? "dark-common" : "light-common",
@@ -52,6 +51,8 @@ export default function HeaderBarMenu() {
 			console.error("An error occurred during sign out", error)
 		}
 	}
+
+	if (!isSignedIn) return null
 
 	return (
 		<>

@@ -5,6 +5,7 @@ export type UserStoreState = {
 	email: string | null
 	userName: string | null
 	fullName: string | null
+	isSignedIn: boolean
 }
 
 export type UserStoreAction = {
@@ -20,15 +21,16 @@ const initialState: UserStoreState = {
 	email: null,
 	userName: null,
 	fullName: null,
+	isSignedIn: false,
 }
 
 export const useUserStore = create<UserStoreState & UserStoreAction>(
 	(set) => ({
 		...initialState,
-		setUserId: (userId) => set({ userId }),
-		setEmail: (email) => set({ email }),
-		setUserName: (userName) => set({ userName }),
-		setFullName: (fullName) => set({ fullName }),
+		setUserId: (userId) => set({ userId, isSignedIn: true }),
+		setEmail: (email) => set({ email, isSignedIn: true }),
+		setUserName: (userName) => set({ userName, isSignedIn: true }),
+		setFullName: (fullName) => set({ fullName, isSignedIn: true }),
 		reset: () => set(initialState),
 	}),
 )
