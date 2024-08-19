@@ -140,7 +140,7 @@ export default function PostCommentButton({
 					className="flex-col rounded-lg border-0"
 					onPointerDownOutside={handleOpenAlert}
 				>
-					{/* post */}
+					{/* user info */}
 					<div className="flex items-start gap-3">
 						{userAvatarUrl ? (
 							<Avatar className="h-12 w-12">
@@ -166,6 +166,7 @@ export default function PostCommentButton({
 									{postVisibility}
 								</Badge>
 							</div>
+							{/* post content */}
 							<div className="flex flex-col gap-4">
 								<div className="whitespace-pre-wrap">{postContent}</div>
 							</div>
@@ -191,6 +192,7 @@ export default function PostCommentButton({
 					{/* post button */}
 					<Button
 						onClick={handleSubmit}
+						// if charsLimit is reached or value is empty -> disable
 						disabled={value.length > charsLimit || value.length === 0}
 					>
 						Reply
@@ -198,6 +200,7 @@ export default function PostCommentButton({
 				</DialogContent>
 			</Dialog>
 
+			{/* show when value is not empty */}
 			<AlertDialog open={alertIsOpen} onOpenChange={setOpenAlert}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
