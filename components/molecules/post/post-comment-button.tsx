@@ -15,6 +15,7 @@ import { Button } from "@components/atoms/button"
 import { Dialog, DialogContent } from "@components/atoms/dialog"
 import { Textarea } from "@components/atoms/textarea"
 import { ROUTE } from "@constants/route"
+import { createPostComment } from "@prisma/functions/comment"
 import { cn } from "@utils/cn"
 import {
 	CircleUser,
@@ -54,17 +55,32 @@ export default function PostCommentButton({
 	postTimeDiff,
 	postVisibility,
 }: PostCommentButtonProps) {
-	const [modalIsOpen, setOpenModal] = React.useState(false)
-	const [alertIsOpen, setAlertOpen] = React.useState(false)
-	const [value, setValue] = React.useState("")
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+	/*
+	 * The useTransition hook is a part of React's concurrent features.
+	 * It allows you to mark updates as "transitions," which means they can be interrupted by more urgent updates.
+	 * This is particularly useful for improving the user experience by keeping the UI responsive during longer-running updates.
+	 */
+	const [isPending, startTransition] = React.useTransition()
 
+	// Modal for creating a new comment
+	const [modalIsOpen, setOpenModal] = React.useState<boolean>(false)
+	// Alert dialog for discarding comment
+	const [alertIsOpen, setOpenAlert] = React.useState<boolean>(false)
+	// User input value
+	const [value, setValue] = React.useState("")
+	// Reference to the textarea element
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+	// Comment count
+	const [commentCount, setCommentCount] =
+		React.useState<number>(initialCommentCount)
+
+	// Handles opening the modal
 	const handleClick = () => {
 		setOpenModal(!modalIsOpen)
 	}
 
-	const mid_threshold = 500
-	const last_threshold = 550
+	// Comment characters limit
+	const charsLimit = 550
 
 	// Handles value change in the textarea
 	const handleChange = React.useCallback(
@@ -78,8 +94,20 @@ export default function PostCommentButton({
 	const handleOpenAlert = () => {
 		// If the value is not empty, open the alert
 		if (value.length > 0) {
-			setAlertOpen(true)
+			setOpenAlert(true)
 		}
+	}
+
+	// Handles submitting the comment
+	const handleSubmit = async () => {
+		await createPostComment(postId, userId, value)
+
+		// Close the modal
+		setOpenModal(false)
+		// Reset the value
+		setValue("")
+		// Increment the comment count
+		setCommentCount(commentCount + 1)
 	}
 
 	// Handles discarding the comment
@@ -104,7 +132,7 @@ export default function PostCommentButton({
 				onClick={handleClick}
 			>
 				<MessageSquare />
-				<span>{initialCommentCount}</span>
+				<span>{commentCount}</span>
 			</Button>
 
 			<Dialog open={modalIsOpen} onOpenChange={setOpenModal}>
@@ -161,11 +189,16 @@ export default function PostCommentButton({
 					</div>
 
 					{/* post button */}
-					<Button disabled={value.length > last_threshold}>Reply</Button>
+					<Button
+						onClick={handleSubmit}
+						disabled={value.length > charsLimit || value.length === 0}
+					>
+						Reply
+					</Button>
 				</DialogContent>
 			</Dialog>
 
-			<AlertDialog open={alertIsOpen} onOpenChange={setAlertOpen}>
+			<AlertDialog open={alertIsOpen} onOpenChange={setOpenAlert}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Discard comment ?</AlertDialogTitle>

@@ -1,4 +1,5 @@
 "use server"
+
 import { prisma } from "@prisma/functions/client"
 
 export type PostReactionActionProps = {
