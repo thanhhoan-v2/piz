@@ -1,26 +1,15 @@
 import { prisma } from "@prisma/functions/client"
 
-// Get a post information (no of loves, hates, comments, shares)
+// Get a post information (no of reactions, comments, shares)
 export const getPostInfo = async (id: number) => {
-	const noLoves = await prisma.postReaction.count({
-		where: { postId: id, reactionType: "LOVE" },
-	})
+	const noReactions = await prisma.postReaction.count({ where: { postId: id } })
 
-	const noHates = await prisma.postReaction.count({
-		where: { postId: id, reactionType: "HATE" },
-	})
+	const noComments = await prisma.comment.count({ where: { postId: id } })
 
-	const noComments = await prisma.comment.count({
-		where: { postId: id },
-	})
-
-	const noShares = await prisma.share.count({
-		where: { postId: id },
-	})
+	const noShares = await prisma.share.count({ where: { postId: id } })
 
 	return {
-		noLoves,
-		noHates,
+		noReactions,
 		noComments,
 		noShares,
 	}

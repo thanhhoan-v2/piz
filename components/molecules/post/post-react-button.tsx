@@ -1,41 +1,32 @@
 "use client"
+
 import { Button } from "@components/atoms/button"
-import {
-	type PostReactionActionProps,
-	createPostReaction,
-} from "@prisma/functions/post/reaction"
-import { Forward, Heart, MessageSquare } from "lucide-react"
+import { createPostReaction } from "@prisma/functions/post/reaction"
+import { Heart } from "lucide-react"
 import React from "react"
 
 // Types for props passing to post item component
-export type PostItemProps = {
-	key: string
-	type: "reaction" | "comment" | "share"
+type PostReactButtonProps = {
 	initialReactionCount: number
-	initialCommentCount: number
-	initialShareCount: number
 	isReacted: boolean
+	userId: string
+	postId: number
+	className?: string
 }
 
 // Types for local state of post item
-type PostItemState = {
-	reaction: number
-	comment: number
-	share: number
+type PostReactButtonState = {
+	reactionCount: number
 	isReacted: boolean
-	showComment: boolean
 }
 
-export default function PostItem({
-	key,
-	type,
+export default function PostReactButton({
 	userId,
 	postId,
 	initialReactionCount,
-	initialCommentCount,
-	initialShareCount,
 	isReacted,
-}: PostItemProps & PostReactionActionProps) {
+	className,
+}: PostReactButtonProps) {
 	/*
 	 * The useTransition hook is a part of React's concurrent features.
 	 * It allows you to mark updates as "transitions," which means they can be interrupted by more urgent updates.
@@ -44,16 +35,13 @@ export default function PostItem({
 	const [isPending, startTransition] = React.useTransition()
 
 	// Initialize local state for post item
-	const initialState: PostItemState = {
-		reaction: initialReactionCount,
-		comment: initialCommentCount,
-		share: initialShareCount,
+	const initialState: PostReactButtonState = {
+		reactionCount: initialReactionCount,
 		isReacted: isReacted,
-		showComment: false,
 	}
 
 	const [localState, setLocalState] =
-		React.useState<PostItemState>(initialState)
+		React.useState<PostReactButtonState>(initialState)
 
 	// Debounce the click handler
 	let debounceTimeout: NodeJS.Timeout | null = null
@@ -70,14 +58,12 @@ export default function PostItem({
 			setLocalState((prev) => {
 				const newState = { ...prev }
 
-				if (type === "reaction") {
-					if (prev.isReacted) {
-						newState.reaction -= 1
-						newState.isReacted = false
-					} else {
-						newState.reaction += 1
-						newState.isReacted = true
-					}
+				if (prev.isReacted) {
+					newState.reactionCount -= 1
+					newState.isReacted = false
+				} else {
+					newState.reactionCount += 1
+					newState.isReacted = true
 				}
 
 				return newState
@@ -90,40 +76,24 @@ export default function PostItem({
 					// Revert local state to its previous state if server call fails
 					setLocalState((prev) => {
 						const revertedState = { ...prev }
-						if (type === "reaction") {
-							if (prev.isReacted) {
-								revertedState.reaction += 1
-								revertedState.isReacted = true
-							} else {
-								revertedState.reaction -= 1
-								revertedState.isReacted = false
-							}
+						if (prev.isReacted) {
+							revertedState.reactionCount += 1
+							revertedState.isReacted = true
+						} else {
+							revertedState.reactionCount -= 1
+							revertedState.isReacted = false
 						}
 						return revertedState
 					})
 				})
 			})
 		}, 300)
-
-		if (type === "comment") {
-			setLocalState((prev) => ({ ...prev, showComment: !prev.showComment }))
-		}
-
-		if (type === "share") {
-		}
 	}
 
 	return (
-		<>
-			<div>
-
-				{localState.showComment && (
-					// help me
-					<div className="mt-9 min-h-[100px] w-[100px] flex-center">
-						comment
-					</div>
-				)}
-			</div>
-		</>
+		<Button variant="ghost" className={className} onClick={handleClick}>
+			<Heart fill={localState.isReacted ? "red" : "gray"} />
+			<span>{localState.reactionCount}</span>
+		</Button>
 	)
 }

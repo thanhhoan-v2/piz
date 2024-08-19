@@ -1,55 +1,62 @@
 "use server"
 import { prisma } from "@prisma/functions/client"
-import type { ReactionType } from "@prisma/global"
 
-export type CreatePostReactionProps = {
+export type PostReactionActionProps = {
 	userId: string
 	postId: number
-	reactionType: ReactionType
 }
 
+// GET a post reaction by userId and postId
+export const getPostReaction = async (userId: string, postId: number) => {
+	return await prisma.postReaction.findFirst({
+		where: { userId, postId },
+	})
+}
+
+// CREATE a new post reaction or DELETE the existing one
 export const createPostReaction = async ({
 	userId,
 	postId,
-	reactionType,
-}: CreatePostReactionProps) => {
+}: PostReactionActionProps) => {
 	try {
-		// Check if the user has already reacted to the post
-		// SELECT * FROM post_reaction
-		// WHERE userId = userId AND postId = postId
-		const existingReaction = await prisma.postReaction.findFirst({
-			where: {
-				userId,
-				postId,
-			},
-		})
+		const existingReaction = await getPostReaction(userId, postId)
 
-		// If the user has already reacted to the post, update the reaction
-		// UPDATE post_reaction SET reactionType
 		if (existingReaction) {
-			const updatedPostReaction = await prisma.postReaction.update({
-				where: {
-					id: existingReaction.id,
-				},
-				data: {
-					reactionType,
-				},
-			})
-			console.log("[POST_REACTION] Updated: ", updatedPostReaction)
+			// If the user has already reacted to the post, delete the reaction
+			await deletePostReaction({ userId, postId })
 		} else {
 			// If the user has not reacted to the post
-			// INSERT INTO post_reaction (userId, postId, reactionType)
-			// VALUES (userId, postId, reactionType)
 			const newPostReaction = await prisma.postReaction.create({
-				data: {
-					userId,
-					postId,
-					reactionType,
-				},
+				data: { userId, postId },
 			})
 			console.log("[POST_REACTION] Created: ", newPostReaction)
 		}
 	} catch (error) {
 		console.error("[POST_REACTION] Error creating: ", error)
+	}
+}
+
+// DELETE a post reaction
+export const deletePostReaction = async ({
+	userId,
+	postId,
+}: PostReactionActionProps) => {
+	try {
+		const existingReaction = await getPostReaction(userId, postId)
+
+		// If the user has already reacted to the post, delete the reaction
+		if (existingReaction) {
+			const deletedPostReaction = await prisma.postReaction.delete({
+				where: {
+					id: existingReaction.id,
+				},
+			})
+			console.log("[POST_REACTION] Deleted: ", deletedPostReaction)
+		} else {
+			console.log("[POST_REACTION] No existing reaction found to delete")
+		}
+	} catch (error) {
+		console.error("[POST_REACTION] Error deleting: ", error)
+		throw error // Rethrow the error to handle it in the component
 	}
 }

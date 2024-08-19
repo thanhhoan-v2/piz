@@ -74,6 +74,11 @@
 }
 
 /* FLEX */
+.flex-col {
+	display: flex;
+	flex-direction: column;
+}
+
 .flex-center {
 	display: flex;
 	justify-content: center;
