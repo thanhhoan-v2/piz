@@ -4,13 +4,12 @@ import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
 import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
-import { ROUTE } from "@constants/route"
 import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PostProps } from "@prisma/global"
-import { cn } from "@utils/cn"
+import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 import { calculateTimeDiff } from "@utils/time.helpers"
-import { CircleUser } from "lucide-react"
+import { CircleUser, Crown } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 
@@ -25,6 +24,13 @@ export default async function Post({
 	updatedAt,
 	isDeleted,
 }: PostProps) {
+	// Get the current user to check if the post is created by the current user
+	const supabase = createSupabaseClientWithCookies()
+	const {
+		data: { user },
+	} = await supabase.auth.getUser()
+	const appUserName = user?.user_metadata.user_name
+
 	// Get the number of loves, hates, comments
 	const { noReactions, noComments, noShares } = await getPostInfo(id)
 
@@ -54,10 +60,11 @@ export default async function Post({
 							<div>
 								<div className="flex-y-center gap-4">
 									<Link
-										href={cn(ROUTE.HOME, userName) as Route}
-										className="font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
+										href={`/${userName}` as Route}
+										className="flex items-center gap-2 font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
 									>
-										{userName}
+										<p>{userName}</p>
+										{appUserName === userName && <Crown className="size-4" />}
 									</Link>
 									<p className="text-slate-500 text-sm">
 										{calculateTimeDiff(createdAt, updatedAt)}
