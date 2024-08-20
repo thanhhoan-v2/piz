@@ -1,19 +1,18 @@
 import HeaderBar from "@components/organisms/header-bar"
 import SideBar from "@components/organisms/side-bar"
 import { fetchUser } from "@supabase/functions/fetchUser"
-import FetchUser from "@utils/user.helpers"
+import SetUserStore from "@utils/user.helpers"
 import type React from "react"
 
-const AppLayout = async ({
-	children,
-}: { children: React.ReactNode }) => {
+const AppLayout = async ({ children }: { children: React.ReactNode }) => {
 	// Fetch user for first time on server-side
 	const user = await fetchUser()
 
 	return (
 		<>
 			{/* does not render anything  */}
-			<FetchUser user={user} />
+			{/* set user store */}
+			<SetUserStore user={user} />
 
 			<div className="flex w-full flex-col text-foreground transition-colors duration-300">
 				<HeaderBar />

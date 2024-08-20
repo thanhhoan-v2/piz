@@ -4,7 +4,7 @@ import { useUserStore } from "@stores/user-store"
 import React from "react"
 
 // Helper component to sync server-fetched user data with Zustand store on the client
-export default function FetchUser({ user }: { user: UserProps }) {
+export default function SetUserStore({ user }: { user: UserProps }) {
 	const setUserId = useUserStore((state) => state.setUserId)
 	const setEmail = useUserStore((state) => state.setEmail)
 	const setUserName = useUserStore((state) => state.setUserName)

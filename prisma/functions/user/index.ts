@@ -7,7 +7,6 @@ export const getUser = async (userName: string) => {
 		const user = await prisma.appUser.findUnique({
 			where: { userName: userName },
 		})
-		console.log("[USER] Found: ", user)
 		return user
 	} catch (error) {
 		console.error("[USER] Error when fetching: ", error)

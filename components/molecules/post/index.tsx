@@ -46,7 +46,7 @@ export default async function Post({
 		<>
 			<div
 				key={id}
-				className="mb-2 flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3"
+				className="mb-2 flex min-h-[100px] w-full min-w-[600px] flex-col justify-between rounded-lg bg-background-item px-5 py-3"
 			>
 				<div className="flex justify-between">
 					<div className="flex items-start gap-3">

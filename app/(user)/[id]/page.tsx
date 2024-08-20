@@ -4,6 +4,10 @@ import { Button } from "@components/atoms/button"
 import FollowButton from "@components/molecules/button/follow-button"
 import Post from "@components/molecules/post"
 import { getUser } from "@prisma/functions/user"
+import {
+	countUserFollowers,
+	getFirstThreeFollowerAvatarUrls,
+} from "@prisma/functions/user/follow"
 import { getAllUserPosts } from "@prisma/functions/user/post"
 import type { PostProps } from "@prisma/global"
 import { firstLetterToUpper } from "@utils/string.helpers"
@@ -16,6 +20,21 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 		data: { user: appUser },
 	} = await supabase.auth.getUser()
 
+	// Get the first three follower avatar urls for AvatarStack
+	let firstThreeAvatarUrls: { name: string; image: string }[] = []
+	if (appUser) {
+		const data = await getFirstThreeFollowerAvatarUrls({ userId: appUser.id })
+		if (data) firstThreeAvatarUrls = data
+	}
+
+	// Get number of followers
+	let noFollowers = 0
+	if (appUser) {
+		const data = await countUserFollowers({ userId: appUser.id })
+		console.log(data)
+		if (data) noFollowers = data
+	}
+
 	// Viewing user, another person
 	const viewingUser = await getUser(params.id)
 
@@ -25,14 +44,6 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 		const data = await getAllUserPosts({ userId: viewingUser.id })
 		if (data) posts = data
 	}
-
-	// TODO: replace with actual avatars
-	const avatars = [
-		{ name: "a", image: "https://github.com/shadcn.png" },
-		{ name: "a", image: "https://github.com/shadcn.png" },
-		{ name: "a", image: "https://github.com/shadcn.png" },
-		{ name: "a", image: "https://github.com/shadcn.png" },
-	]
 
 	return (
 		<>
@@ -63,8 +74,11 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 				</div>
 
 				<div className="mt-5 flex-start-center gap-5 px-4">
-					<AvatarStack avatars={avatars} showHiddenAvatarLength={false} />
-					<p>18 followers</p>
+					<AvatarStack
+						avatars={firstThreeAvatarUrls}
+						showHiddenAvatarLength={false}
+					/>
+					<p>{noFollowers} followers</p>
 				</div>
 
 				{/* if the user viewing profile is the main user */}
