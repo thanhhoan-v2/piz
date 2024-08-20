@@ -1,11 +1,11 @@
 "use server"
-import type { PostSaveButtonProps } from "@components/molecules/post/post-dropdown-menu"
+import type { PostSaveProps } from "@components/molecules/post/post-dropdown-menu"
 import { prisma } from "@prisma/functions/client"
 
 export const createSavedPost = async ({
 	userId,
 	postId,
-}: PostSaveButtonProps) => {
+}: PostSaveProps) => {
 	try {
 		const savedPost = await prisma.savedPost.create({
 			data: { userId, postId },

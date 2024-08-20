@@ -10,12 +10,14 @@ import {
 } from "@components/atoms/dropdown-menu"
 import { ThemeToggle } from "@components/molecules/toggle/theme-toggle"
 import { ROUTE } from "@constants/route"
-import { signOut } from "@services/auth/sign-out"
 import { useUserStore } from "@stores/user-store"
 import { cn } from "@utils/cn"
+import { createSupabaseClientForBrowser } from "@utils/supabase/client"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
+import type { Route } from "next"
 import { useTheme } from "next-themes"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 const iconClass = "mr-2 h-4 w-4"
 
@@ -32,6 +34,8 @@ const items = [
 	},
 ]
 
+const supabase = createSupabaseClientForBrowser()
+
 export default function HeaderBarMenu() {
 	const { theme, setTheme } = useTheme()
 	const isSignedIn = useUserStore((state) => state.isSignedIn)
@@ -40,13 +44,16 @@ export default function HeaderBarMenu() {
 		theme === "dark" ? "dark-common" : "light-common",
 	)
 
-	const reset = useUserStore((state) => state.reset)
+	const userStoreReset = useUserStore((state) => state.reset)
 
 	const handleSignOut = async () => {
 		console.log("signing out...")
 		try {
-			reset()
-			await signOut()
+			// Reset the user store before signing out
+			userStoreReset()
+			// Sign out
+			await supabase.auth.signOut()
+			redirect("/sign-in" as Route)
 		} catch (error) {
 			console.error("An error occurred during sign out", error)
 		}
@@ -66,10 +73,7 @@ export default function HeaderBarMenu() {
 					<DropdownMenuGroup>
 						{items.map(({ href, icon, label }, index) => (
 							<Link key={href + index.toString()} href={href}>
-								<DropdownMenuItem
-									key={label}
-									className={dropdownMenuItemClass}
-								>
+								<DropdownMenuItem key={label} className={dropdownMenuItemClass}>
 									{icon}
 									<span>{label}</span>
 								</DropdownMenuItem>
@@ -79,9 +83,7 @@ export default function HeaderBarMenu() {
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className={dropdownMenuItemClass}
-						onClick={() =>
-							setTheme(theme === "dark" ? "light" : "dark")
-						}
+						onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
 					>
 						<ThemeToggle
 							noButton

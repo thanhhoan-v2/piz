@@ -1,4 +1,5 @@
 import { signIn } from "@app/(auth)/sign-in/actions"
+import InputEmail from "@app/(auth)/sign-in/input-email"
 import {
 	Card,
 	CardContent,
@@ -30,13 +31,7 @@ export default function SignInPage({
 				<form className="grid gap-4">
 					<div className="grid gap-2">
 						<Label htmlFor="email">Email</Label>
-						<Input
-							id="email"
-							name="email"
-							type="email"
-							placeholder=""
-							required
-						/>
+						<InputEmail />
 					</div>
 					<div className="grid gap-2">
 						<div className="flex-between">
@@ -48,12 +43,7 @@ export default function SignInPage({
 								Forgot your password?
 							</Link>
 						</div>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							required
-						/>
+						<Input id="password" name="password" type="password" required />
 					</div>
 					<div className="grid gap-2">
 						<SubmitButton
