@@ -17,7 +17,7 @@ import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 const iconClass = "mr-2 h-4 w-4"
 
@@ -38,6 +38,7 @@ const supabase = createSupabaseClientForBrowser()
 
 export default function HeaderBarMenu() {
 	const { theme, setTheme } = useTheme()
+	const router = useRouter()
 	const isSignedIn = useUserStore((state) => state.isSignedIn)
 	const dropdownMenuItemClass = cn(
 		"cursor-pointer",
@@ -53,7 +54,8 @@ export default function HeaderBarMenu() {
 			userStoreReset()
 			// Sign out
 			await supabase.auth.signOut()
-			redirect("/sign-in" as Route)
+			// Redirect to sign-in page
+			router.push("/sign-in" as Route)
 		} catch (error) {
 			console.error("An error occurred during sign out", error)
 		}

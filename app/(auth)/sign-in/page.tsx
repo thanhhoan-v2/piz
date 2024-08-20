@@ -1,5 +1,4 @@
 import { signIn } from "@app/(auth)/sign-in/actions"
-import InputEmail from "@app/(auth)/sign-in/input-email"
 import {
 	Card,
 	CardContent,
@@ -8,9 +7,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@components/atoms/card"
-import { Input } from "@components/atoms/input"
 import { Label } from "@components/atoms/label"
 import { SubmitButton } from "@components/molecules/button/submit-button"
+import InputEmail from "@components/molecules/form/input-email"
+import InputPassword from "@components/molecules/form/input-password"
 import { TriangleAlert } from "lucide-react"
 import Link from "next/link"
 
@@ -43,7 +43,7 @@ export default function SignInPage({
 								Forgot your password?
 							</Link>
 						</div>
-						<Input id="password" name="password" type="password" required />
+						<InputPassword />
 					</div>
 					<div className="grid gap-2">
 						<SubmitButton
