@@ -9,6 +9,7 @@ export default function FetchUser({ user }: { user: UserProps }) {
 	const setEmail = useUserStore((state) => state.setEmail)
 	const setUserName = useUserStore((state) => state.setUserName)
 	const setFullName = useUserStore((state) => state.setFullName)
+	const setUserAvatarUrl = useUserStore((state) => state.setUserAvatarUrl)
 
 	React.useEffect(() => {
 		const fetchUserData = async () => {
@@ -17,11 +18,12 @@ export default function FetchUser({ user }: { user: UserProps }) {
 				setEmail(user.email)
 				setUserName(user.user_metadata.user_name)
 				setFullName(user.user_metadata.full_name)
+				setUserAvatarUrl(user.user_metadata.avatar_url)
 			}
 		}
 
 		fetchUserData()
-	}, [user, setEmail, setFullName, setUserId, setUserName])
+	}, [user, setEmail, setFullName, setUserId, setUserName, setUserAvatarUrl])
 
 	return null
 }

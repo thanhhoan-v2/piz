@@ -1,14 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
-import { Badge } from "@components/atoms/badge"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
 import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
+import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
 import { ROUTE } from "@constants/route"
 import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PostProps } from "@prisma/global"
 import { cn } from "@utils/cn"
+import { calculateTimeDiff } from "@utils/time.helpers"
 import { CircleUser } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
@@ -62,9 +63,7 @@ export default async function Post({
 										{calculateTimeDiff(createdAt, updatedAt)}
 									</p>
 								</div>
-								<Badge className="w-fit" variant="outline">
-									{visibility}
-								</Badge>
+								<PostVisibilityBadge visibility={visibility} />
 							</div>
 							<div className="flex flex-col gap-4">
 								<div className="whitespace-pre-wrap">{content}</div>
@@ -106,31 +105,4 @@ export default async function Post({
 			</div>
 		</>
 	)
-}
-
-export const calculateTimeDiff = (createdAt: Date, updatedAt: Date | null) => {
-	const currentTime = new Date()
-	const givenTime = updatedAt ?? createdAt
-
-	// Calculate the difference in milliseconds
-	const differenceInMilliseconds = currentTime.getTime() - givenTime?.getTime()
-
-	// Convert milliseconds to seconds, minutes, hours, days
-	const seconds = Math.floor(differenceInMilliseconds / 1000)
-	const minutes = Math.floor(differenceInMilliseconds / (1000 * 60))
-	const hours = Math.floor(differenceInMilliseconds / (1000 * 60 * 60))
-	const days = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24))
-
-	let timeAgo = `${seconds} seconds ago`
-	if (seconds > 60) {
-		timeAgo = `${minutes} minutes ago`
-	}
-	if (minutes > 60) {
-		timeAgo = `${hours} hours ago`
-	}
-	if (hours > 24) {
-		timeAgo = `${days} days ago`
-	}
-
-	return timeAgo
 }

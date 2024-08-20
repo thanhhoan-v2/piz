@@ -29,7 +29,17 @@ export const signUp = async (formData: FormData) => {
 
 	if (error) {
 		console.error("Sign-up error:", error)
-		const redirectUrl = `${"/sign-up" as Route}?message=${error.message}`
+		console.log(error)
+
+		let errorMessage =
+			"An error occurred during signing up. Maybe one of your first name, last name, or username is already taken."
+		if (error.message.includes("username")) {
+			errorMessage = "The username is already taken."
+		} else if (error.message.includes("full_name")) {
+			errorMessage = "The full name is already taken."
+		}
+
+		const redirectUrl = `${"/sign-up" as Route}?message=${errorMessage}`
 		return redirect(redirectUrl)
 	}
 

@@ -1,3 +1,4 @@
+import { signUp } from "@app/(auth)/sign-up/actions"
 import {
 	Card,
 	CardContent,
@@ -9,7 +10,6 @@ import {
 import { Input } from "@components/atoms/input"
 import { Label } from "@components/atoms/label"
 import { SubmitButton } from "@components/molecules/button/submit-button"
-import { signUp } from "@services/auth/sign-up"
 import { TriangleAlert } from "lucide-react"
 import Link from "next/link"
 
@@ -74,12 +74,7 @@ export default function SignUpPage({
 					{/* password */}
 					<div className="grid gap-2">
 						<Label htmlFor="password">Password</Label>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							required
-						/>
+						<Input id="password" name="password" type="password" required />
 					</div>
 					<div className="grid gap-2">
 						<SubmitButton

@@ -115,21 +115,21 @@ model Notification {
 }
 
 model Post {
-  id                                      Int             @id @default(autoincrement()) @map("id")
-  userId                                  String          @map("user_id") @db.Uuid
-  userName                                String?         @map("user_name")
-  userAvatarUrl                           String?         @map("user_avatar_url")
-  visibility                              PostVisibility? @default(PUBLIC) @map("visibility")
-  content                                 String          @map("content")
-  createdAt                               DateTime        @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
-  updatedAt                               DateTime?       @map("updated_at") @db.Timestamptz(6)
-  isDeleted                               Boolean?        @default(false) @map("is_deleted")
+  id                                      Int            @id @default(autoincrement()) @map("id")
+  userId                                  String         @map("user_id") @db.Uuid
+  userName                                String?        @map("user_name")
+  userAvatarUrl                           String?        @map("user_avatar_url")
+  visibility                              PostVisibility @default(PUBLIC) @map("visibility")
+  content                                 String         @map("content")
+  createdAt                               DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  updatedAt                               DateTime?      @map("updated_at") @db.Timestamptz(6)
+  isDeleted                               Boolean?       @default(false) @map("is_deleted")
   attachments                             Attachment[]
   comments                                Comment[]
   notifications                           Notification[]
-  app_user_post_user_avatar_urlToapp_user AppUser?        @relation("post_user_avatar_urlToapp_user", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
-  user                                    AppUser?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  app_user_post_user_nameToapp_user       AppUser?        @relation("post_user_nameToapp_user", fields: [userName], references: [userName], onDelete: NoAction, onUpdate: NoAction)
+  app_user_post_user_avatar_urlToapp_user AppUser?       @relation("post_user_avatar_urlToapp_user", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
+  user                                    AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_user_post_user_nameToapp_user       AppUser?       @relation("post_user_nameToapp_user", fields: [userName], references: [userName], onDelete: NoAction, onUpdate: NoAction)
   post_action                             post_action[]
   post_reaction                           PostReaction[]
   report                                  report[]

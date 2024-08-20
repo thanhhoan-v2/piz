@@ -35,8 +35,10 @@ enum PostActionType {
 
 enum PostVisibility {
   PUBLIC
-  FRIENDS_ONLY
-  JUST_ME
+  FOLLOWERS_ONLY
+  MENTIONED_ONLY
+  FANS_ONLY
+  ME_ONLY
 }
 
 enum PrivacyMode {

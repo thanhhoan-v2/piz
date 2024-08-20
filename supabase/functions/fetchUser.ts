@@ -8,8 +8,7 @@ export const fetchUser = async () => {
 		error,
 	} = await supabase.auth.getUser()
 
-	if (error)
-		console.error("SupabaseFunctions fetchUser error: ", error)
+	if (error) console.error("[SUPABASE_FUNCTION] fetchUser error: ", error)
 
 	return user
 }

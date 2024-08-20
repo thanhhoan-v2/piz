@@ -42,7 +42,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	// If user is signed in and the href is post
 	if (href === "post" && isSignedIn) {
 		return (
-			<SideBarMobileDrawer isOpen={isPostOpen} setOpen={setOpenPost}>
+			<SideBarMobileDrawer>
 				<div className={sideBarItemClass}>
 					<Icon fill={iconFill} />
 				</div>
