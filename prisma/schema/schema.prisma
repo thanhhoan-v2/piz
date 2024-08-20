@@ -165,3 +165,28 @@ model PostReaction {
 
   @@unique([userId, postId], map: "unique_post_reaction")
 }
+
+model SavedPost {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  postId    Int      @default(autoincrement())
+  isDeleted Boolean? @default(false)
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+}
+
+/// Post report
+model ReportPost {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  postId    Int      @default(autoincrement())
+  content   String
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+}
+
+/// User report
+model ReportUser {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+}

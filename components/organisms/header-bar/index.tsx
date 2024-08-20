@@ -1,6 +1,6 @@
 import { Logo } from "@components/atoms/logo"
+import HeaderBarMenu from "@components/organisms/header-bar/header-bar-dropdown-menu"
 import HeaderBarLogo from "@components/organisms/header-bar/header-bar-logo"
-import HeaderBarMenu from "@components/organisms/header-bar/header-bar-menu"
 import HeaderBarNavigation from "@components/organisms/header-bar/header-bar-navigation"
 
 export default function HeaderBar() {

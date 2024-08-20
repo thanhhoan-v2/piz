@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
 import { Badge } from "@components/atoms/badge"
-import { Button } from "@components/atoms/button"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
+import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
 import { ROUTE } from "@constants/route"
@@ -9,7 +9,7 @@ import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PostProps } from "@prisma/global"
 import { cn } from "@utils/cn"
-import { CircleUser, Ellipsis } from "lucide-react"
+import { CircleUser } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 
@@ -72,9 +72,7 @@ export default async function Post({
 						</div>
 					</div>
 
-					<Button variant="ghost">
-						<Ellipsis />
-					</Button>
+					<PostDropdownMenu userId={userId} postId={id} />
 				</div>
 
 				<div className="mx-2 my-4 flex gap-2">
