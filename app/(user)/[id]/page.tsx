@@ -2,7 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
 import { AvatarStack } from "@components/atoms/avatar-stack"
 import { Button } from "@components/atoms/button"
 import FollowButton from "@components/molecules/button/follow-button"
+import Post from "@components/molecules/post"
 import { getUser } from "@prisma/functions/user"
+import { getAllUserPosts } from "@prisma/functions/user/post"
+import type { PostProps } from "@prisma/global"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
@@ -15,6 +18,13 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 
 	// Viewing user, another person
 	const viewingUser = await getUser(params.id)
+
+	// Get all posts by the viewing user
+	let posts: PostProps[] = []
+	if (viewingUser) {
+		const data = await getAllUserPosts({ userId: viewingUser.id })
+		if (data) posts = data
+	}
 
 	// TODO: replace with actual avatars
 	const avatars = [
@@ -73,6 +83,34 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 							<Button disabled>Follow</Button>
 						)}
 					</>
+				)}
+
+				{/* user posts */}
+				{posts.map(
+					({
+						id,
+						userId,
+						userName,
+						userAvatarUrl,
+						content,
+						visibility,
+						createdAt,
+						updatedAt,
+						isDeleted,
+					}) => (
+						<Post
+							key={id} // no need to pass
+							id={id}
+							userId={userId}
+							userName={userName}
+							userAvatarUrl={userAvatarUrl}
+							content={content}
+							visibility={visibility}
+							createdAt={createdAt}
+							updatedAt={updatedAt}
+							isDeleted={isDeleted}
+						/>
+					),
 				)}
 			</div>
 		</>

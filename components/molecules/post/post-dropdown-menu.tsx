@@ -27,13 +27,7 @@ import {
 import { Textarea } from "@components/atoms/textarea"
 import { createReportedPost } from "@prisma/functions/post/report"
 import { createSavedPost } from "@prisma/functions/post/saved"
-import {
-	BookMarked,
-	Copy,
-	Ellipsis,
-	FlagTriangleRight,
-	UserMinus,
-} from "lucide-react"
+import { BookMarked, Copy, Ellipsis, FlagTriangleRight } from "lucide-react"
 import React from "react"
 
 export type PostSaveProps = {
@@ -64,9 +58,6 @@ export default function PostDropdownMenu({ userId, postId }: PostSaveProps) {
 	const handleSavePost = async () => {
 		await createSavedPost({ userId, postId })
 	}
-
-	// Handles unfollowing the poster
-	const handleUnfollow = () => {}
 
 	// REPORT
 	// ------------------------
@@ -118,20 +109,6 @@ export default function PostDropdownMenu({ userId, postId }: PostSaveProps) {
 						>
 							<p>Save</p>
 							<BookMarked />
-						</Button>
-					</DropdownMenuItem>
-
-					<DropdownMenuSeparator />
-
-					{/* unfollow */}
-					<DropdownMenuItem asChild className={dropdownMenuItemClassName}>
-						<Button
-							variant="ghost"
-							className="w-full flex-between"
-							onClick={handleUnfollow}
-						>
-							<p>Unfollow</p>
-							<UserMinus />
 						</Button>
 					</DropdownMenuItem>
 
