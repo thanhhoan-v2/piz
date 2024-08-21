@@ -19,7 +19,6 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
 
 				<div>
 					<SideBar />
-
 					<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
 						{children}
 					</main>

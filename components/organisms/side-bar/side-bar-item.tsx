@@ -16,7 +16,7 @@ import { type LucideIcon, UserRoundX } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import React from "react"
 
 type SideBarItemProps = {
@@ -29,13 +29,16 @@ const sideBarItemClass =
 
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const pathname = usePathname()
-	const [isPostOpen, setOpenPost] = React.useState(false)
+	const searchParams = useSearchParams()
+	const [isLoading, setLoading] = React.useState(false)
 	const [isWelcomeModalOpen, toggleWelcomeModal] = React.useState(false)
 	const { theme } = useTheme()
 
+	// user store
 	const userName = useUserStore((state) => state.userName)
 	const isSignedIn = useUserStore((state) => state.isSignedIn)
 
+	// Icon fill for different pages
 	const iconFill =
 		pathname === href ? (theme === "dark" ? "white" : "black") : "none"
 

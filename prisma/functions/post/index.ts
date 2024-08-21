@@ -3,7 +3,7 @@
 import type { $Enums } from "@prisma/client"
 import { prisma } from "@prisma/functions/client"
 
-type CreatePostProps = {
+export type CreatePostProps = {
 	userId: string | null
 	userName: string | null
 	userAvatarUrl: string | null
@@ -21,6 +21,7 @@ export const createPost = async ({
 }: CreatePostProps) => {
 	try {
 		if (userId) {
+			console.log("Creating post..")
 			const newPost = await prisma.post.create({
 				data: {
 					userId: userId,
@@ -30,7 +31,8 @@ export const createPost = async ({
 					visibility: visibility,
 				},
 			})
-			console.log("[POST] Created: ", newPost)
+			console.log("Created post: ", newPost)
+			return newPost
 		}
 		console.log("[POST] Missing userId when creating post")
 	} catch (error) {
@@ -55,6 +57,10 @@ export const getPostInfo = async (id: number) => {
 	}
 }
 
-// TODO: Implement user recommended posts
 // Get all posts
-export const getAllPosts = async () => await prisma.post.findMany()
+// TODO: Implement user recommended posts
+export const getAllPosts = async () => {
+	const posts = await prisma.post.findMany()
+	// revalidatePath("/")
+	return posts.map((post) => ({ ...post }))
+}

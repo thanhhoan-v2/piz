@@ -1,3 +1,5 @@
+"use client"
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -29,8 +31,10 @@ import {
 } from "@components/atoms/select"
 import { Textarea } from "@components/atoms/textarea"
 import { $Enums } from "@prisma/client"
-import { createPost } from "@prisma/functions/post"
+import { type CreatePostProps, createPost } from "@prisma/functions/post"
+import type { PostProps } from "@prisma/global"
 import { useUserStore } from "@stores/user-store"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
@@ -81,16 +85,55 @@ export default function SideBarMobileDrawer({
 		}
 	}
 
+	const queryClient = useQueryClient()
+	// React Query mutation to update the posts
+	// Update both on server and client (optimistic update)
+	const addPostMutation = useMutation({
+		mutationKey: ["addPost"],
+		mutationFn: async (newPost: CreatePostProps) => await createPost(newPost),
+		// Always refetch when the mutation is successful
+		onSuccess: () => {
+			// Invalidate the posts query to ensure consistency with the server
+			queryClient.invalidateQueries({ queryKey: ["posts"] })
+		},
+		// Always refetch after error or success
+		onSettled: async () => {
+			return await queryClient.invalidateQueries({ queryKey: ["posts"] })
+		},
+		// // Optimistic update
+		onMutate: async (newPost) => {
+			// Cancel any outgoing refetches
+			// (so they don't overwrite our optimistic update)
+			await queryClient.cancelQueries({ queryKey: ["posts"] })
+
+			// Snapshot the previous value
+			const previousPosts = queryClient.getQueryData(["posts"])
+
+			// Optimistically update to the new value
+			queryClient.setQueryData(["posts"], (old: PostProps[]) => [
+				...old,
+				newPost,
+			])
+
+			// Return a context object with the snapshotted value
+			return { previousPosts }
+		},
+		onError: (error) => {
+			console.error("Error creating post:", error)
+		},
+	})
+
 	// Handles post submission
-	const handleSubmitPost = async () => {
+	const handleSubmitPost = () => {
 		// Create post on server
-		await createPost({
+		const newPost: CreatePostProps = {
 			userId: userId,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: postContent,
 			visibility: postVisibility,
-		})
+		}
+		addPostMutationAsync(newPost)
 		// Close the drawer
 		setOpenDrawer(false)
 		// Reset the post content
@@ -98,6 +141,9 @@ export default function SideBarMobileDrawer({
 		// Reset the post visibility
 		setPostVisibility("PUBLIC")
 	}
+
+	const addPostMutationAsync = async (newPost: CreatePostProps) =>
+		await addPostMutation.mutateAsync(newPost)
 
 	// Handles the discard post
 	const handleDiscard = () => {
@@ -129,8 +175,6 @@ export default function SideBarMobileDrawer({
 						<DrawerTitle>New post</DrawerTitle>
 						<DrawerDescription>What are you thinking?</DrawerDescription>
 					</DrawerHeader>
-
-					{/* body */}
 					<div className="flex items-start gap-3 p-4">
 						<Avatar className="h-12 w-12">
 							{/* <AvatarImage src={user?.imageUrl} alt="User Avatar" /> */}
@@ -157,8 +201,6 @@ export default function SideBarMobileDrawer({
 							</div>
 						</div>
 					</div>
-
-					{/* footer */}
 					<DrawerFooter>
 						<div className="flex-between ">
 							{/* Select post visibility */}
@@ -216,8 +258,6 @@ export default function SideBarMobileDrawer({
 					</DrawerFooter>
 				</DrawerContent>
 			</Drawer>
-
-			{/* show when value is not empty */}
 			<AlertDialog open={alertIsOpen} onOpenChange={setOpenAlert}>
 				<AlertDialogContent>
 					<AlertDialogHeader>

@@ -43,7 +43,6 @@ export const createFollow = async ({
 					requestStatus: requestStatus,
 				},
 			})
-			console.log("[FOLLOW] Created: ", newFollow)
 			return newFollow
 		}
 		console.log("[FOLLOW] Missing followerId or followeeId when creating")
@@ -65,7 +64,6 @@ export const deleteFollow = async ({
 					followeeId: followeeId,
 				},
 			})
-			console.log("[FOLLOW] Deleted: ", deletedFollow)
 			return deletedFollow
 		}
 	} catch (error) {
@@ -89,7 +87,6 @@ export const checkIsFollowing = async ({
 					followeeId: followeeId,
 				},
 			})
-			console.log("[FOLLOW] Existing: ", existingFollow)
 			return existingFollow
 		}
 		console.log("[FOLLOW] Missing followerId or followeeId when finding")

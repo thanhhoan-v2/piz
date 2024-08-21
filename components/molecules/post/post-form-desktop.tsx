@@ -6,7 +6,6 @@ import { useUserStore } from "@stores/user-store"
 
 export default function PostFormDesktop() {
 	const userAvatarUrl = useUserStore((state) => state.userAvatarUrl)
-	console.log(userAvatarUrl)
 	return (
 		<>
 			<SideBarMobileDrawer>
