@@ -35,11 +35,18 @@ export default function Post({
 
 	const userStoreUserName = useUserStore((state) => state.userName)
 
+	// const queryClient = useQueryClient()
+	// const user = queryClient.getQueryData([USER.APP])
+	// console.log("user ", user.user_metadata.user_name)
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	React.useEffect(() => {
 		const fetchData = async () => {
 			// Get the current user to check if the post is created by the current user
 			setAppUserName(userStoreUserName || null)
+
+			// const appUser = useQueryDataAppUser()
+			// console.log(appUser)
 
 			// Get the number of loves, hates, comments
 			const { noReactions, noComments, noShares } = await getPostInfo(id)

@@ -1,12 +1,12 @@
 import HeaderBar from "@components/organisms/header-bar"
 import SideBar from "@components/organisms/side-bar"
-import { fetchUser } from "@supabase/functions/fetchUser"
+import { getAppUser } from "@supabase/functions/fetchUser"
 import SetUserStore from "@utils/user.helpers"
 import type React from "react"
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
 	// Fetch user for first time on server-side
-	const user = await fetchUser()
+	const user = await getAppUser()
 
 	return (
 		<>

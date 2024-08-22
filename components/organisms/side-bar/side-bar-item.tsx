@@ -8,7 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@components/atoms/dialog"
-import SideBarMobileDrawer from "@components/organisms/side-bar/side-bar-mobile-drawer"
+import PostForm from "@components/organisms/side-bar/post-form"
 import { ROUTE } from "@constants/route"
 import { useUserStore } from "@stores/user-store"
 import { cn } from "@utils/cn"
@@ -45,11 +45,11 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	// If user is signed in and the href is post
 	if (href === "post" && isSignedIn) {
 		return (
-			<SideBarMobileDrawer>
+			<PostForm>
 				<div className={sideBarItemClass}>
 					<Icon fill={iconFill} />
 				</div>
-			</SideBarMobileDrawer>
+			</PostForm>
 		)
 	}
 

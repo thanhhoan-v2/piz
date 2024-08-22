@@ -1,6 +1,8 @@
+"use server"
+
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
-export const fetchUser = async () => {
+export const getAppUser = async () => {
 	const supabase = createSupabaseClientWithCookies()
 
 	const {

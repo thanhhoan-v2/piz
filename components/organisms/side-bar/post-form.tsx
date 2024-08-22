@@ -30,16 +30,17 @@ import {
 	SelectValue,
 } from "@components/atoms/select"
 import { Textarea } from "@components/atoms/textarea"
+import { POST } from "@constants/query-key"
+import { useQueryAppUser } from "@hooks/queries/app-user"
 import { $Enums } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
 import type { PostProps } from "@prisma/global"
-import { useUserStore } from "@stores/user-store"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
 
-export default function SideBarMobileDrawer({
+export default function PostForm({
 	children,
 }: {
 	children: React.ReactNode
@@ -59,16 +60,6 @@ export default function SideBarMobileDrawer({
 	// Reference to textarea
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-	// User store values
-	const userId = useUserStore((state) => state.userId)
-	const userName = useUserStore((state) => state.userName)
-	const userAvatarUrl = useUserStore((state) => state.userAvatarUrl)
-
-	// Post length, mid warning
-	const mid_threshold = 500
-	// and last warning
-	const last_threshold = 550
-
 	// Handles post content
 	const handleChange = React.useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -76,6 +67,13 @@ export default function SideBarMobileDrawer({
 		},
 		[],
 	)
+
+	// Handles the discard post
+	const handleDiscard = () => {
+		setOpenDrawer(false)
+		setPostContent("")
+		setPostVisibility("PUBLIC")
+	}
 
 	// Handles the alert dialog to discard comment
 	const handleOpenAlert = () => {
@@ -86,6 +84,13 @@ export default function SideBarMobileDrawer({
 	}
 
 	const queryClient = useQueryClient()
+
+	// Get the lastet info of current user
+	const { data: user } = useQueryAppUser()
+	const userId = user?.user_metadata?.id
+	const userName = user?.user_metadata?.user_name
+	const userAvatarUrl = user?.user_metadata?.avatar_url
+
 	// React Query mutation to update the posts
 	// Update both on server and client (optimistic update)
 	const addPostMutation = useMutation({
@@ -94,20 +99,20 @@ export default function SideBarMobileDrawer({
 		// Always refetch when the mutation is successful
 		onSuccess: () => {
 			// Invalidate the posts query to ensure consistency with the server
-			queryClient.invalidateQueries({ queryKey: ["posts"] })
+			queryClient.invalidateQueries({ queryKey: [POST.ALL] })
 		},
 		// Always refetch after error or success
 		onSettled: async () => {
-			return await queryClient.invalidateQueries({ queryKey: ["posts"] })
+			return await queryClient.invalidateQueries({ queryKey: [POST.ALL] })
 		},
 		// // Optimistic update
 		onMutate: async (newPost) => {
 			// Cancel any outgoing refetches
 			// (so they don't overwrite our optimistic update)
-			await queryClient.cancelQueries({ queryKey: ["posts"] })
+			await queryClient.cancelQueries({ queryKey: [POST.ALL] })
 
 			// Snapshot the previous value
-			const previousPosts = queryClient.getQueryData(["posts"])
+			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
 			queryClient.setQueryData(["posts"], (old: PostProps[]) => [
@@ -145,12 +150,10 @@ export default function SideBarMobileDrawer({
 	const addPostMutationAsync = async (newPost: CreatePostProps) =>
 		await addPostMutation.mutateAsync(newPost)
 
-	// Handles the discard post
-	const handleDiscard = () => {
-		setOpenDrawer(false)
-		setPostContent("")
-		setPostVisibility("PUBLIC")
-	}
+	// Post length, mid warning
+	const mid_threshold = 500
+	// and last warning
+	const last_threshold = 550
 
 	// Textarea auto increases its height on value length
 	// biome-ignore lint/correctness/useExhaustiveDependencies: value is only needed here

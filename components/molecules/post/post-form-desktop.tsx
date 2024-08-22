@@ -1,14 +1,14 @@
 "use client"
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
 import { Input } from "@components/atoms/input"
-import SideBarMobileDrawer from "@components/organisms/side-bar/side-bar-mobile-drawer"
+import PostForm from "@components/organisms/side-bar/post-form"
 import { useUserStore } from "@stores/user-store"
 
 export default function PostFormDesktop() {
 	const userAvatarUrl = useUserStore((state) => state.userAvatarUrl)
 	return (
 		<>
-			<SideBarMobileDrawer>
+			<PostForm>
 				<div className="flex-center gap-3 rounded-lg bg-background-item p-3">
 					<Avatar>
 						<AvatarImage
@@ -20,7 +20,7 @@ export default function PostFormDesktop() {
 					</Avatar>
 					<Input placeholder="What's happening?" className="" />
 				</div>
-			</SideBarMobileDrawer>
+			</PostForm>
 		</>
 	)
 }
