@@ -60,7 +60,11 @@ export const getPostInfo = async (id: number) => {
 // Get all posts
 // TODO: Implement user recommended posts
 export const getAllPosts = async () => {
-	const posts = await prisma.post.findMany()
+	const posts = await prisma.post.findMany({
+		orderBy: {
+			createdAt: "desc", // Ascending order
+		},
+	})
 	// revalidatePath("/")
 	return posts.map((post) => ({ ...post }))
 }

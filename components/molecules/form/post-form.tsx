@@ -86,15 +86,16 @@ export default function PostForm({
 	const queryClient = useQueryClient()
 
 	// Get the lastet info of current user
+	// Why not useQueryClient() ? Because cache data may not be the lastest data
 	const { data: user } = useQueryAppUser()
-	const userId = user?.user_metadata?.id
+	const userId = user?.id
 	const userName = user?.user_metadata?.user_name
 	const userAvatarUrl = user?.user_metadata?.avatar_url
 
 	// React Query mutation to update the posts
 	// Update both on server and client (optimistic update)
 	const addPostMutation = useMutation({
-		mutationKey: ["addPost"],
+		mutationKey: [POST.ADD],
 		mutationFn: async (newPost: CreatePostProps) => await createPost(newPost),
 		// Always refetch when the mutation is successful
 		onSuccess: () => {
@@ -115,7 +116,7 @@ export default function PostForm({
 			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
-			queryClient.setQueryData(["posts"], (old: PostProps[]) => [
+			queryClient.setQueryData([POST.ALL], (old: PostProps[]) => [
 				...old,
 				newPost,
 			])
@@ -132,7 +133,7 @@ export default function PostForm({
 	const handleSubmitPost = () => {
 		// Create post on server
 		const newPost: CreatePostProps = {
-			userId: userId,
+			userId: userId ?? null,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: postContent,

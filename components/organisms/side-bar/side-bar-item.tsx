@@ -8,7 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@components/atoms/dialog"
-import PostForm from "@components/organisms/side-bar/post-form"
+import PostForm from "@components/molecules/form/post-form"
 import { ROUTE } from "@constants/route"
 import { useUserStore } from "@stores/user-store"
 import { cn } from "@utils/cn"

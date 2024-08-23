@@ -1,11 +1,12 @@
 "use client"
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
 import { Input } from "@components/atoms/input"
-import PostForm from "@components/organisms/side-bar/post-form"
-import { useUserStore } from "@stores/user-store"
+import PostForm from "@components/molecules/form/post-form"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
 
 export default function PostFormDesktop() {
-	const userAvatarUrl = useUserStore((state) => state.userAvatarUrl)
+	const user = useQueryDataAppUser()
+	const userAvatarUrl = user?.user_metadata?.avatar_url
 	return (
 		<>
 			<PostForm>

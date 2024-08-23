@@ -32,7 +32,7 @@ export default function ReactQueryProvider({
 		<QueryClientProvider client={queryClient}>
 			{/* <HydrationBoundary state={dehydrate(queryClient)}> */}
 			{children}
-			<ReactQueryDevtools initialIsOpen={false} />
+			<ReactQueryDevtools initialIsOpen={true} />
 			{/* </HydrationBoundary> */}
 		</QueryClientProvider>
 	)
