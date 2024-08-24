@@ -10,13 +10,13 @@ import {
 } from "@components/atoms/dialog"
 import PostForm from "@components/molecules/form/post-form"
 import { ROUTE } from "@constants/route"
-import { useUserStore } from "@stores/user-store"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import { cn } from "@utils/cn"
 import { type LucideIcon, UserRoundX } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname } from "next/navigation"
 import React from "react"
 
 type SideBarItemProps = {
@@ -29,21 +29,19 @@ const sideBarItemClass =
 
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const pathname = usePathname()
-	const searchParams = useSearchParams()
-	const [isLoading, setLoading] = React.useState(false)
 	const [isWelcomeModalOpen, toggleWelcomeModal] = React.useState(false)
 	const { theme } = useTheme()
 
-	// user store
-	const userName = useUserStore((state) => state.userName)
-	const isSignedIn = useUserStore((state) => state.isSignedIn)
+	// Get user data from query cache
+	const user = useQueryDataAppUser()
+	const userName = user?.user_metadata?.userName
 
 	// Icon fill for different pages
 	const iconFill =
 		pathname === href ? (theme === "dark" ? "white" : "black") : "none"
 
 	// If user is signed in and the href is post
-	if (href === "post" && isSignedIn) {
+	if (href === "post" && userName) {
 		return (
 			<PostForm>
 				<div className={sideBarItemClass}>
@@ -54,7 +52,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	}
 
 	// If user is signed in and the href is profile
-	if (href === "profile" && isSignedIn) {
+	if (href === "profile" && userName) {
 		return (
 			<Link
 				prefetch={true}
@@ -88,7 +86,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	}
 
 	// If user is not signed in
-	if (!isSignedIn) {
+	if (!userName) {
 		return (
 			<>
 				<Button

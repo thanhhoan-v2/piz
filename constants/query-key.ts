@@ -7,4 +7,5 @@ export const POST = {
 export const USER = {
 	APP: "app_user",
 	ID: "user_id",
+	SESSION: "user_session",
 }

@@ -13,13 +13,12 @@ export type SupabaseUserProps = {
 	}
 	user_metadata: {
 		email: string
-		email_verified: boolean
-		full_name: string
+		userName: string
+		fullName: string
 		password: string
+		email_verified: boolean
 		phone_verified: boolean
 		sub: string
-		user_name: string
-		avatar_url?: string
 	}
 	identities: {
 		identity_id: string

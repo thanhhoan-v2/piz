@@ -9,8 +9,14 @@ import {
 	DropdownMenuTrigger,
 } from "@components/atoms/dropdown-menu"
 import { ThemeToggle } from "@components/molecules/toggle/theme-toggle"
+import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
-import { useUserStore } from "@stores/user-store"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
+import {
+	useQueryClientClearCache,
+	useQueryClientRemoveQueries,
+} from "@hooks/queries/client"
+import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { createSupabaseClientForBrowser } from "@utils/supabase/client"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
@@ -39,19 +45,22 @@ const supabase = createSupabaseClientForBrowser()
 export default function HeaderBarMenu() {
 	const { theme, setTheme } = useTheme()
 	const router = useRouter()
-	const isSignedIn = useUserStore((state) => state.isSignedIn)
 	const dropdownMenuItemClass = cn(
 		"cursor-pointer",
 		theme === "dark" ? "dark-common" : "light-common",
 	)
 
-	const userStoreReset = useUserStore((state) => state.reset)
+	const user = useQueryDataAppUser()
+
+	const queryClient = useQueryClient()
 
 	const handleSignOut = async () => {
-		console.log("signing out...")
+		console.log("Signing out ...")
 		try {
-			// Reset the user store before signing out
-			userStoreReset()
+			// Clear query cache before signing out
+			useQueryClientClearCache(queryClient)
+			// Remove
+			useQueryClientRemoveQueries(queryClient, USER.APP)
 			// Sign out
 			await supabase.auth.signOut()
 			// Redirect to sign-in page
@@ -61,7 +70,7 @@ export default function HeaderBarMenu() {
 		}
 	}
 
-	if (!isSignedIn) return null
+	if (!user || !user.id) return null
 
 	return (
 		<>
