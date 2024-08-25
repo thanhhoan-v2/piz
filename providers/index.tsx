@@ -1,2 +1,2 @@
 export * from "./theme-provider"
-export * from "./react-query-provider"
+export * from "./query-provider"

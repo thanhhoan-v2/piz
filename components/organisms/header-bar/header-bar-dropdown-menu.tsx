@@ -1,4 +1,6 @@
 "use client"
+
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/atoms/button"
 import {
 	DropdownMenu,
@@ -11,7 +13,6 @@ import {
 import { ThemeToggle } from "@components/molecules/toggle/theme-toggle"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
-import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import {
 	useQueryClientClearCache,
 	useQueryClientRemoveQueries,
@@ -19,6 +20,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { createSupabaseClientForBrowser } from "@utils/supabase/client"
+import { useResetAtom } from "jotai/utils"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
@@ -50,17 +52,18 @@ export default function HeaderBarMenu() {
 		theme === "dark" ? "dark-common" : "light-common",
 	)
 
-	const user = useQueryDataAppUser()
-
 	const queryClient = useQueryClient()
+	const resetUserAtom = useResetAtom(userAtom)
 
 	const handleSignOut = async () => {
 		console.log("Signing out ...")
 		try {
 			// Clear query cache before signing out
 			useQueryClientClearCache(queryClient)
-			// Remove
+			// Remove queries from cache
 			useQueryClientRemoveQueries(queryClient, USER.APP)
+			// Reset user atom
+			resetUserAtom()
 			// Sign out
 			await supabase.auth.signOut()
 			// Redirect to sign-in page
@@ -69,8 +72,6 @@ export default function HeaderBarMenu() {
 			console.error("An error occurred during sign out", error)
 		}
 	}
-
-	if (!user || !user.id) return null
 
 	return (
 		<>

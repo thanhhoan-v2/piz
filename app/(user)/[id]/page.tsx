@@ -3,7 +3,8 @@ import { AvatarStack } from "@components/atoms/avatar-stack"
 import { Button } from "@components/atoms/button"
 import FollowButton from "@components/molecules/button/follow-button"
 import Post from "@components/molecules/post"
-import { getUser } from "@prisma/functions/user"
+import { avatarPlaceholder } from "@constants/image-placeholder"
+import { getViewingUserInfo } from "@prisma/functions/user"
 import {
 	countUserFollowers,
 	getFirstThreeFollowerAvatarUrls,
@@ -20,6 +21,16 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 		data: { user: appUser },
 	} = await supabase.auth.getUser()
 
+	// Viewing user, another person
+	const viewingUser = await getViewingUserInfo(params.id)
+
+	// Get all posts by the viewing user
+	let posts: PostProps[] = []
+	if (viewingUser) {
+		const data = await getAllUserPosts({ userId: viewingUser.id })
+		if (data) posts = data
+	}
+
 	// Get the first three follower avatar urls for AvatarStack
 	let firstThreeAvatarUrls: { name: string; image: string }[] = []
 	if (appUser) {
@@ -33,16 +44,6 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 		const data = await countUserFollowers({ userId: appUser.id })
 		console.log(data)
 		if (data) noFollowers = data
-	}
-
-	// Viewing user, another person
-	const viewingUser = await getUser(params.id)
-
-	// Get all posts by the viewing user
-	let posts: PostProps[] = []
-	if (viewingUser) {
-		const data = await getAllUserPosts({ userId: viewingUser.id })
-		if (data) posts = data
 	}
 
 	return (
@@ -62,12 +63,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 
 					<div className="">
 						<Avatar className="h-24 w-24">
-							<AvatarImage
-								src={
-									viewingUser?.avatarUrl ??
-									"https://static.vecteezy.com/system/resources/thumbnails/025/337/669/small_2x/default-male-avatar-profile-icon-social-media-chatting-online-user-free-vector.jpg"
-								}
-							/>
+							<AvatarImage src={viewingUser?.avatarUrl ?? avatarPlaceholder} />
 							<AvatarFallback>Piz</AvatarFallback>
 						</Avatar>
 					</div>

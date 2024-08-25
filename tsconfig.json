@@ -30,16 +30,12 @@
 			"@providers/*": ["./providers/*"],
 			"@hooks/*": ["./hooks/*"],
 			"@schemas/*": ["./schemas/*"],
-			"@prisma/*": ["./prisma/*"],
+      "@prisma/*": ["./prisma/*"],
 			"@supabase/*": ["./supabase/*"],
-			"@stores/*": ["./stores/*"]
+			"@stores/*": ["./stores/*"],
+			"@atoms/*": ["./atoms/*"]
 		}
 	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts"
-	],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
 	"exclude": ["node_modules", "node_modules/@radix-ui/**"]
 }

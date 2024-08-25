@@ -2,7 +2,7 @@
 
 import { prisma } from "@prisma/functions/client"
 
-export const getUser = async (userName: string) => {
+export const getViewingUserInfo = async (userName: string) => {
 	try {
 		const user = await prisma.appUser.findUnique({
 			where: { userName: userName },

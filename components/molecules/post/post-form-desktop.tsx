@@ -1,11 +1,13 @@
 "use client"
+
+import { userAtom } from "@atoms/user"
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
 import { Input } from "@components/atoms/input"
 import PostForm from "@components/molecules/form/post-form"
-import { useQueryDataAppUser } from "@hooks/queries/app-user"
+import { useAtomValue } from "jotai"
 
 export default function PostFormDesktop() {
-	const user = useQueryDataAppUser()
+	const user = useAtomValue(userAtom)
 	const userAvatarUrl = user?.user_metadata?.avatar_url
 	return (
 		<>

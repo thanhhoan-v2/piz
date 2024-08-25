@@ -1,4 +1,5 @@
-import { createSupabaseClientForBrowser } from "@utils/supabase/client"
+"use server"
+import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
 type SupabasePartialSearchProps = {
 	prefix: string
@@ -9,11 +10,11 @@ export const supabasePartialSearch = async ({
 	prefix,
 	prefixFunction,
 }: SupabasePartialSearchProps) => {
-	const supabase = createSupabaseClientForBrowser()
+	const supabase = createSupabaseClientWithCookies()
 
 	const { data, error } = await supabase.rpc(prefixFunction, { prefix })
 	if (error) {
-		console.error("Error when searching: ", error)
+		console.error("<< Supabase >> Error when searching: ", error)
 		return null
 	}
 

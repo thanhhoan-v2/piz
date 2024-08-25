@@ -5,10 +5,10 @@ import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
 import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PostProps } from "@prisma/global"
-import { useUserStore } from "@stores/user-store"
 import { calculateTimeDiff } from "@utils/time.helpers"
 import { CircleUser, Crown } from "lucide-react"
 import type { Route } from "next"
@@ -33,7 +33,8 @@ export default function Post({
 	const [noShares, setNoShares] = useState<number>(0)
 	const [fetchedPostReaction, setFetchedPostReaction] = useState<boolean>(false)
 
-	const userStoreUserName = useUserStore((state) => state.userName)
+	const appUser = useQueryDataAppUser()
+	const queriedUserName = appUser?.user_metadata?.userName
 
 	// const queryClient = useQueryClient()
 	// const user = queryClient.getQueryData([USER.APP])
@@ -43,7 +44,7 @@ export default function Post({
 	React.useEffect(() => {
 		const fetchData = async () => {
 			// Get the current user to check if the post is created by the current user
-			setAppUserName(userStoreUserName || null)
+			setAppUserName(queriedUserName || null)
 
 			// const appUser = useQueryDataAppUser()
 			// console.log(appUser)

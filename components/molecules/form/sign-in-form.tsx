@@ -1,5 +1,6 @@
 "use client"
 
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/atoms/button"
 import {
 	Card,
@@ -15,6 +16,7 @@ import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
 import { useSignIn } from "@hooks/auth/use-sign-in"
 import { useQueryClient } from "@tanstack/react-query"
+import { useSetAtom } from "jotai"
 import { TriangleAlert, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -28,6 +30,7 @@ export default function SignInForm() {
 
 	const router = useRouter()
 	const queryClient = useQueryClient()
+	const setUserAtom = useSetAtom(userAtom)
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -42,10 +45,11 @@ export default function SignInForm() {
 			// Store in query client
 			queryClient.setQueryData([USER.APP], user)
 			queryClient.setQueryData([USER.SESSION], session)
-			// Store in local storage
-			localStorage.setItem(USER.APP, JSON.stringify(session))
-			localStorage.setItem(USER.SESSION, JSON.stringify(session))
 
+			// Set user atom
+			setUserAtom(user)
+
+			// Push to home page
 			router.push(ROUTE.HOME)
 		}
 
@@ -66,21 +70,23 @@ export default function SignInForm() {
 						<div className="grid gap-2">
 							{/* email */}
 							<Label htmlFor="email">Email</Label>
-							<Input
-								id="email"
-								name="email"
-								type="email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								placeholder=""
-								required
-							/>
+							<div className="flex">
+								<Input
+									id="email"
+									name="email"
+									type="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									placeholder=""
+									required
+								/>
 
-							{email.length > 0 && (
-								<Button variant="ghost" onClick={() => setEmail("")}>
-									<X className="size-4" />
-								</Button>
-							)}
+								{email.length > 0 && (
+									<Button variant="ghost" onClick={() => setEmail("")}>
+										<X className="size-4" />
+									</Button>
+								)}
+							</div>
 						</div>
 						<div className="grid gap-2">
 							<div className="flex-between">

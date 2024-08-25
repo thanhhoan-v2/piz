@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@components/atoms/button"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import type { $Enums } from "@prisma/client"
 import {
 	type CreateFollowProps,
@@ -15,8 +16,10 @@ export default function FollowButton({
 	followeeId, // the user to follow
 }: CreateFollowProps) {
 	// Follow state
-	const [isFollowing, setIsFollowing] = React.useState(false)
 	const [followStatus, setFollowStatus] = React.useState<string | null>(null)
+
+	const appUser = useQueryDataAppUser()
+	const appUserId = appUser?.id
 
 	// Fetch if the user is following the user
 	React.useEffect(() => {
@@ -64,13 +67,30 @@ export default function FollowButton({
 		if (deletedFollow) setFollowStatus(null)
 	}
 
+	// If the user is viewing their own profile
+	if (appUserId === followeeId) return null
+
 	// If the request is (already) accepted
 	if (followStatus === "ACCEPTED")
-		return <Button onClick={handleUnfollow}>Following</Button>
+		return (
+			<Button
+				onClick={handleUnfollow}
+				className="bg-pink-600 font-bold text-white hover:bg-pink-400"
+			>
+				Following
+			</Button>
+		)
 
 	// If the request is pending
 	if (followStatus === "PENDING")
-		return <Button onClick={handleUnfollow}>Pending</Button>
+		return (
+			<Button
+				onClick={handleUnfollow}
+				className="bg-cyan-500 font-italic text-white hover:bg-cyan-400"
+			>
+				Pending
+			</Button>
+		)
 
 	// If the user is not following or requesting to follow the viewing user
 	return <Button onClick={handleFollow}>Follow</Button>

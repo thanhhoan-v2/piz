@@ -1,6 +1,10 @@
 import { updateSession } from "@utils/supabase/middleware"
 import type { NextRequest } from "next/server"
 
+// 1. Specify protected and public routes
+const protectedRoutes = ["/search", "/activity", "/profile", "/settings"]
+const publicRoutes = ["/sign-in", "/sign-up", "/"]
+
 export async function middleware(request: NextRequest) {
 	return updateSession(request)
 }

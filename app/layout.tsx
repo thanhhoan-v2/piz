@@ -1,7 +1,8 @@
 import localFont from "next/font/local"
 import "@styles/globals.css"
+import "jotai-devtools/styles.css"
 import { AppLayout } from "@components/templates"
-import ReactQueryProvider from "@providers/react-query-provider"
+import QueryProvider from "@providers/query-provider"
 import { ThemeProvider } from "next-themes"
 
 const geistSans = localFont({
@@ -36,7 +37,7 @@ export default function RootLayout({
 			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background" suppressHydrationWarning>
-				<ReactQueryProvider>
+				<QueryProvider>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"
@@ -45,7 +46,7 @@ export default function RootLayout({
 					>
 						<AppLayout>{children}</AppLayout>
 					</ThemeProvider>
-				</ReactQueryProvider>
+				</QueryProvider>
 			</body>
 		</html>
 	)

@@ -31,6 +31,7 @@
 		"@radix-ui/react-tooltip": "^1.1.2",
 		"@supabase/ssr": "latest",
 		"@supabase/supabase-js": "latest",
+		"@tanstack/query-core": "^5.52.0",
 		"@tanstack/query-sync-storage-persister": "^5.52.0",
 		"@tanstack/react-query": "^5.52.1",
 		"@tanstack/react-query-devtools": "^5.52.1",
@@ -45,6 +46,10 @@
 		"framer-motion": "^11.3.30",
 		"geist": "^1.3.1",
 		"input-otp": "^1.2.4",
+		"jotai": "^2.9.3",
+		"jotai-devtools": "^0.10.1",
+		"jotai-resetter": "^1.0.9",
+		"jotai-tanstack-query": "^0.8.7",
 		"lucide-react": "^0.418.0",
 		"next": "^14.2.6",
 		"next-themes": "^0.3.0",
@@ -59,8 +64,7 @@
 		"tailwind-merge": "^2.5.2",
 		"use-dehydrated-state": "^0.1.0",
 		"vaul": "^0.9.1",
-		"zod": "^3.23.8",
-		"zustand": "^4.5.5"
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@mermaid-js/mermaid-cli": "^10.9.1",
