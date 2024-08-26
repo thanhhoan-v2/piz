@@ -1,12 +1,13 @@
 "use client"
+import { userAtom } from "@atoms/user"
 import { Input } from "@components/atoms/input"
 import SearchList from "@components/molecules/search/search-list"
 import SearchSkeleton from "@components/molecules/skeleton/search-skeleton"
-import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import { useDebounce } from "@hooks/use-debounce"
 import type { AppUserProps } from "@prisma/global"
 import { supabasePartialSearch } from "@supabase/functions/partial-search"
 import { searchUsersByUserNamePrefix } from "@supabase/prefix-functions"
+import { useAtomValue } from "jotai"
 import { SearchIcon } from "lucide-react"
 import React from "react"
 
@@ -15,8 +16,8 @@ export default function SearchBar() {
 	const [searchResults, setSearchResults] = React.useState<AppUserProps[]>([])
 	const [isSearching, setIsSearching] = React.useState<boolean>(false)
 
-	const appUser = useQueryDataAppUser()
-	const appUserId = appUser?.id
+	const user = useAtomValue(userAtom)
+	const appUserId = user?.id
 
 	const handleSearch = React.useCallback(
 		useDebounce(async (value: string) => {

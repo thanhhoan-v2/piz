@@ -1,5 +1,6 @@
 "use client"
 
+import { userAtom } from "@atoms/user"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -10,7 +11,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@components/atoms/alert-dialog"
-import { Avatar, AvatarFallback } from "@components/atoms/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
 import { Badge } from "@components/atoms/badge"
 import { Button } from "@components/atoms/button"
 import {
@@ -30,13 +31,15 @@ import {
 	SelectValue,
 } from "@components/atoms/select"
 import { Textarea } from "@components/atoms/textarea"
+import WelcomeModal from "@components/molecules/modal/welcome-modal"
+import { avatarPlaceholder } from "@constants/image-placeholder"
 import { POST } from "@constants/query-key"
-import { useQueryAppUser } from "@hooks/queries/app-user"
 import { $Enums } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
 import type { PostProps } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
+import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
 
@@ -53,6 +56,7 @@ export default function PostForm({
 
 	// Post
 	const [postContent, setPostContent] = React.useState("")
+
 	// Post visibility
 	const [postVisibility, setPostVisibility] =
 		React.useState<$Enums.PostVisibility>("PUBLIC")
@@ -86,11 +90,10 @@ export default function PostForm({
 	const queryClient = useQueryClient()
 
 	// Get the lastet info of current user
-	// Why not useQueryClient() ? Because cache data may not be the lastest data
-	const { data: user } = useQueryAppUser()
+	const user = useAtomValue(userAtom)
 	const userId = user?.id
-	const userName = user?.user_metadata?.user_name
-	const userAvatarUrl = user?.user_metadata?.avatar_url
+	const userName = user?.user_metadata?.userName
+	const userAvatarUrl = user?.user_metadata?.avatarUrl
 
 	// React Query mutation to update the posts
 	// Update both on server and client (optimistic update)
@@ -165,6 +168,8 @@ export default function PostForm({
 		}
 	}, [postContent])
 
+	if (!user) return <WelcomeModal>{children}</WelcomeModal>
+
 	return (
 		<>
 			<Drawer open={isDrawerOpen} onOpenChange={setOpenDrawer}>
@@ -181,7 +186,10 @@ export default function PostForm({
 					</DrawerHeader>
 					<div className="flex items-start gap-3 p-4">
 						<Avatar className="h-12 w-12">
-							{/* <AvatarImage src={user?.imageUrl} alt="User Avatar" /> */}
+							<AvatarImage
+								src={userAvatarUrl ?? avatarPlaceholder}
+								alt={userName}
+							/>
 							<AvatarFallback>PIZ</AvatarFallback>
 						</Avatar>
 

@@ -1,15 +1,17 @@
 "use client"
+import { userAtom } from "@atoms/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
 import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
 import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
-import { useQueryDataAppUser } from "@hooks/queries/app-user"
+import { avatarPlaceholder } from "@constants/image-placeholder"
 import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PostProps } from "@prisma/global"
 import { calculateTimeDiff } from "@utils/time.helpers"
+import { useAtomValue } from "jotai"
 import { CircleUser, Crown } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
@@ -33,21 +35,14 @@ export default function Post({
 	const [noShares, setNoShares] = useState<number>(0)
 	const [fetchedPostReaction, setFetchedPostReaction] = useState<boolean>(false)
 
-	const appUser = useQueryDataAppUser()
-	const queriedUserName = appUser?.user_metadata?.userName
-
-	// const queryClient = useQueryClient()
-	// const user = queryClient.getQueryData([USER.APP])
-	// console.log("user ", user.user_metadata.user_name)
+	const user = useAtomValue(userAtom)
+	const queriedUserName = user?.user_metadata?.userName
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	React.useEffect(() => {
 		const fetchData = async () => {
 			// Get the current user to check if the post is created by the current user
 			setAppUserName(queriedUserName || null)
-
-			// const appUser = useQueryDataAppUser()
-			// console.log(appUser)
 
 			// Get the number of loves, hates, comments
 			const { noReactions, noComments, noShares } = await getPostInfo(id)
@@ -57,6 +52,7 @@ export default function Post({
 
 			// Get the reaction of the post
 			const fetchedPostReaction = await getPostReaction(userId, id)
+			// and set to the state
 			setFetchedPostReaction(!!fetchedPostReaction)
 		}
 
@@ -77,7 +73,10 @@ export default function Post({
 				<div className="flex items-start gap-3">
 					{userAvatarUrl ? (
 						<Avatar className="h-12 w-12">
-							<AvatarImage src={userAvatarUrl ?? ""} alt="User Avatar" />
+							<AvatarImage
+								src={userAvatarUrl ?? avatarPlaceholder}
+								alt="User Avatar"
+							/>
 							<AvatarFallback>PIZ</AvatarFallback>
 						</Avatar>
 					) : (
@@ -120,11 +119,11 @@ export default function Post({
 				<PostCommentButton
 					initialCommentCount={noComments}
 					className={postButtonClassName}
-					// user related
+					// User related props
 					userId={userId}
 					userName={userName}
 					userAvatarUrl={userAvatarUrl}
-					// post related
+					// Post related props
 					postId={id}
 					postContent={content}
 					postTimeDiff={calculateTimeDiff(createdAt, updatedAt)}
