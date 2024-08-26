@@ -62,7 +62,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	if (href === ROUTE.HOME)
 		return (
 			<>
-				<Button variant="ghost" className={sideBarItemClass} asChild>
+				<Button variant="ghost" className={sideBarItemClass}>
 					<Link
 						prefetch={true}
 						href={href as Route}

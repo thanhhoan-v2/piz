@@ -15,12 +15,32 @@ import { Label } from "@components/atoms/label"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
 import { useSignIn } from "@hooks/auth/use-sign-in"
+import type { PrismaUserProps } from "@prisma/global"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
-import { TriangleAlert, X } from "lucide-react"
+import { X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React from "react"
+
+const translateErrorMessage = (
+	errorMessage: string,
+	foundUser: PrismaUserProps | null,
+) => {
+	const errorMessageMap: { [key: string]: string } = {
+		"Invalid login credentials": "Wrong email or password",
+	}
+	const foundUserErrorMessageMap: { [key: string]: string } = {
+		"Invalid login credentials":
+			"The password that you've entered is incorrect",
+	}
+
+	if (foundUser) {
+		return foundUserErrorMessageMap[errorMessage] ?? errorMessage
+	}
+
+	return errorMessageMap[errorMessage] ?? errorMessage
+}
 
 export default function SignInForm() {
 	const [email, setEmail] = React.useState<string>("")
@@ -37,11 +57,18 @@ export default function SignInForm() {
 		setLoading(true)
 		setError(null)
 
-		const { user, session, error } = await useSignIn({ email, password })
+		const { user, session, errorMessage, foundUser } = await useSignIn({
+			email,
+			password,
+		})
 
-		if (error) {
-			setError(error.message)
-		} else {
+		if (errorMessage) {
+			const translatedErrorMessage = translateErrorMessage(
+				errorMessage,
+				foundUser,
+			)
+			setError(translatedErrorMessage)
+		} else if (user) {
 			// Store in query client
 			queryClient.setQueryData([USER.APP], user)
 			queryClient.setQueryData([USER.SESSION], session)
@@ -49,11 +76,12 @@ export default function SignInForm() {
 			// Set user atom
 			setUserAtom(user)
 
+			// Set loading to false
+			setLoading(false)
+
 			// Push to home page
 			router.push(ROUTE.HOME)
 		}
-
-		setLoading(false)
 	}
 
 	return (
@@ -137,7 +165,6 @@ export default function SignInForm() {
 					{error && (
 						<div className="w-full p-4 text-center text-foreground">
 							<div className="flex-center gap-2 text-red-700">
-								<TriangleAlert size={18} />
 								<p>{error}</p>
 							</div>
 						</div>

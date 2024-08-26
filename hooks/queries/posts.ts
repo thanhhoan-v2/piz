@@ -1,10 +1,10 @@
 import { POST } from "@constants/query-key"
 import { getAllPosts } from "@prisma/functions/post"
-import type { PostProps } from "@prisma/global"
+import type { PrismaPostProps } from "@prisma/global"
 import { useQuery } from "@tanstack/react-query"
 
 export const useQueryPosts = () =>
-	useQuery<PostProps[]>({
+	useQuery<PrismaPostProps[]>({
 		queryKey: [POST.ALL],
 		queryFn: async () => getAllPosts(),
 		// refetchOnMount: "always", // Always refetch data when the component mounts

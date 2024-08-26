@@ -36,7 +36,7 @@ import { avatarPlaceholder } from "@constants/image-placeholder"
 import { POST } from "@constants/query-key"
 import { $Enums } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
-import type { PostProps } from "@prisma/global"
+import type { PrismaPostProps } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
@@ -119,7 +119,7 @@ export default function PostForm({
 			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
-			queryClient.setQueryData([POST.ALL], (old: PostProps[]) => [
+			queryClient.setQueryData([POST.ALL], (old: PrismaPostProps[]) => [
 				...old,
 				newPost,
 			])

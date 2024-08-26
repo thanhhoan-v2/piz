@@ -1,6 +1,5 @@
 export type {
-	Post as PostProps,
-	PostReaction as PostReactionProps,
-	AppUser as AppUserProps,
-	ReactionType,
+	Post as PrismaPostProps,
+	PostReaction as PrismaPostReactionProps,
+	AppUser as PrismaUserProps,
 } from "@prisma/client"

@@ -19,7 +19,9 @@ export default function WelcomeModal({
 	return (
 		<>
 			<Dialog open={isWelcomeModalOpen} onOpenChange={toggleWelcomeModal}>
-				<DialogTrigger>{children}</DialogTrigger>
+				<DialogTrigger className="cursor-pointer" asChild>
+					{children}
+				</DialogTrigger>
 				<DialogContent className="min-h-[300px] w-[80vw] rounded-lg">
 					<DialogHeader className="mt-8">
 						<DialogTitle className="font-bold tablet:text-3xl">

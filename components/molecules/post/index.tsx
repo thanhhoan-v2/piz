@@ -9,7 +9,7 @@ import PostVisibilityBadge from "@components/molecules/post/post-visibility-badg
 import { avatarPlaceholder } from "@constants/image-placeholder"
 import { getPostInfo } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
-import type { PostProps } from "@prisma/global"
+import type { PrismaPostProps } from "@prisma/global"
 import { calculateTimeDiff } from "@utils/time.helpers"
 import { useAtomValue } from "jotai"
 import { CircleUser, Crown } from "lucide-react"
@@ -28,7 +28,7 @@ export default function Post({
 	createdAt,
 	updatedAt,
 	isDeleted,
-}: PostProps) {
+}: PrismaPostProps) {
 	const [appUserName, setAppUserName] = useState<string | null>(null)
 	const [noReactions, setNoReactions] = useState<number>(0)
 	const [noComments, setNoComments] = useState<number>(0)
