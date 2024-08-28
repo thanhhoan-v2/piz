@@ -40,20 +40,33 @@ export const createPost = async ({
 	}
 }
 
-// Get a post information (no of reactions, comments, shares)
-export const getPostInfo = async (id: number) => {
-	const noReactions = await prisma.postReaction.count({
-		where: { postId: id },
-	})
+// Get number of reactions, comments, shares
+export const getPostCounts = async ({ postId }: { postId: number }) => {
+	try {
+		const noReactions = await prisma.postReaction.count({
+			where: { postId: postId },
+		})
 
-	const noComments = await prisma.comment.count({ where: { postId: id } })
+		const noComments = await prisma.comment.count({
+			where: { postId: postId },
+		})
 
-	const noShares = await prisma.share.count({ where: { postId: id } })
+		const noShares = await prisma.share.count({
+			where: { postId: postId },
+		})
 
-	return {
-		noReactions,
-		noComments,
-		noShares,
+		return {
+			noReactions: noReactions || 0,
+			noComments: noComments || 0,
+			noShares: noShares || 0,
+		}
+	} catch (error) {
+		console.error("Error fetching post counts:", error)
+		return {
+			noReactions: 0,
+			noComments: 0,
+			noShares: 0,
+		}
 	}
 }
 

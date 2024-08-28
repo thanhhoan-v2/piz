@@ -12,10 +12,11 @@ import {
 } from "@components/atoms/card"
 import { Input } from "@components/atoms/input"
 import { Label } from "@components/atoms/label"
+import AuthButton from "@components/molecules/button/auth-button"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
 import { useSignIn } from "@hooks/auth/use-sign-in"
-import type { PrismaUserProps } from "@prisma/global"
+import type { PrismaUser } from "@prisma/global"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 import { X } from "lucide-react"
@@ -25,7 +26,7 @@ import React from "react"
 
 const translateErrorMessage = (
 	errorMessage: string,
-	foundUser: PrismaUserProps | null,
+	foundUser: PrismaUser | null,
 ) => {
 	const errorMessageMap: { [key: string]: string } = {
 		"Invalid login credentials": "Wrong email or password",
@@ -79,7 +80,7 @@ export default function SignInForm() {
 			// Set loading to false
 			setLoading(false)
 
-			// Push to home page
+			// Direct to home page
 			router.push(ROUTE.HOME)
 		}
 	}
@@ -122,7 +123,7 @@ export default function SignInForm() {
 								<Label htmlFor="password">Password</Label>
 								<Link
 									href="/forgot-password"
-									className="text-md decoration-pink-400 underline-offset-4 hover:underline hover:decoration-wavy"
+									className="text-sm decoration-pink-400 underline-offset-4 hover:underline hover:decoration-wavy"
 								>
 									Forgot your password?
 								</Link>
@@ -146,9 +147,11 @@ export default function SignInForm() {
 							</div>
 						</div>
 						<div className="grid gap-2">
-							<Button type="submit" disabled={loading}>
-								{loading ? "Signing in..." : "Sign in"}
-							</Button>
+							<AuthButton
+								isLoading={loading}
+								normalLabel="Sign In"
+								loadingLabel="Signing In"
+							/>
 						</div>
 						<div className="mt-4 flex-between text-sm">
 							Don&apos;t have an account?{" "}

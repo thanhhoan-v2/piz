@@ -20,7 +20,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { createSupabaseClientForBrowser } from "@utils/supabase/client"
-import { useResetAtom } from "jotai/utils"
+import { useAtom } from "jotai"
+import { RESET } from "jotai/utils"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
@@ -44,7 +45,7 @@ const items = [
 
 const supabase = createSupabaseClientForBrowser()
 
-export default function HeaderBarMenu() {
+export default function HeaderDropdownMenu() {
 	const { theme, setTheme } = useTheme()
 	const router = useRouter()
 	const dropdownMenuItemClass = cn(
@@ -53,17 +54,16 @@ export default function HeaderBarMenu() {
 	)
 
 	const queryClient = useQueryClient()
-	const resetUserAtom = useResetAtom(userAtom)
+	const [user, setUser] = useAtom(userAtom)
 
 	const handleSignOut = async () => {
-		console.log("Signing out ...")
 		try {
 			// Clear query cache before signing out
 			useQueryClientClearCache(queryClient)
 			// Remove queries from cache
 			useQueryClientRemoveQueries(queryClient, USER.APP)
 			// Reset user atom
-			resetUserAtom()
+			setUser(RESET)
 			// Sign out
 			await supabase.auth.signOut()
 			// Redirect to sign-in page
@@ -72,6 +72,18 @@ export default function HeaderBarMenu() {
 			console.error("An error occurred during sign out", error)
 		}
 	}
+
+	if (!user)
+		return (
+			<>
+				<Link href={ROUTE.SIGN_UP}>
+					<Button variant="link">Create account</Button>
+				</Link>
+				<Link href={ROUTE.SIGN_IN}>
+					<Button>Log in</Button>
+				</Link>
+			</>
+		)
 
 	return (
 		<>

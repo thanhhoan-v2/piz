@@ -1,5 +1,8 @@
 export type {
-	Post as PrismaPostProps,
-	PostReaction as PrismaPostReactionProps,
-	AppUser as PrismaUserProps,
+	// TABLES
+	Post as PrismaPost,
+	PostReaction as PrismaPostReaction,
+	AppUser as PrismaUser,
+	// ENUMS
+	PostVisibility as PrismaPostVisibilityEnum,
 } from "@prisma/client"

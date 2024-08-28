@@ -1,16 +1,16 @@
 "use client"
 
 import Post from "@components/molecules/post"
-import { useQueryPosts } from "@hooks/queries/posts"
+import { useQueryAllPosts } from "@hooks/queries/posts"
 
-export default function Posts() {
+export default function PostList() {
 	const {
 		data: posts,
 		isLoading,
 		isError,
 		isSuccess,
 		isPending,
-	} = useQueryPosts()
+	} = useQueryAllPosts()
 
 	if (isError) return <div>Error loading posts 😢</div>
 	if (isLoading) return <div>Loading posts...</div>

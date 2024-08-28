@@ -1,14 +1,18 @@
 "use server"
 
 import { prisma } from "@prisma/functions/client"
+import type { PrismaPostReaction } from "@prisma/global"
 
-export type PostReactionActionProps = {
-	userId: string
+export type PostReactionProps = {
+	userId?: string
 	postId: number
 }
 
 // GET a post reaction by userId and postId
-export const getPostReaction = async (userId: string, postId: number) => {
+export const getPostReaction = async ({
+	userId,
+	postId,
+}: PostReactionProps) => {
 	return await prisma.postReaction.findFirst({
 		where: { userId, postId },
 	})
@@ -18,19 +22,23 @@ export const getPostReaction = async (userId: string, postId: number) => {
 export const createPostReaction = async ({
 	userId,
 	postId,
-}: PostReactionActionProps) => {
+}: PostReactionProps) => {
 	try {
-		const existingReaction = await getPostReaction(userId, postId)
+		if (userId) {
+			const existingReaction = await getPostReaction({ userId, postId })
 
-		if (existingReaction) {
-			// If the user has already reacted to the post, delete the reaction
-			await deletePostReaction({ userId, postId })
+			if (existingReaction) {
+				// If the user has already reacted to the post, delete the reaction
+				await deletePostReaction({ userId, postId })
+			} else {
+				// If the user has not reacted to the post
+				const newPostReaction = await prisma.postReaction.create({
+					data: { userId, postId },
+				})
+				console.log("[POST_REACTION] Created: ", newPostReaction)
+			}
 		} else {
-			// If the user has not reacted to the post
-			const newPostReaction = await prisma.postReaction.create({
-				data: { userId, postId },
-			})
-			console.log("[POST_REACTION] Created: ", newPostReaction)
+			console.log("[POST_REACTION] User ID not found")
 		}
 	} catch (error) {
 		console.error("[POST_REACTION] Error creating: ", error)
@@ -41,20 +49,25 @@ export const createPostReaction = async ({
 export const deletePostReaction = async ({
 	userId,
 	postId,
-}: PostReactionActionProps) => {
+}: PostReactionProps) => {
 	try {
-		const existingReaction = await getPostReaction(userId, postId)
+		if (userId) {
+			const existingReaction = await getPostReaction({ userId, postId })
 
-		// If the user has already reacted to the post, delete the reaction
-		if (existingReaction) {
-			const deletedPostReaction = await prisma.postReaction.delete({
-				where: {
-					id: existingReaction.id,
-				},
-			})
-			console.log("[POST_REACTION] Deleted: ", deletedPostReaction)
+			// If the user has already reacted to the post, delete the reaction
+			if (existingReaction) {
+				const deletedPostReaction: PrismaPostReaction =
+					await prisma.postReaction.delete({
+						where: {
+							id: existingReaction.id,
+						},
+					})
+				console.log("[POST_REACTION] Deleted: ", deletedPostReaction)
+			} else {
+				console.log("[POST_REACTION] No existing reaction found to delete")
+			}
 		} else {
-			console.log("[POST_REACTION] No existing reaction found to delete")
+			console.log("[POST_REACTION] User ID not found")
 		}
 	} catch (error) {
 		console.error("[POST_REACTION] Error deleting: ", error)

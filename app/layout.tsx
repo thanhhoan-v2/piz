@@ -1,6 +1,7 @@
 import localFont from "next/font/local"
 import "@styles/globals.css"
 import "jotai-devtools/styles.css"
+import { LoadingScreen } from "@components/molecules/loading-screen"
 import { AppLayout } from "@components/templates"
 import QueryProvider from "@providers/query-provider"
 import { ThemeProvider } from "next-themes"
@@ -38,6 +39,7 @@ export default function RootLayout({
 		>
 			<body className="bg-background" suppressHydrationWarning>
 				<QueryProvider>
+					<LoadingScreen duration={200} />
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"

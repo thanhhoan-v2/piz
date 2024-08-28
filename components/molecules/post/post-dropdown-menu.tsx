@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@components/atoms/textarea"
 import { createReportedPost } from "@prisma/functions/post/report"
 import { createSavedPost } from "@prisma/functions/post/saved"
+import { useCopyToClipboard } from "@uidotdev/usehooks"
 import { BookMarked, Copy, Ellipsis, FlagTriangleRight } from "lucide-react"
 import React from "react"
 
@@ -41,9 +42,18 @@ export type PostReportProps = {
 	content: string
 }
 
+export type PostCopyLinkProps = {
+	userName: string | null
+}
+
 const dropdownMenuItemClassName = "cursor-pointer hover:bg-background-item"
 
-export default function PostDropdownMenu({ userId, postId }: PostSaveProps) {
+export default function PostDropdownMenu({
+	userId,
+	postId,
+	userName,
+	content,
+}: PostSaveProps & PostReportProps & PostCopyLinkProps) {
 	// Dropdown menu
 	const [isDropdownOpen, setOpenDropdown] = React.useState<boolean>(false)
 	// Report dialog
@@ -88,8 +98,9 @@ export default function PostDropdownMenu({ userId, postId }: PostSaveProps) {
 	}
 	// ------------------------
 
-	// Handles copying the post link
-	const handleCopyPostLink = () => {}
+	const [copiedText, copyToClipboard] = useCopyToClipboard()
+
+	const postLink = `${userName}/post/${postId}`
 
 	return (
 		<>
@@ -133,7 +144,7 @@ export default function PostDropdownMenu({ userId, postId }: PostSaveProps) {
 						<Button
 							variant="ghost"
 							className="w-full flex-between"
-							onClick={handleCopyPostLink}
+							onClick={() => copyToClipboard(postLink)}
 						>
 							<p>Copy link</p>
 							<Copy />

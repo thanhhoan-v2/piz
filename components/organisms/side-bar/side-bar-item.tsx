@@ -18,8 +18,13 @@ type SideBarItemProps = {
 	icon: LucideIcon
 }
 
-const sideBarItemClass =
-	"dark:hover:background-item flex items-center gap-3 rounded-md p-4 font-medium text-sm transition-colors hover:bg-muted size-[70px]"
+const sizes =
+	"mobile_s:w-[60px] mobile_m:w-[60px] mobile_l:w-[70px] mobile_s:h-[40px] tablet:h-[70px]"
+
+const sideBarItemClass = cn(
+	"dark:hover:background-item flex items-center gap-3 rounded-md font-medium text-sm transition-colors hover:bg-muted flex-center",
+	sizes,
+)
 
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const pathname = usePathname()
@@ -37,9 +42,9 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	if (href === "post" && userName) {
 		return (
 			<PostForm>
-				<div className={sideBarItemClass}>
+				<Button variant="ghost" className={sideBarItemClass}>
 					<Icon fill={iconFill} />
-				</div>
+				</Button>
 			</PostForm>
 		)
 	}
@@ -49,28 +54,30 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 		return (
 			<Link
 				prefetch={true}
-				href={`/${userName}`}
-				className={cn(sideBarItemClass, !userName && "pointer-events-none")}
-				aria-disabled={!userName && "true"}
+				href={`/${userName}` as Route}
+				aria-disabled={!userName && true}
 			>
-				{!userName ? <UserRoundX fill={iconFill} /> : <Icon fill={iconFill} />}
+				<Button
+					variant="ghost"
+					className={cn(sideBarItemClass, !userName && "pointer-events-none")}
+				>
+					{!userName ? (
+						<UserRoundX className="w-full" fill={iconFill} />
+					) : (
+						<Icon fill={iconFill} />
+					)}
+				</Button>
 			</Link>
 		)
 	}
 
-	// If the href is home despite user authentication
+	// If the href is home despite user is authenticated or not
 	if (href === ROUTE.HOME)
 		return (
 			<>
-				<Button variant="ghost" className={sideBarItemClass}>
-					<Link
-						prefetch={true}
-						href={href as Route}
-						className={sideBarItemClass}
-					>
-						<Icon fill={iconFill} />
-					</Link>
-				</Button>
+				<Link prefetch={true} href={href as Route} className={sideBarItemClass}>
+					<Icon fill={iconFill} />
+				</Link>
 			</>
 		)
 
@@ -90,11 +97,9 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	// If user is signed in
 	return (
 		<>
-			<Button variant="ghost" className={sideBarItemClass} asChild>
-				<Link prefetch={true} href={href as Route} className={sideBarItemClass}>
-					<Icon fill={iconFill} />
-				</Link>
-			</Button>
+			<Link prefetch={true} href={href as Route} className={sideBarItemClass}>
+				<Icon fill={iconFill} />
+			</Link>
 		</>
 	)
 }

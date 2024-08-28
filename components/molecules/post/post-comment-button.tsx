@@ -9,23 +9,14 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@components/atoms/alert-dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
-import { Badge } from "@components/atoms/badge"
 import { Button } from "@components/atoms/button"
 import { Dialog, DialogContent } from "@components/atoms/dialog"
 import { Textarea } from "@components/atoms/textarea"
-import { ROUTE } from "@constants/route"
+import PostUserInfo from "@components/molecules/post/post-user-info"
 import { createPostComment } from "@prisma/functions/comment"
+import type { PrismaPostVisibilityEnum } from "@prisma/global"
 import { cn } from "@utils/cn"
-import {
-	CircleUser,
-	HashIcon,
-	ImageIcon,
-	MenuIcon,
-	MessageSquare,
-} from "lucide-react"
-import type { Route } from "next"
-import Link from "next/link"
+import { HashIcon, ImageIcon, MenuIcon, MessageSquare } from "lucide-react"
 import React from "react"
 
 type PostCommentButtonProps = {
@@ -38,8 +29,9 @@ type PostCommentButtonProps = {
 	// post related
 	postId: number
 	postContent: string
-	postTimeDiff: string
-	postVisibility: string | null
+	postVisibility: PrismaPostVisibilityEnum
+	postCreatedAt: Date
+	postUpdatedAt: Date | null
 }
 
 export default function PostCommentButton({
@@ -52,8 +44,9 @@ export default function PostCommentButton({
 	// post related
 	postId,
 	postContent,
-	postTimeDiff,
 	postVisibility,
+	postCreatedAt,
+	postUpdatedAt,
 }: PostCommentButtonProps) {
 	/*
 	 * The useTransition hook is a part of React's concurrent features.
@@ -140,38 +133,15 @@ export default function PostCommentButton({
 					className="flex-col rounded-lg border-0"
 					onPointerDownOutside={handleOpenAlert}
 				>
-					{/* user info */}
-					<div className="flex items-start gap-3">
-						{userAvatarUrl ? (
-							<Avatar className="h-12 w-12">
-								<AvatarImage src={userAvatarUrl ?? ""} alt="User Avatar" />
-								<AvatarFallback>PIZ</AvatarFallback>
-							</Avatar>
-						) : (
-							<CircleUser />
-						)}
-
-						<div className="flex flex-col gap-2">
-							<div>
-								<div className="flex-y-center gap-4">
-									<Link
-										href={cn(ROUTE.HOME, userName) as Route}
-										className="font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
-									>
-										{userName}
-									</Link>
-									<p className="text-slate-500 text-sm">{postTimeDiff}</p>
-								</div>
-								<Badge className="w-fit" variant="outline">
-									{postVisibility}
-								</Badge>
-							</div>
-							{/* post content */}
-							<div className="flex flex-col gap-4">
-								<div className="whitespace-pre-wrap">{postContent}</div>
-							</div>
-						</div>
-					</div>
+					<PostUserInfo
+						userName={userName}
+						userAvatarUrl={userAvatarUrl}
+						content={postContent}
+						visibility={postVisibility}
+						createdAt={postCreatedAt}
+						updatedAt={postUpdatedAt}
+						appUserName={userName}
+					/>
 
 					{/* form */}
 					<div className="mb-8 w-full flex-start flex-col gap-2">

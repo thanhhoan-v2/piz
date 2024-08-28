@@ -2,7 +2,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { DevTools } from "jotai-devtools"
 import React from "react"
 
 /*
@@ -46,8 +45,8 @@ export default function QueryProvider({
 		<QueryClientProvider client={queryClient}>
 			{/* <ResetProvider> */}
 			{/* <HydrateAtoms>{children}</HydrateAtoms> */}
-			<DevTools />
 			{children}
+			{/* <DevTools /> */}
 			<ReactQueryDevtools initialIsOpen={true} />
 			{/* </ResetProvider> */}
 		</QueryClientProvider>

@@ -1,7 +1,9 @@
 "use client"
 
 import { Button } from "@components/atoms/button"
+import { POST } from "@constants/query-key"
 import { createPostReaction } from "@prisma/functions/post/reaction"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Heart } from "lucide-react"
 import React from "react"
 
@@ -9,7 +11,7 @@ import React from "react"
 type PostReactButtonProps = {
 	initialReactionCount: number
 	isReacted: boolean
-	userId: string
+	userId?: string
 	postId: number
 	className?: string
 }
@@ -27,12 +29,7 @@ export default function PostReactButton({
 	isReacted,
 	className,
 }: PostReactButtonProps) {
-	/*
-	 * The useTransition hook is a part of React's concurrent features.
-	 * It allows you to mark updates as "transitions," which means they can be interrupted by more urgent updates.
-	 * This is particularly useful for improving the user experience by keeping the UI responsive during longer-running updates.
-	 */
-	const [isPending, startTransition] = React.useTransition()
+	const queryClient = useQueryClient()
 
 	// Initialize local state for post item
 	const initialState: PostReactButtonState = {
@@ -43,21 +40,19 @@ export default function PostReactButton({
 	const [localState, setLocalState] =
 		React.useState<PostReactButtonState>(initialState)
 
-	// Debounce the click handler
-	let debounceTimeout: NodeJS.Timeout | null = null
+	const mutation = useMutation({
+		mutationKey: [POST.REACTION, postId],
+		mutationFn: () => createPostReaction({ userId, postId }),
+		onMutate: async () => {
+			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+			await queryClient.cancelQueries({ queryKey: [POST.SINGLE, postId] })
 
-	const handleClick = () => {
-		// Prevent multiple rapid clicks from triggering multiple state updates and server calls
-		// If there's an existing timeout (`debounceTimeout`), it clears it to reset the debounce timer
-		if (debounceTimeout) {
-			clearTimeout(debounceTimeout)
-		}
+			// Snapshot the previous value
+			const previousPost = queryClient.getQueryData([POST.SINGLE, postId])
 
-		// Sets a new timeout that will execute the reaction logic after defined milliseconds
-		debounceTimeout = setTimeout(() => {
+			// Optimistically update to the new value
 			setLocalState((prev) => {
 				const newState = { ...prev }
-
 				if (prev.isReacted) {
 					newState.reactionCount -= 1
 					newState.isReacted = false
@@ -65,34 +60,41 @@ export default function PostReactButton({
 					newState.reactionCount += 1
 					newState.isReacted = true
 				}
-
 				return newState
 			})
 
-			// Use `startTransition` to prioritize the UI update over the server call
-			startTransition(() => {
-				// Create a post reaction on the server (or delete if existed one)
-				createPostReaction({ userId, postId }).catch(() => {
-					// Revert local state to its previous state if server call fails
-					setLocalState((prev) => {
-						const revertedState = { ...prev }
-						if (prev.isReacted) {
-							revertedState.reactionCount += 1
-							revertedState.isReacted = true
-						} else {
-							revertedState.reactionCount -= 1
-							revertedState.isReacted = false
-						}
-						return revertedState
-					})
+			// Return a context object with the snapshotted value
+			return { previousPost }
+		},
+		onError: (err, variables, context) => {
+			// Revert to the previous value
+			if (context?.previousPost) {
+				setLocalState((prev) => {
+					const revertedState = { ...prev }
+					if (prev.isReacted) {
+						revertedState.reactionCount += 1
+						revertedState.isReacted = true
+					} else {
+						revertedState.reactionCount -= 1
+						revertedState.isReacted = false
+					}
+					return revertedState
 				})
-			})
-		}, 300)
+			}
+		},
+		onSettled: () => {
+			// Invalidate the query to ensure the data is up-to-date
+			queryClient.invalidateQueries({ queryKey: [POST.SINGLE, postId] })
+		},
+	})
+
+	const handleClick = () => {
+		mutation.mutate()
 	}
 
 	return (
 		<Button variant="ghost" className={className} onClick={handleClick}>
-			<Heart fill={localState.isReacted ? "red" : "gray"} />
+			<Heart fill={localState.isReacted ? "red" : "rgb(9,9,11)"} />
 			<span>{localState.reactionCount}</span>
 		</Button>
 	)

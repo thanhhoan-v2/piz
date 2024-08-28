@@ -1,6 +1,7 @@
 import { USER } from "@constants/query-key"
 import { getAppUser } from "@supabase/functions/fetchUser"
-import { useQuery } from "@tanstack/react-query"
+import type { SupabaseUser } from "@supabase/global"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useQueryAppUser = () =>
 	useQuery({
@@ -8,7 +9,7 @@ export const useQueryAppUser = () =>
 		queryFn: getAppUser,
 	})
 
-// export const useQueryDataAppUser = (): SupabaseUserProps | undefined => {
-// 	const queryClient = useQueryClient()
-// 	return queryClient.getQueryData([USER.APP])
-// }
+export const useQueryDataAppUser = (): SupabaseUser | undefined => {
+	const queryClient = useQueryClient()
+	return queryClient.getQueryData([USER.APP])
+}

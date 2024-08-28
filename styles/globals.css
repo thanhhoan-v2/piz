@@ -90,6 +90,13 @@ body {
 	align-items: center;
 }
 
+.flex-col-center {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
 .flex-y-center {
 	display: flex;
 	align-items: center;

@@ -10,7 +10,7 @@ import {
 	getFirstThreeFollowerAvatarUrls,
 } from "@prisma/functions/user/follow"
 import { getAllUserPosts } from "@prisma/functions/user/post"
-import type { PrismaPostProps } from "@prisma/global"
+import type { PostDTO } from "@prisma/global"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
@@ -25,7 +25,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 	const viewingUser = await getViewingUserInfo(params.id)
 
 	// Get all posts by the viewing user
-	let posts: PrismaPostProps[] = []
+	let posts: PostDTO[] = []
 	if (viewingUser) {
 		const data = await getAllUserPosts({ userId: viewingUser.id })
 		if (data) posts = data
@@ -96,32 +96,34 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 				)}
 
 				{/* user posts */}
-				{posts.map(
-					({
-						id,
-						userId,
-						userName,
-						userAvatarUrl,
-						content,
-						visibility,
-						createdAt,
-						updatedAt,
-						isDeleted,
-					}) => (
-						<Post
-							key={id} // no need to pass
-							id={id}
-							userId={userId}
-							userName={userName}
-							userAvatarUrl={userAvatarUrl}
-							content={content}
-							visibility={visibility}
-							createdAt={createdAt}
-							updatedAt={updatedAt}
-							isDeleted={isDeleted}
-						/>
-					),
-				)}
+				<div className="mt-5">
+					{posts.map(
+						({
+							id,
+							userId,
+							userName,
+							userAvatarUrl,
+							content,
+							visibility,
+							createdAt,
+							updatedAt,
+							isDeleted,
+						}) => (
+							<Post
+								key={id} // no need to pass
+								id={id}
+								userId={userId}
+								userName={userName}
+								userAvatarUrl={userAvatarUrl}
+								content={content}
+								visibility={visibility}
+								createdAt={createdAt}
+								updatedAt={updatedAt}
+								isDeleted={isDeleted}
+							/>
+						),
+					)}
+				</div>
 			</div>
 		</>
 	)

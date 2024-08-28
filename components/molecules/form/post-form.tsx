@@ -11,8 +11,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@components/atoms/alert-dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
-import { Badge } from "@components/atoms/badge"
 import { Button } from "@components/atoms/button"
 import {
 	Drawer,
@@ -32,11 +30,11 @@ import {
 } from "@components/atoms/select"
 import { Textarea } from "@components/atoms/textarea"
 import WelcomeModal from "@components/molecules/modal/welcome-modal"
-import { avatarPlaceholder } from "@constants/image-placeholder"
+import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
 import { $Enums } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
-import type { PrismaPostProps } from "@prisma/global"
+import type { PostDTO } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
@@ -93,6 +91,7 @@ export default function PostForm({
 	const user = useAtomValue(userAtom)
 	const userId = user?.id
 	const userName = user?.user_metadata?.userName
+	const fullName = user?.user_metadata?.fullName
 	const userAvatarUrl = user?.user_metadata?.avatarUrl
 
 	// React Query mutation to update the posts
@@ -119,9 +118,9 @@ export default function PostForm({
 			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
-			queryClient.setQueryData([POST.ALL], (old: PrismaPostProps[]) => [
-				...old,
+			queryClient.setQueryData([POST.ALL], (old: PostDTO[]) => [
 				newPost,
+				...old,
 			])
 
 			// Return a context object with the snapshotted value
@@ -173,7 +172,7 @@ export default function PostForm({
 	return (
 		<>
 			<Drawer open={isDrawerOpen} onOpenChange={setOpenDrawer}>
-				<DrawerTrigger>{children}</DrawerTrigger>
+				<DrawerTrigger asChild>{children}</DrawerTrigger>
 
 				<DrawerContent
 					className="h-[90vh] bg-background-item dark:bg-background-item"
@@ -184,35 +183,33 @@ export default function PostForm({
 						<DrawerTitle>New post</DrawerTitle>
 						<DrawerDescription>What are you thinking?</DrawerDescription>
 					</DrawerHeader>
-					<div className="flex items-start gap-3 p-4">
-						<Avatar className="h-12 w-12">
-							<AvatarImage
-								src={userAvatarUrl ?? avatarPlaceholder}
-								alt={userName}
+					<div className="flex-col items-start gap-3 p-4">
+						<PostUserInfo
+							isWriteOnly
+							userName={userName}
+							userAvatarUrl={userAvatarUrl}
+							visibility={postVisibility}
+							appUserName={userName}
+							createdAt={new Date()}
+							updatedAt={null}
+						/>
+						<div className="mb-8 w-full flex-start flex-col gap-2">
+							<Textarea
+								autoFocus
+								ref={textareaRef}
+								value={postContent}
+								onChange={handleChange}
+								placeholder={cn("Dear ", fullName, ", what is in your mind ?")}
+								className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
 							/>
-							<AvatarFallback>PIZ</AvatarFallback>
-						</Avatar>
-
-						<div className="flex w-full flex-col gap-2">
-							<Badge className="w-fit">{userName}</Badge>
-
-							{/* form */}
-							<div className="w-full flex-start flex-col gap-2">
-								<Textarea
-									ref={textareaRef}
-									value={postContent}
-									onChange={handleChange}
-									placeholder="Type here ..."
-									className=" resize-none border-none p-0 focus-visible:ring-0"
-								/>
-								<div className="flex space-x-4">
-									<ImageIcon />
-									<HashIcon />
-									<MenuIcon />
-								</div>
+							<div className="flex space-x-4">
+								<ImageIcon />
+								<HashIcon />
+								<MenuIcon />
 							</div>
 						</div>
 					</div>
+
 					<DrawerFooter>
 						<div className="flex-between ">
 							{/* Select post visibility */}
@@ -270,6 +267,7 @@ export default function PostForm({
 					</DrawerFooter>
 				</DrawerContent>
 			</Drawer>
+
 			<AlertDialog open={alertIsOpen} onOpenChange={setOpenAlert}>
 				<AlertDialogContent>
 					<AlertDialogHeader>

@@ -11,6 +11,7 @@ import {
 } from "@components/atoms/card"
 import { Input } from "@components/atoms/input"
 import { Label } from "@components/atoms/label"
+import AuthButton from "@components/molecules/button/auth-button"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
 import { useSignUp } from "@hooks/auth/use-sign-up"
@@ -63,7 +64,7 @@ export default function SignUpForm() {
 
 	return (
 		<>
-			<Card className="w-full max-w-sm border-none">
+			<Card className="h-screen w-full max-w-sm flex-col justify-center border-none">
 				<CardHeader>
 					<CardTitle className="text-2xl">Sign Up</CardTitle>
 					<CardDescription>
@@ -165,9 +166,11 @@ export default function SignUpForm() {
 							)}
 						</div>
 						<div className="grid gap-2">
-							<Button type="submit" disabled={loading}>
-								{loading ? "Signing up..." : "Sign up"}
-							</Button>
+							<AuthButton
+								isLoading={loading}
+								normalLabel="Sign Up"
+								loadingLabel="Signing Up"
+							/>
 						</div>
 						<div className="flex-between text-sm">
 							Already had an account?{" "}

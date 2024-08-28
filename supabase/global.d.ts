@@ -1,4 +1,4 @@
-export type SupabaseUserProps = {
+export type SupabaseUser = {
 	id: string
 	aud: string
 	role: string

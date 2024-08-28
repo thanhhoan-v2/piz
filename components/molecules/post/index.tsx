@@ -1,140 +1,136 @@
 "use client"
-import { userAtom } from "@atoms/user"
-import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
+import { Skeleton } from "@components/atoms/skeleton"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
 import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
 import PostReactButton from "@components/molecules/post/post-react-button"
 import PostShareButton from "@components/molecules/post/post-share-button"
-import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
-import { avatarPlaceholder } from "@constants/image-placeholder"
-import { getPostInfo } from "@prisma/functions/post"
-import { getPostReaction } from "@prisma/functions/post/reaction"
-import type { PrismaPostProps } from "@prisma/global"
-import { calculateTimeDiff } from "@utils/time.helpers"
-import { useAtomValue } from "jotai"
-import { CircleUser, Crown } from "lucide-react"
-import type { Route } from "next"
-import Link from "next/link"
+import PostUserInfo from "@components/molecules/post/post-user-info"
+import { useQueryDataAppUser } from "@hooks/queries/app-user"
+import { useQueryPostCounts, useQueryPostReaction } from "@hooks/queries/post"
+import type { PrismaPost } from "@prisma/global"
+import { cn } from "@utils/cn"
 import React from "react"
 import { useState } from "react"
 
+const postButtonClassName = "flex flex-none h-[30px] w-[70px] gap-2"
+const widths =
+	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
+
 export default function Post({
 	id,
-	userId,
-	userName,
+	userId, // id of the poster
+	userName, // username of the poster
 	userAvatarUrl,
 	content,
 	visibility,
 	createdAt,
 	updatedAt,
 	isDeleted,
-}: PrismaPostProps) {
-	const [appUserName, setAppUserName] = useState<string | null>(null)
-	const [noReactions, setNoReactions] = useState<number>(0)
-	const [noComments, setNoComments] = useState<number>(0)
-	const [noShares, setNoShares] = useState<number>(0)
-	const [fetchedPostReaction, setFetchedPostReaction] = useState<boolean>(false)
+}: PrismaPost) {
+	const [postReactionByAppUser, setPostReactionByAppUser] = useState<
+		boolean | null
+	>(null)
 
-	const user = useAtomValue(userAtom)
-	const queriedUserName = user?.user_metadata?.userName
+	// Get the app user byt query data
+	const user = useQueryDataAppUser()
+	const appUserName = user?.user_metadata?.userName
+	const appUserId = user?.id
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// Get the reaction of the post by the app user by query data
+	const { data: queriedPostReactionByAppUser } = useQueryPostReaction({
+		userId: appUserId,
+		postId: id,
+	})
+
+	// Get the post counts by query data
+	const { data: postCounts, isLoading } = useQueryPostCounts({ postId: id })
+	const noReactions = postCounts?.noReactions
+	const noComments = postCounts?.noComments
+	const noShares = postCounts?.noShares
+
+	console.log(noComments)
+
 	React.useEffect(() => {
 		const fetchData = async () => {
-			// Get the current user to check if the post is created by the current user
-			setAppUserName(queriedUserName || null)
-
-			// Get the number of loves, hates, comments
-			const { noReactions, noComments, noShares } = await getPostInfo(id)
-			setNoReactions(noReactions)
-			setNoComments(noComments)
-			setNoShares(noShares)
-
 			// Get the reaction of the post
-			const fetchedPostReaction = await getPostReaction(userId, id)
-			// and set to the state
-			setFetchedPostReaction(!!fetchedPostReaction)
+			// If queried reaction is found, it sets to true, otherwise false
+			setPostReactionByAppUser(!!queriedPostReactionByAppUser)
 		}
 
 		fetchData()
-	}, [id, userId])
+	}, [queriedPostReactionByAppUser])
 
-	const postButtonClassName = "flex gap-2"
-
-	// If post is deleted, return null
 	if (isDeleted) return null
 
 	return (
 		<div
 			key={id}
-			className="mb-2 flex min-h-[100px] w-full min-w-[600px] flex-col justify-between rounded-lg bg-background-item px-5 py-3"
+			className={cn(
+				"mb-2 flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3",
+				widths,
+			)}
 		>
 			<div className="flex justify-between">
-				<div className="flex items-start gap-3">
-					{userAvatarUrl ? (
-						<Avatar className="h-12 w-12">
-							<AvatarImage
-								src={userAvatarUrl ?? avatarPlaceholder}
-								alt="User Avatar"
-							/>
-							<AvatarFallback>PIZ</AvatarFallback>
-						</Avatar>
-					) : (
-						<CircleUser />
-					)}
-
-					<div className="flex flex-col gap-2">
-						<div>
-							<div className="flex-y-center gap-4">
-								<Link
-									href={`/${userName}` as Route}
-									className="flex items-center gap-2 font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
-								>
-									<p>{userName}</p>
-									{appUserName === userName && <Crown className="size-4" />}
-								</Link>
-								<p className="text-slate-500 text-sm">
-									{calculateTimeDiff(createdAt, updatedAt)}
-								</p>
-							</div>
-							<PostVisibilityBadge visibility={visibility} />
-						</div>
-						<div className="flex flex-col gap-4">
-							<div className="whitespace-pre-wrap">{content}</div>
-						</div>
-					</div>
-				</div>
-
-				<PostDropdownMenu userId={userId} postId={id} />
-			</div>
-
-			<div className="mx-2 my-4 flex gap-2">
-				<PostReactButton
-					userId={userId}
-					postId={id}
-					initialReactionCount={noReactions}
-					isReacted={fetchedPostReaction}
-					className={postButtonClassName}
-				/>
-				<PostCommentButton
-					initialCommentCount={noComments}
-					className={postButtonClassName}
-					// User related props
-					userId={userId}
+				<PostUserInfo
 					userName={userName}
 					userAvatarUrl={userAvatarUrl}
-					// Post related props
-					postId={id}
-					postContent={content}
-					postTimeDiff={calculateTimeDiff(createdAt, updatedAt)}
-					postVisibility={visibility}
+					content={content}
+					visibility={visibility}
+					createdAt={createdAt}
+					updatedAt={updatedAt}
+					appUserName={appUserName}
 				/>
-				<PostShareButton
+
+				<PostDropdownMenu
 					userId={userId}
 					postId={id}
-					initialShareCount={noShares}
-					className={postButtonClassName}
+					userName={userName}
+					content={content}
 				/>
+			</div>
+
+			<div className="mx-2 mt-6 flex h-[30px] gap-2">
+				{isLoading ? (
+					<>
+						<Skeleton className={postButtonClassName} />
+						<Skeleton className={postButtonClassName} />
+						<Skeleton className={postButtonClassName} />
+					</>
+				) : (
+					<>
+						{postReactionByAppUser !== null ? (
+							<PostReactButton
+								className={postButtonClassName}
+								userId={appUserId}
+								postId={id}
+								initialReactionCount={noReactions ?? 0}
+								isReacted={postReactionByAppUser}
+							/>
+						) : (
+							<Skeleton className={postButtonClassName} />
+						)}
+						<PostCommentButton
+							className={postButtonClassName}
+							initialCommentCount={noComments ?? 0}
+							// User related props
+							userId={userId}
+							userName={userName}
+							userAvatarUrl={userAvatarUrl}
+							// Post related props
+							postId={id}
+							postContent={content}
+							postCreatedAt={createdAt}
+							postUpdatedAt={updatedAt}
+							postVisibility={visibility}
+						/>
+						<PostShareButton
+							className={postButtonClassName}
+							userId={userId}
+							postId={id}
+							initialShareCount={noShares ?? 0}
+						/>
+					</>
+				)}
 			</div>
 		</div>
 	)

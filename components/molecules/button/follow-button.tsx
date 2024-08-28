@@ -1,24 +1,31 @@
 "use client"
 
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/atoms/button"
-import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import type { $Enums } from "@prisma/client"
 import {
-	type CreateFollowProps,
 	checkIsFollowing,
 	createFollow,
 	deleteFollow,
 } from "@prisma/functions/follow"
+import { useAtomValue } from "jotai"
 import React from "react"
+
+type FollowButtonProps = {
+	followerId: string
+	followeeId: string
+	className?: string
+}
 
 export default function FollowButton({
 	followerId, // the main user
 	followeeId, // the user to follow
-}: CreateFollowProps) {
+	className,
+}: FollowButtonProps) {
 	// Follow state
 	const [followStatus, setFollowStatus] = React.useState<string | null>(null)
 
-	const appUser = useQueryDataAppUser()
+	const appUser = useAtomValue(userAtom)
 	const appUserId = appUser?.id
 
 	// Fetch if the user is following the user
@@ -75,7 +82,7 @@ export default function FollowButton({
 		return (
 			<Button
 				onClick={handleUnfollow}
-				className="bg-pink-600 font-bold text-white hover:bg-pink-400"
+				className={`${className} bg-pink-600 font-bold text-white hover:bg-pink-400`}
 			>
 				Following
 			</Button>
@@ -86,12 +93,16 @@ export default function FollowButton({
 		return (
 			<Button
 				onClick={handleUnfollow}
-				className="bg-cyan-500 font-italic text-white hover:bg-cyan-400"
+				className={`${className} bg-cyan-500 font-italic text-white hover:bg-cyan-400`}
 			>
 				Pending
 			</Button>
 		)
 
 	// If the user is not following or requesting to follow the viewing user
-	return <Button onClick={handleFollow}>Follow</Button>
+	return (
+		<Button className={`${className}`} onClick={handleFollow}>
+			Follow
+		</Button>
+	)
 }
