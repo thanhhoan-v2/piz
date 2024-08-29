@@ -32,7 +32,10 @@ import { Textarea } from "@components/atoms/textarea"
 import WelcomeModal from "@components/molecules/modal/welcome-modal"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
-import { $Enums } from "@prisma/client"
+import {
+	PostVisibility,
+	type PostVisibility as PostVisibilityType,
+} from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
 import type { PrismaPost } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -57,7 +60,7 @@ export default function PostForm({
 
 	// Post visibility
 	const [postVisibility, setPostVisibility] =
-		React.useState<$Enums.PostVisibility>("PUBLIC")
+		React.useState<PostVisibilityType>("PUBLIC")
 
 	// Reference to textarea
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
@@ -214,7 +217,7 @@ export default function PostForm({
 						<div className="flex-between ">
 							{/* Select post visibility */}
 							<Select
-								onValueChange={(value: $Enums.PostVisibility) =>
+								onValueChange={(value: PostVisibility) =>
 									setPostVisibility(value)
 								}
 							>
@@ -222,19 +225,19 @@ export default function PostForm({
 									<SelectValue placeholder="Anyone can view" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value={$Enums.PostVisibility.PUBLIC}>
+									<SelectItem value={PostVisibility.PUBLIC}>
 										Anyone can view
 									</SelectItem>
-									<SelectItem value={$Enums.PostVisibility.FOLLOWERS_ONLY}>
+									<SelectItem value={PostVisibility.FOLLOWERS_ONLY}>
 										Only followers can view
 									</SelectItem>
-									<SelectItem value={$Enums.PostVisibility.MENTIONED_ONLY}>
+									<SelectItem value={PostVisibility.MENTIONED_ONLY}>
 										Only metioned users can view
 									</SelectItem>
-									<SelectItem value={$Enums.PostVisibility.FANS_ONLY}>
+									<SelectItem value={PostVisibility.FANS_ONLY}>
 										Only fans can view 🔞
 									</SelectItem>
-									<SelectItem value={$Enums.PostVisibility.ME_ONLY}>
+									<SelectItem value={PostVisibility.ME_ONLY}>
 										Only you can view, because you are an introvert 😃
 									</SelectItem>
 								</SelectContent>
