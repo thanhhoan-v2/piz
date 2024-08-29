@@ -1,9 +1,10 @@
 import { Badge } from "@components/atoms/badge"
 import { PostVisibility } from "@prisma/client"
+import type { PostVisibilityEnumType } from "@prisma/global"
 import { cn } from "@utils/cn"
 
 type PostVisibilityBadgeProps = {
-	visibility: PostVisibility
+	visibility: PostVisibilityEnumType
 }
 
 export default function PostVisibilityBadge({

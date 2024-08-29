@@ -33,27 +33,16 @@ import WelcomeModal from "@components/molecules/modal/welcome-modal"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
-import type { PrismaPost } from "@prisma/global"
+import {
+	PostVisibilityEnumMap,
+	type PostVisibilityEnumType,
+	type PrismaPost,
+} from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
-
-type PostVisibilityEnumType =
-	| "PUBLIC"
-	| "FOLLOWERS_ONLY"
-	| "MENTIONED_ONLY"
-	| "FANS_ONLY"
-	| "ME_ONLY"
-
-const PostVisibilityEnumMap = {
-	PUBLIC: "PUBLIC",
-	FOLLOWERS_ONLY: "FOLLOWERS_ONLY",
-	MENTIONED_ONLY: "MENTIONED_ONLY",
-	FANS_ONLY: "FANS_ONLY",
-	ME_ONLY: "ME_ONLY",
-}
 
 export default function PostForm({
 	children,
