@@ -3,6 +3,7 @@ const nextConfig = {
 	transpilePackages: ["lucide-react", "jotai-devtools"],
 	experimental: {
 		typedRoutes: true,
+		serverActions: true,
 	},
 }
 
