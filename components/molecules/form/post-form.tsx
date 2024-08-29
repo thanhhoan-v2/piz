@@ -32,10 +32,6 @@ import { Textarea } from "@components/atoms/textarea"
 import WelcomeModal from "@components/molecules/modal/welcome-modal"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
-import {
-	PostVisibility,
-	type PostVisibility as PostVisibilityType,
-} from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
 import type { PrismaPost } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -43,6 +39,21 @@ import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
+
+type PostVisibilityEnumType =
+	| "PUBLIC"
+	| "FOLLOWERS_ONLY"
+	| "MENTIONED_ONLY"
+	| "FANS_ONLY"
+	| "ME_ONLY"
+
+const PostVisibilityEnumMap = {
+	PUBLIC: "PUBLIC",
+	FOLLOWERS_ONLY: "FOLLOWERS_ONLY",
+	MENTIONED_ONLY: "MENTIONED_ONLY",
+	FANS_ONLY: "FANS_ONLY",
+	ME_ONLY: "ME_ONLY",
+}
 
 export default function PostForm({
 	children,
@@ -60,7 +71,7 @@ export default function PostForm({
 
 	// Post visibility
 	const [postVisibility, setPostVisibility] =
-		React.useState<PostVisibilityType>("PUBLIC")
+		React.useState<PostVisibilityEnumType>("PUBLIC")
 
 	// Reference to textarea
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
@@ -217,7 +228,7 @@ export default function PostForm({
 						<div className="flex-between ">
 							{/* Select post visibility */}
 							<Select
-								onValueChange={(value: PostVisibility) =>
+								onValueChange={(value: PostVisibilityEnumType) =>
 									setPostVisibility(value)
 								}
 							>
@@ -225,19 +236,19 @@ export default function PostForm({
 									<SelectValue placeholder="Anyone can view" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value={PostVisibility.PUBLIC}>
+									<SelectItem value={PostVisibilityEnumMap.PUBLIC}>
 										Anyone can view
 									</SelectItem>
-									<SelectItem value={PostVisibility.FOLLOWERS_ONLY}>
+									<SelectItem value={PostVisibilityEnumMap.FOLLOWERS_ONLY}>
 										Only followers can view
 									</SelectItem>
-									<SelectItem value={PostVisibility.MENTIONED_ONLY}>
+									<SelectItem value={PostVisibilityEnumMap.MENTIONED_ONLY}>
 										Only metioned users can view
 									</SelectItem>
-									<SelectItem value={PostVisibility.FANS_ONLY}>
+									<SelectItem value={PostVisibilityEnumMap.FANS_ONLY}>
 										Only fans can view 🔞
 									</SelectItem>
-									<SelectItem value={PostVisibility.ME_ONLY}>
+									<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>
 										Only you can view, because you are an introvert 😃
 									</SelectItem>
 								</SelectContent>
