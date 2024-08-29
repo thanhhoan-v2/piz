@@ -1,9 +1,8 @@
 // import { PrismaClient } from "../../node_modules/.prisma/client"
-import Prisma from "@prisma/client"
-const { PrismaClient } = Prisma
+import { PrismaClient } from "@prisma/client/edge"
 
 const globalForPrisma = globalThis as unknown as {
-	prisma: InstanceType<typeof PrismaClient>
+	prisma: PrismaClient
 }
 
 // Checks if globalForPrisma.prisma already exists

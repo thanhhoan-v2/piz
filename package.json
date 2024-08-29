@@ -1,5 +1,6 @@
 {
 	"private": true,
+	"postinstall": "prisma generate",
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
