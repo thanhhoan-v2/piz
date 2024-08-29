@@ -2,7 +2,7 @@
 
 import { userAtom } from "@atoms/user"
 import { Button } from "@components/atoms/button"
-import type { $Enums } from "@prisma/client"
+import type { FollowStatus } from "@prisma/client"
 import {
 	checkIsFollowing,
 	createFollow,
@@ -37,17 +37,13 @@ export default function FollowButton({
 					followeeId,
 				})
 				// If the user is following the user
-				if (
-					existingFollow?.requestStatus === ("ACCEPTED" as $Enums.FollowStatus)
-				) {
-					setFollowStatus("ACCEPTED" as $Enums.FollowStatus)
+				if (existingFollow?.requestStatus === ("ACCEPTED" as FollowStatus)) {
+					setFollowStatus("ACCEPTED" as FollowStatus)
 				}
 
 				// If the request is pending
-				if (
-					existingFollow?.requestStatus === ("PENDING" as $Enums.FollowStatus)
-				) {
-					setFollowStatus("PENDING" as $Enums.FollowStatus)
+				if (existingFollow?.requestStatus === ("PENDING" as FollowStatus)) {
+					setFollowStatus("PENDING" as FollowStatus)
 				}
 			}
 			handleCheckIsFollowing()
@@ -59,12 +55,12 @@ export default function FollowButton({
 	// Follow the viewing user
 	const handleFollow = async () => {
 		const newFollow = await createFollow({ followerId, followeeId })
-		if (newFollow?.requestStatus === ("ACCEPTED" as $Enums.FollowStatus)) {
-			setFollowStatus("ACCEPTED" as $Enums.FollowStatus)
+		if (newFollow?.requestStatus === ("ACCEPTED" as FollowStatus)) {
+			setFollowStatus("ACCEPTED" as FollowStatus)
 		}
 
-		if (newFollow?.requestStatus === ("PENDING" as $Enums.FollowStatus)) {
-			setFollowStatus("PENDING" as $Enums.FollowStatus)
+		if (newFollow?.requestStatus === ("PENDING" as FollowStatus)) {
+			setFollowStatus("PENDING" as FollowStatus)
 		}
 	}
 
