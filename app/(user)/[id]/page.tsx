@@ -4,7 +4,7 @@ import { Button } from "@components/atoms/button"
 import FollowButton from "@components/molecules/button/follow-button"
 import Post from "@components/molecules/post"
 import { avatarPlaceholder } from "@constants/image-placeholder"
-import type { Prisma } from "@prisma/client"
+import type { Post as IPost } from "@prisma/client"
 import { getViewingUserInfo } from "@prisma/functions/user"
 import {
 	countUserFollowers,
@@ -25,7 +25,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 	const viewingUser = await getViewingUserInfo(params.id)
 
 	// Get all posts by the viewing user
-	let posts: Prisma.PostGetPayload<Prisma.PostFindManyArgs>[] = []
+	let posts: IPost[] = []
 	if (viewingUser) {
 		const data = await getAllUserPosts({ userId: viewingUser.id })
 		if (data) posts = data
