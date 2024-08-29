@@ -2,7 +2,7 @@ import PostFormDesktop from "@components/molecules/post/post-form-desktop"
 import PostList from "@components/molecules/post/post-list"
 import { POST, USER } from "@constants/query-key"
 import { getPostComments } from "@hooks/queries/comment"
-import { getAllPosts, getPosCounts } from "@prisma/functions/post"
+import { getAllPosts, getPostCounts } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import type { PrismaPost } from "@prisma/global"
 import { getAppUser } from "@supabase/functions/fetchUser"
@@ -36,7 +36,7 @@ export default async function HomePage() {
 			// Prefetch counts (reaction, comment, share) for each post
 			await queryClient.prefetchQuery({
 				queryKey: [POST.COUNTS, post.id],
-				queryFn: () => getPosCounts({ postId: post.id }),
+				queryFn: () => getPostCounts({ postId: post.id }),
 			})
 			// Prefetch comment(s)
 			await queryClient.prefetchQuery({

@@ -10,7 +10,7 @@ import {
 	getFirstThreeFollowerAvatarUrls,
 } from "@prisma/functions/user/follow"
 import { getAllUserPosts } from "@prisma/functions/user/post"
-import type { PostDTO } from "@prisma/global"
+import type { PrismaPost } from "@prisma/global"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
@@ -25,7 +25,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 	const viewingUser = await getViewingUserInfo(params.id)
 
 	// Get all posts by the viewing user
-	let posts: PostDTO[] = []
+	let posts: PrismaPost[] = []
 	if (viewingUser) {
 		const data = await getAllUserPosts({ userId: viewingUser.id })
 		if (data) posts = data

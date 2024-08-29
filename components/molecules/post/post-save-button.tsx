@@ -1,10 +1,9 @@
 import { Button } from "@components/atoms/button"
 
-
 export default function PostSaveButton({
 	userId,
 	postId,
-}: PostSaveButtonProps) {
+}: { userId: string; postId: string }) {
 	const handleSavePost = () => {}
 
 	return (

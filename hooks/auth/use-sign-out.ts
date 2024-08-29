@@ -1,4 +1,4 @@
-import { USER.SESSION } from "@constants/local-storage"
+import { USER } from "@constants/query-key"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
 export const signOut = async () => {

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	Toast,
@@ -7,11 +7,11 @@ import {
 	ToastProvider,
 	ToastTitle,
 	ToastViewport,
-	useToast,
-} from "@components/atoms";
+} from "@components/atoms/toast"
+import { useToast } from "@components/atoms/use-toast"
 
 export function Toaster() {
-	const { toasts } = useToast();
+	const { toasts } = useToast()
 
 	return (
 		<ToastProvider>
@@ -19,9 +19,7 @@ export function Toaster() {
 				<Toast key={id} {...props}>
 					<div className="grid gap-1">
 						{title && <ToastTitle>{title}</ToastTitle>}
-						{description && (
-							<ToastDescription>{description}</ToastDescription>
-						)}
+						{description && <ToastDescription>{description}</ToastDescription>}
 					</div>
 					{action}
 					<ToastClose />
@@ -29,5 +27,5 @@ export function Toaster() {
 			))}
 			<ToastViewport />
 		</ToastProvider>
-	);
+	)
 }

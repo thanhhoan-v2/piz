@@ -34,7 +34,7 @@ import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
 import { $Enums } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
-import type { PostDTO } from "@prisma/global"
+import type { PrismaPost } from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
@@ -118,7 +118,7 @@ export default function PostForm({
 			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
-			queryClient.setQueryData([POST.ALL], (old: PostDTO[]) => [
+			queryClient.setQueryData([POST.ALL], (old: PrismaPost[]) => [
 				newPost,
 				...old,
 			])
