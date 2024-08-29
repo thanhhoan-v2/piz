@@ -16,7 +16,7 @@ import AuthButton from "@components/molecules/button/auth-button"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
 import { useSignIn } from "@hooks/auth/use-sign-in"
-import type { PrismaUser } from "@prisma/global"
+import type { AppUser } from "@prisma/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 import { X } from "lucide-react"
@@ -26,7 +26,7 @@ import React from "react"
 
 const translateErrorMessage = (
 	errorMessage: string,
-	foundUser: PrismaUser | null,
+	foundUser: AppUser | null,
 ) => {
 	const errorMessageMap: { [key: string]: string } = {
 		"Invalid login credentials": "Wrong email or password",

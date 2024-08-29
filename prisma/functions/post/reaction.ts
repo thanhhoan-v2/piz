@@ -1,7 +1,7 @@
 "use server"
 
+import type { PostReaction } from "@prisma/client"
 import { prisma } from "@prisma/functions/client"
-import type { PrismaPostReaction } from "@prisma/global"
 
 export type PostReactionProps = {
 	userId?: string
@@ -56,7 +56,7 @@ export const deletePostReaction = async ({
 
 			// If the user has already reacted to the post, delete the reaction
 			if (existingReaction) {
-				const deletedPostReaction: PrismaPostReaction =
+				const deletedPostReaction: PostReaction =
 					await prisma.postReaction.delete({
 						where: {
 							id: existingReaction.id,

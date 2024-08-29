@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/atoms/avatar"
+import type { PostVisibilityEnumType } from "@components/molecules/form/post-form"
 import PostVisibilityBadge from "@components/molecules/post/post-visibility-badge"
 import { avatarPlaceholder } from "@constants/image-placeholder"
-import type { PrismaPostVisibilityEnum } from "@prisma/global"
 import { calculateTimeDiff } from "@utils/time.helpers"
 import { Sparkles } from "lucide-react"
 import type { Route } from "next"
@@ -11,7 +11,7 @@ type PostUserInfoProps = {
 	userAvatarUrl: string | null
 	userName: string | null
 	content?: string
-	visibility: PrismaPostVisibilityEnum
+	visibility: PostVisibilityEnumType
 	createdAt: Date
 	updatedAt: Date | null
 	appUserName?: string | null

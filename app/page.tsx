@@ -2,9 +2,9 @@ import PostFormDesktop from "@components/molecules/post/post-form-desktop"
 import PostList from "@components/molecules/post/post-list"
 import { POST, USER } from "@constants/query-key"
 import { getPostComments } from "@hooks/queries/comment"
+import type { Post as IPost } from "@prisma/client"
 import { getAllPosts, getPostCounts } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
-import type { PrismaPost } from "@prisma/global"
 import { getAppUser } from "@supabase/functions/fetchUser"
 import {
 	HydrationBoundary,
@@ -24,7 +24,7 @@ export default async function HomePage() {
 		queryFn: getAllPosts,
 	})
 
-	const allPosts = queryClient.getQueryData<PrismaPost[]>([POST.ALL])
+	const allPosts = queryClient.getQueryData<IPost[]>([POST.ALL])
 	if (allPosts && Array.isArray(allPosts)) {
 		for (const post of allPosts) {
 			// Prefetch reactions for each post

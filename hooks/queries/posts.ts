@@ -1,10 +1,10 @@
 import { POST } from "@constants/query-key"
+import type { Post } from "@prisma/client"
 import { getAllPosts } from "@prisma/functions/post"
-import type { PrismaPost } from "@prisma/global"
 import { useQuery } from "@tanstack/react-query"
 
 export const useQueryAllPosts = () =>
-	useQuery<PrismaPost[]>({
+	useQuery<Post[]>({
 		queryKey: [POST.ALL],
 		queryFn: getAllPosts,
 	})

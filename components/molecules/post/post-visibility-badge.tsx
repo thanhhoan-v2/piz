@@ -1,6 +1,6 @@
 import { Badge } from "@components/atoms/badge"
+import type { PostVisibilityEnumType } from "@components/molecules/form/post-form"
 import { PostVisibility } from "@prisma/client"
-import type { PostVisibilityEnumType } from "@prisma/global"
 import { cn } from "@utils/cn"
 
 type PostVisibilityBadgeProps = {

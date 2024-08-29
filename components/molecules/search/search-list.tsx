@@ -1,12 +1,12 @@
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
 import FollowButton from "@components/molecules/button/follow-button"
 import { avatarPlaceholder } from "@constants/image-placeholder"
-import type { PrismaUser } from "@prisma/global"
+import type { AppUser } from "@prisma/client"
 import type { Route } from "next"
 import Link from "next/link"
 
 type SearchListProps = {
-	searchResults: PrismaUser[]
+	searchResults: AppUser[]
 	appUserId: string | null
 }
 

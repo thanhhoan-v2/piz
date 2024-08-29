@@ -32,17 +32,28 @@ import { Textarea } from "@components/atoms/textarea"
 import WelcomeModal from "@components/molecules/modal/welcome-modal"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
+import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
-import {
-	PostVisibilityEnumMap,
-	type PostVisibilityEnumType,
-	type PrismaPost,
-} from "@prisma/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
+
+export type PostVisibilityEnumType =
+	| "PUBLIC"
+	| "FOLLOWERS_ONLY"
+	| "MENTIONED_ONLY"
+	| "FANS_ONLY"
+	| "ME_ONLY"
+
+export const PostVisibilityEnumMap = {
+	PUBLIC: "PUBLIC",
+	FOLLOWERS_ONLY: "FOLLOWERS_ONLY",
+	MENTIONED_ONLY: "MENTIONED_ONLY",
+	FANS_ONLY: "FANS_ONLY",
+	ME_ONLY: "ME_ONLY",
+}
 
 export default function PostForm({
 	children,
@@ -121,10 +132,7 @@ export default function PostForm({
 			const previousPosts = queryClient.getQueryData([POST.ALL])
 
 			// Optimistically update to the new value
-			queryClient.setQueryData([POST.ALL], (old: PrismaPost[]) => [
-				newPost,
-				...old,
-			])
+			queryClient.setQueryData([POST.ALL], (old: Post[]) => [newPost, ...old])
 
 			// Return a context object with the snapshotted value
 			return { previousPosts }

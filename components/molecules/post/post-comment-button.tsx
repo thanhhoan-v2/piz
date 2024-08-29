@@ -12,9 +12,9 @@ import {
 import { Button } from "@components/atoms/button"
 import { Dialog, DialogContent } from "@components/atoms/dialog"
 import { Textarea } from "@components/atoms/textarea"
+import type { PostVisibilityEnumType } from "@components/molecules/form/post-form"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { createPostComment } from "@prisma/functions/comment"
-import type { PrismaPostVisibilityEnum } from "@prisma/global"
 import { cn } from "@utils/cn"
 import { HashIcon, ImageIcon, MenuIcon, MessageSquare } from "lucide-react"
 import React from "react"
@@ -29,7 +29,7 @@ type PostCommentButtonProps = {
 	// post related
 	postId: number
 	postContent: string
-	postVisibility: PrismaPostVisibilityEnum
+	postVisibility: PostVisibilityEnumType
 	postCreatedAt: Date
 	postUpdatedAt: Date | null
 }

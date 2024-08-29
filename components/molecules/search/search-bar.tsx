@@ -4,7 +4,7 @@ import { Input } from "@components/atoms/input"
 import SearchList from "@components/molecules/search/search-list"
 import SearchSkeleton from "@components/molecules/skeleton/search-skeleton"
 import { useDebounce } from "@hooks/use-debounce"
-import type { PrismaUser } from "@prisma/global"
+import type { AppUser } from "@prisma/client"
 import { supabasePartialSearch } from "@supabase/functions/partial-search"
 import { searchUsersByUserNamePrefix } from "@supabase/prefix-functions"
 import { useAtomValue } from "jotai"
@@ -13,7 +13,7 @@ import React from "react"
 
 export default function SearchBar() {
 	const [searchValue, setSearchValue] = React.useState<string>("")
-	const [searchResults, setSearchResults] = React.useState<PrismaUser[]>([])
+	const [searchResults, setSearchResults] = React.useState<AppUser[]>([])
 	const [isSearching, setIsSearching] = React.useState<boolean>(false)
 
 	const user = useAtomValue(userAtom)

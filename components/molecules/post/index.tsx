@@ -1,4 +1,5 @@
 "use client"
+
 import { Skeleton } from "@components/atoms/skeleton"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
 import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
@@ -7,7 +8,7 @@ import PostShareButton from "@components/molecules/post/post-share-button"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import { useQueryPostCounts, useQueryPostReaction } from "@hooks/queries/post"
-import type { PrismaPost } from "@prisma/global"
+import type { Post as IPost } from "@prisma/client"
 import { cn } from "@utils/cn"
 import React from "react"
 import { useState } from "react"
@@ -26,7 +27,7 @@ export default function Post({
 	createdAt,
 	updatedAt,
 	isDeleted,
-}: PrismaPost) {
+}: IPost) {
 	const [postReactionByAppUser, setPostReactionByAppUser] = useState<
 		boolean | null
 	>(null)
