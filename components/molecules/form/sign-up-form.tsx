@@ -53,8 +53,8 @@ export default function SignUpForm() {
 			queryClient.setQueryData([USER.APP], user)
 			queryClient.setQueryData([USER.SESSION], session)
 			// Store in local storage
-			localStorage.setItem(USER.APP, JSON.stringify(session))
-			localStorage.setItem(USER.SESSION, JSON.stringify(session))
+			// localStorage.setItem(USER.APP, JSON.stringify(session))
+			// localStorage.setItem(USER.SESSION, JSON.stringify(session))
 
 			router.push(ROUTE.HOME)
 		}

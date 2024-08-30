@@ -3,7 +3,6 @@
 	"scripts": {
 		"postinstall": "prisma generate",
 		"vercel-build": "prisma generate && prisma migrate deploy && next build",
-
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
@@ -57,6 +56,7 @@
 		"lucide-react": "^0.418.0",
 		"next": "^14.2.6",
 		"next-themes": "^0.3.0",
+		"nextjs-toploader": "^3.6.15",
 		"pnpm": "^9.8.0",
 		"react": "18.2.0",
 		"react-day-picker": "8.10.1",
@@ -64,6 +64,7 @@
 		"react-hook-form": "^7.53.0",
 		"react-resizable-panels": "^2.1.1",
 		"recharts": "^2.12.7",
+		"sharp": "^0.33.5",
 		"sonner": "^1.5.0",
 		"tailwind-merge": "^2.5.2",
 		"use-dehydrated-state": "^0.1.0",

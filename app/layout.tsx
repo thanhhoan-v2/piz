@@ -1,4 +1,5 @@
 import localFont from "next/font/local"
+import NextTopLoader from "nextjs-toploader"
 import "@styles/globals.css"
 import "jotai-devtools/styles.css"
 import { LoadingScreen } from "@components/molecules/loading-screen"
@@ -38,6 +39,21 @@ export default function RootLayout({
 			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background" suppressHydrationWarning>
+				<NextTopLoader
+					color="white"
+					initialPosition={0.1}
+					crawlSpeed={200}
+					height={5}
+					crawl={true}
+					showSpinner={true}
+					easing="ease-in"
+					speed={200}
+					shadow={false}
+					template='<div class="bar" role="bar"><div class="peg"></div></div> 
+  <div class="spinner" role="spinner"><div class="spinner-icon"></div></div>'
+					zIndex={1600}
+					showAtBottom={false}
+				/>
 				<QueryProvider>
 					<LoadingScreen duration={200} />
 					<ThemeProvider
