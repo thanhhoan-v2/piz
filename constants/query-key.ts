@@ -13,3 +13,7 @@ export const USER = {
 	ID: "user_id",
 	SESSION: "user_session",
 }
+
+export const NOTI = {
+	ALL: "all_notifications",
+}

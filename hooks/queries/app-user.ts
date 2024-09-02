@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 export const useQueryAppUser = () =>
 	useQuery({
 		queryKey: [USER.APP],
-		queryFn: getAppUser,
+		queryFn: async () => getAppUser(),
 	})
 
 export const useQueryDataAppUser = (): SupabaseUser | undefined => {

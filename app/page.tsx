@@ -2,7 +2,8 @@ import PostFormDesktop from "@components/molecules/post/post-form-desktop"
 import PostList from "@components/molecules/post/post-list"
 import { POST, USER } from "@constants/query-key"
 import { getPostComments } from "@hooks/queries/comment"
-import type { Post as IPost } from "@prisma/client"
+import type { AppUser, Post as IPost } from "@prisma/client"
+import { getAllNotifications } from "@prisma/functions/noti"
 import { getAllPosts, getPostCounts } from "@prisma/functions/post"
 import { getPostReaction } from "@prisma/functions/post/reaction"
 import { getAppUser } from "@supabase/functions/fetchUser"
@@ -17,8 +18,8 @@ export default async function HomePage() {
 
 	// Prefetch the posts
 	// TODO:
-	// - Implement user custom feed for authorized userr & public feed for non-authorized users
-	// - Change to prefetchInfiniteQuery
+	// Implement user custom feed for authorized userr & public feed for non-authorized users
+	// Change to prefetchInfiniteQuery
 	await queryClient.prefetchQuery({
 		queryKey: [POST.ALL],
 		queryFn: getAllPosts,
@@ -51,6 +52,15 @@ export default async function HomePage() {
 		queryKey: [USER.APP],
 		queryFn: getAppUser,
 	})
+
+	const appUser = queryClient.getQueryData<AppUser>([USER.APP])
+
+	// Prefetch notifications for the authorized user
+	if (appUser)
+		await queryClient.prefetchQuery({
+			queryKey: [POST.ALL],
+			queryFn: () => getAllNotifications({ receiverId: appUser.id }),
+		})
 
 	return (
 		<>

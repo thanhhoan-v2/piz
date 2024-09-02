@@ -180,6 +180,8 @@ Table Tag {
 Table Notification {
   id Int [pk, increment]
   senderId String [not null, note: 'The user who send the notification. Could be tagger, commenter, follower, reactioner']
+  senderUserName String
+  senderAvatarUrl String
   receiverId String [not null, note: 'The user who receive the notification']
   followId Int [note: 'Add id of relevants for future needs?']
   postId Int
@@ -198,6 +200,10 @@ Table Notification {
   CommentReaction CommentReaction
   Tag Tag
   Follow Follow
+
+  indexes {
+    (senderId, receiverId, notificationType) [unique]
+  }
 }
 
 Table Post {

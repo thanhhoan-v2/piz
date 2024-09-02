@@ -21,8 +21,6 @@ export default function PostList() {
 		retry: 3,
 	})
 
-	console.log(posts)
-
 	if (isError) {
 		console.log("Error loading posts : ", error)
 		return <div>Error loading posts 😢</div>

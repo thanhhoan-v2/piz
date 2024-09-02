@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@prisma/functions/client"
-import { CreateNoti } from "@prisma/functions/noti"
+import { createNotification } from "@prisma/functions/noti"
 
 /*
  * When A follow B, the request must be accepted by B.
@@ -45,7 +45,7 @@ export const createFollow = async ({
 			})
 
 			// Create a "follow" notification
-			CreateNoti({
+			createNotification({
 				senderId: followerId,
 				receiverId: followeeId,
 				notiType: "FOLLOW",

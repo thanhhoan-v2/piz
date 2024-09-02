@@ -129,6 +129,8 @@ model Notification {
   id                Int               @id @default(autoincrement())
   /// The user who send the notification. Could be tagger, commenter, follower, reactioner
   senderId          String            @db.Uuid
+  senderUserName    String?
+  senderAvatarUrl   String?
   /// The user who receive the notification
   receiverId        String            @db.Uuid
   /// Add id of relevants for future needs?
@@ -149,6 +151,9 @@ model Notification {
   CommentReaction   CommentReaction?  @relation(fields: [commentReactionId], references: [id])
   Tag               Tag?              @relation(fields: [tagId], references: [id])
   Follow            Follow?           @relation(fields: [followId], references: [id])
+
+  /// Only one notification per type is allowed
+  @@unique([senderId, receiverId, notificationType])
 }
 
 model Post {

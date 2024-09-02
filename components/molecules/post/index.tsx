@@ -37,28 +37,21 @@ export default function Post({
 	const appUserName = user?.user_metadata?.userName
 	const appUserId = user?.id
 
-	// Get the reaction of the post by the app user by query data
-	const { data: queriedPostReactionByAppUser } = useQueryPostReaction({
-		userId: appUserId,
-		postId: id,
-	})
-
 	// Get the post counts by query data
 	const { data: postCounts, isLoading } = useQueryPostCounts({ postId: id })
 	const noReactions = postCounts?.noReactions
 	const noComments = postCounts?.noComments
 	const noShares = postCounts?.noShares
 
-	console.log(noComments)
+	// Get the reaction of the post by the app user by query data
+	const { data: queriedPostReactionByAppUser } = useQueryPostReaction({
+		userId: appUserId,
+		postId: id,
+	})
 
+	// Set post reaction by user if it fetched successfully
 	React.useEffect(() => {
-		const fetchData = async () => {
-			// Get the reaction of the post
-			// If queried reaction is found, it sets to true, otherwise false
-			setPostReactionByAppUser(!!queriedPostReactionByAppUser)
-		}
-
-		fetchData()
+		setPostReactionByAppUser(!!queriedPostReactionByAppUser)
 	}, [queriedPostReactionByAppUser])
 
 	if (isDeleted) return null
