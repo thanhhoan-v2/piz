@@ -79,5 +79,6 @@ export const getAllPosts = async () => {
 		},
 	})
 	// revalidatePath("/")
-	return posts.map((post) => ({ ...post }))
+	// return posts.map((post) => ({ ...post }))
+	return posts
 }

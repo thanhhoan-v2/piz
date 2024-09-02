@@ -1,5 +1,6 @@
 "use client"
 
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/atoms/button"
 import {
 	Card,
@@ -14,8 +15,10 @@ import { Label } from "@components/atoms/label"
 import AuthButton from "@components/molecules/button/auth-button"
 import { USER } from "@constants/query-key"
 import { ROUTE } from "@constants/route"
+import { faker } from "@faker-js/faker"
 import { useSignUp } from "@hooks/auth/use-sign-up"
 import { useQueryClient } from "@tanstack/react-query"
+import { useSetAtom } from "jotai"
 import { TriangleAlert, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -32,6 +35,7 @@ export default function SignUpForm() {
 
 	const router = useRouter()
 	const queryClient = useQueryClient()
+	const setUserAtom = useSetAtom(userAtom)
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -48,18 +52,30 @@ export default function SignUpForm() {
 
 		if (error) {
 			setError(error.message)
-		} else {
-			// Store in query client
+		} else if (user) {
 			queryClient.setQueryData([USER.APP], user)
 			queryClient.setQueryData([USER.SESSION], session)
-			// Store in local storage
-			// localStorage.setItem(USER.APP, JSON.stringify(session))
-			// localStorage.setItem(USER.SESSION, JSON.stringify(session))
+
+			setUserAtom(user)
 
 			router.push(ROUTE.HOME)
 		}
 
 		setLoading(false)
+	}
+
+	const handleFakeUser = () => {
+		const fake_email: string = faker.internet.email()
+		const fake_firstName: string = faker.person.firstName()
+		const fake_lastName: string = faker.person.lastName()
+		const fake_userName: string = faker.internet.userName()
+		const fake_password: string = "aaaaaa"
+
+		setEmail(fake_email)
+		setPassword(fake_password)
+		setFirstName(fake_firstName)
+		setLastName(fake_lastName)
+		setUserName(fake_userName)
 	}
 
 	return (
@@ -78,92 +94,103 @@ export default function SignUpForm() {
 							<div className="grid gap-2">
 								{/* first name */}
 								<Label htmlFor="firstName">First name</Label>
-								<Input
-									value={firstName}
-									onChange={(e) => setFirstName(e.target.value)}
-									id="firstName"
-									type="firstName"
-									name="firstName"
-									placeholder=""
-									required
-								/>
-								{firstName.length > 0 && (
-									<Button variant="ghost" onClick={() => setPassword("")}>
-										<X className="size-4" />
-									</Button>
-								)}
+								<div className="flex">
+									<Input
+										value={firstName}
+										onChange={(e) => setFirstName(e.target.value)}
+										id="firstName"
+										type="firstName"
+										name="firstName"
+										placeholder=""
+										required
+									/>
+									{firstName.length > 0 && (
+										<Button variant="ghost" onClick={() => setPassword("")}>
+											<X className="size-4" />
+										</Button>
+									)}
+								</div>
 							</div>
 							<div className="grid gap-2">
 								{/* last name */}
 								<Label htmlFor="lastName">Last name</Label>
-								<Input
-									value={lastName}
-									onChange={(e) => setLastName(e.target.value)}
-									id="lastName"
-									type="lastName"
-									name="lastName"
-									placeholder=""
-									required
-								/>
-								{lastName.length > 0 && (
-									<Button variant="ghost" onClick={() => setPassword("")}>
-										<X className="size-4" />
-									</Button>
-								)}
+								<div className="flex">
+									<Input
+										value={lastName}
+										onChange={(e) => setLastName(e.target.value)}
+										id="lastName"
+										type="lastName"
+										name="lastName"
+										placeholder=""
+										required
+									/>
+									{lastName.length > 0 && (
+										<Button variant="ghost" onClick={() => setPassword("")}>
+											<X className="size-4" />
+										</Button>
+									)}
+								</div>
 							</div>
 						</div>
 						{/* username */}
 						<div className="grid gap-2">
 							<Label htmlFor="userName">Username</Label>
-							<Input
-								value={userName}
-								onChange={(e) => setUserName(e.target.value)}
-								id="userName"
-								type="userName"
-								name="userName"
-								placeholder=""
-								required
-							/>
-							{userName.length > 0 && (
-								<Button variant="ghost" onClick={() => setPassword("")}>
-									<X className="size-4" />
-								</Button>
-							)}
+							<div className="flex">
+								<Input
+									value={userName}
+									onChange={(e) => setUserName(e.target.value)}
+									id="userName"
+									type="userName"
+									name="userName"
+									placeholder=""
+									required
+								/>
+								{userName.length > 0 && (
+									<Button variant="ghost" onClick={() => setPassword("")}>
+										<X className="size-4" />
+									</Button>
+								)}
+							</div>
 						</div>
 						{/* email */}
 						<div className="grid gap-2">
 							<Label htmlFor="email">Email</Label>
-							<Input
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								id="email"
-								name="email"
-								type="email"
-								placeholder=""
-								required
-							/>
-							{email.length > 0 && (
-								<Button variant="ghost" onClick={() => setPassword("")}>
-									<X className="size-4" />
-								</Button>
-							)}
+							<div className="flex">
+								<Input
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									id="email"
+									name="email"
+									type="email"
+									placeholder=""
+									required
+								/>
+								{email.length > 0 && (
+									<Button variant="ghost" onClick={() => setPassword("")}>
+										<X className="size-4" />
+									</Button>
+								)}
+							</div>
 						</div>
 						{/* password */}
 						<div className="grid gap-2">
 							<Label htmlFor="password">Password</Label>
-							<Input
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								id="password"
-								name="password"
-								type="password"
-								required
-							/>
-							{password.length > 0 && (
-								<Button variant="ghost" onClick={() => setPassword("")}>
-									<X className="size-4" />
-								</Button>
-							)}
+
+							<div className="flex">
+								<Input
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									id="password"
+									name="password"
+									type="password"
+									required
+								/>
+								{password.length > 0 && (
+									<Button variant="ghost" onClick={() => setPassword("")}>
+										<X className="size-4" />
+									</Button>
+								)}
+							</div>
 						</div>
 						<div className="grid gap-2">
 							<AuthButton
@@ -192,6 +219,7 @@ export default function SignUpForm() {
 							</div>
 						</div>
 					)}
+					<Button onClick={handleFakeUser}>Fake user</Button>
 				</CardFooter>
 			</Card>
 		</>

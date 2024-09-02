@@ -1,11 +1,12 @@
 "use server"
 
 import { prisma } from "@prisma/functions/client"
+import { CreateNoti } from "@prisma/functions/noti"
 
 /*
  * When A follow B, the request must be accepted by B.
  * Public profile can be viewed by anyone.
- * Private profile can only be viewed by followers.
+ * Private profile can only be viewed by (accepted) followers.
  */
 
 export type CreateFollowProps = {
@@ -13,7 +14,6 @@ export type CreateFollowProps = {
 	followeeId: string | null // User who is followed
 }
 
-// Create a follow relationship between two users
 export const createFollow = async ({
 	followerId,
 	followeeId,
@@ -43,6 +43,14 @@ export const createFollow = async ({
 					requestStatus: requestStatus,
 				},
 			})
+
+			// Create a "follow" notification
+			CreateNoti({
+				senderId: followerId,
+				receiverId: followeeId,
+				notiType: "FOLLOW",
+			})
+
 			return newFollow
 		}
 		console.log("[FOLLOW] Missing followerId or followeeId when creating")

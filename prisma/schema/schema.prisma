@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters", "fullTextIndex", "fullTextSearch", "prismaSchemaFolder"]
+  previewFeatures = ["fullTextIndex", "fullTextSearch", "prismaSchemaFolder"]
 }
 
 datasource db {
@@ -9,23 +9,27 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model AppUser {
-  id          String       @id @db.Uuid
-  email       String       @unique
-  fullName    String       @unique
-  userName    String       @unique
-  password    String
-  avatarUrl   String?      @unique
-  bio         String?
-  isActive    Boolean?     @default(false)
-  privacyMode PrivacyMode? @default(PUBLIC)
-  createdAt   DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  updatedAt   DateTime?    @db.Timestamptz(6)
-  isDeleted   Boolean?     @default(false)
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
+model AppUser {
+  id                    String            @id @db.Uuid
+  email                 String            @unique
+  fullName              String            @unique
+  userName              String            @unique
+  password              String
+  avatarUrl             String?           @unique
+  bio                   String?
+  isActive              Boolean?          @default(false)
+  privacyMode           PrivacyMode?      @default(PUBLIC)
+  createdAt             DateTime          @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  updatedAt             DateTime?         @db.Timestamptz(6)
+  isDeleted             Boolean?          @default(false)
   blockedUsers          Block[]           @relation("blockBlockedIdToAppUser")
   blockingUsers         Block[]           @relation("blockBlockerIdToAppUser")
   comments              Comment[]
+  CommentReaction       CommentReaction[]
   followedUsers         Follow[]          @relation("followFolloweeIdToAppUser")
   followers             Follow[]          @relation("followFollowerIdToAppUser")
   receivedNotifications Notification[]    @relation("notificationReceiverIdToAppUser")
@@ -39,7 +43,6 @@ model AppUser {
   sharesSent            Share[]           @relation("shareSenderIdToAppUser")
   tagsTagged            Tag[]             @relation("tagTaggedIdToAppUser")
   tagsTaggedBy          Tag[]             @relation("tagTaggerIdToAppUser")
-  CommentReaction       CommentReaction[]
 }
 
 model Attachment {
@@ -79,14 +82,15 @@ model Comment {
 }
 
 model Follow {
-  id            Int          @id @default(autoincrement())
-  followerId    String       @db.Uuid
-  followeeId    String       @db.Uuid
-  requestStatus FollowStatus @default(PENDING)
-  followedAt    DateTime?    @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  acceptedAt    DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  followee      AppUser?     @relation("followFolloweeIdToAppUser", fields: [followeeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  follower      AppUser?     @relation("followFollowerIdToAppUser", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id            Int            @id @default(autoincrement())
+  followerId    String         @db.Uuid
+  followeeId    String         @db.Uuid
+  requestStatus FollowStatus   @default(PENDING)
+  followedAt    DateTime?      @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  acceptedAt    DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  followee      AppUser        @relation("followFolloweeIdToAppUser", fields: [followeeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  follower      AppUser        @relation("followFollowerIdToAppUser", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Notification  Notification[]
 
   @@unique([followerId, followeeId])
 }
@@ -97,8 +101,8 @@ model Block {
   blockedId String    @db.Uuid
   createdAt DateTime? @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
   updatedAt DateTime  @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  blocker   AppUser   @relation("blockBlockerIdToAppUser", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   blocked   AppUser   @relation("blockBlockedIdToAppUser", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  blocker   AppUser   @relation("blockBlockerIdToAppUser", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([blockerId, blockedId])
 }
@@ -109,37 +113,42 @@ model Tag {
   taggerId          String         @db.Uuid
   postId            Int
   createdAt         DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  post              Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tagger            AppUser        @relation("tagTaggerIdToAppUser", fields: [taggerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tagged            AppUser        @relation("tagTaggedIdToAppUser", fields: [taggedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  notifications     Notification[]
-  Comment           Comment?       @relation(fields: [commentId], references: [id])
   commentId         Int?
   postReactionId    Int?
   commentReactionId Int?
+  notifications     Notification[]
+  Comment           Comment?       @relation(fields: [commentId], references: [id])
+  post              Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tagged            AppUser        @relation("tagTaggedIdToAppUser", fields: [taggedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tagger            AppUser        @relation("tagTaggerIdToAppUser", fields: [taggerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([taggerId, taggedId, postId])
 }
 
 model Notification {
   id                Int               @id @default(autoincrement())
-  senderId          String?           @db.Uuid
-  receiverId        String?           @db.Uuid
-  postId            Int
-  commentId         Int
-  postReactionId    Int
-  commentReactionId Int
-  tagId             Int
+  /// The user who send the notification. Could be tagger, commenter, follower, reactioner
+  senderId          String            @db.Uuid
+  /// The user who receive the notification
+  receiverId        String            @db.Uuid
+  /// Add id of relevants for future needs?
+  followId          Int?
+  postId            Int?
+  commentId         Int?
+  postReactionId    Int?
+  commentReactionId Int?
+  tagId             Int?
   notificationType  NotificationType?
   createdAt         DateTime          @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
   isRead            Boolean?          @default(false)
-  comment           Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  commentReaction   CommentReaction   @relation(fields: [commentReactionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post              Post              @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  postReaction      PostReaction      @relation(fields: [postReactionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   receiver          AppUser?          @relation("notificationReceiverIdToAppUser", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   sender            AppUser?          @relation("notificationSenderIdToAppUser", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tag               Tag               @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Comment           Comment?          @relation(fields: [commentId], references: [id])
+  Post              Post?             @relation(fields: [postId], references: [id])
+  PostReaction      PostReaction?     @relation(fields: [postReactionId], references: [id])
+  CommentReaction   CommentReaction?  @relation(fields: [commentReactionId], references: [id])
+  Tag               Tag?              @relation(fields: [tagId], references: [id])
+  Follow            Follow?           @relation(fields: [followId], references: [id])
 }
 
 model Post {
@@ -156,7 +165,7 @@ model Post {
   comments           Comment[]
   notifications      Notification[]
   appUserByAvatarUrl AppUser?       @relation("postUserAvatarUrlToAppUser", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
-  user               AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user               AppUser        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   appUserByUserName  AppUser?       @relation("postUserNameToAppUser", fields: [userName], references: [userName], onDelete: NoAction, onUpdate: NoAction)
   postReactions      PostReaction[]
   reports            ReportPost[]
@@ -177,66 +186,4 @@ model Share {
   post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   receiver    AppUser?     @relation("shareReceiverIdToAppUser", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   sender      AppUser?     @relation("shareSenderIdToAppUser", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-//                                 ╭───────────╮
-//                                 │ Reactions │
-//                                 ╰───────────╯
-model PostReaction {
-  id            Int            @id @default(autoincrement())
-  userId        String?        @db.Uuid
-  postId        Int
-  isDeleted     Boolean?       @default(false)
-  createdAt     DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  updatedAt     DateTime?
-  notifications Notification[]
-  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user          AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, postId], map: "uniquePostReaction")
-}
-
-model CommentReaction {
-  id            Int            @id @default(autoincrement())
-  userId        String?        @db.Uuid
-  commentId     Int
-  isDeleted     Boolean?       @default(false)
-  createdAt     DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  updatedAt     DateTime?
-  notifications Notification[]
-  comment       Comment        @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user          AppUser?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, commentId], map: "uniqueCommentReaction")
-}
-
-//                               ╭──────────────╮
-//                               │ Post Actions │
-//                               ╰──────────────╯
-
-model SavedPost {
-  id        Int      @id @default(autoincrement())
-  userId    String   @db.Uuid
-  postId    Int
-  isDeleted Boolean? @default(false)
-  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-}
-
-/// Post report
-model ReportPost {
-  id        Int      @id @default(autoincrement())
-  userId    String   @db.Uuid
-  postId    Int
-  content   String
-  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  post      Post     @relation(fields: [postId], references: [id])
-}
-
-/// User report
-model ReportUser {
-  id        Int      @id @default(autoincrement())
-  userId    String   @db.Uuid
-  content   String
-  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  appUser   AppUser? @relation("reportUserIdToAppUser", fields: [userId], references: [id])
 }

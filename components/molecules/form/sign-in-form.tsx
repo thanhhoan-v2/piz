@@ -70,17 +70,13 @@ export default function SignInForm() {
 			)
 			setError(translatedErrorMessage)
 		} else if (user) {
-			// Store in query client
 			queryClient.setQueryData([USER.APP], user)
 			queryClient.setQueryData([USER.SESSION], session)
 
-			// Set user atom
 			setUserAtom(user)
 
-			// Set loading to false
 			setLoading(false)
 
-			// Direct to home page
 			router.push(ROUTE.HOME)
 		}
 	}

@@ -1,0 +1,365 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table SavedPost {
+  id Int [pk, increment]
+  userId String [not null]
+  postId Int [not null]
+  isDeleted Boolean [default: false]
+  createdAt DateTime [not null]
+}
+
+Table ReportPost {
+  id Int [pk, increment]
+  userId String [not null]
+  postId Int [not null]
+  content String [not null]
+  createdAt DateTime [not null]
+  post Post [not null]
+}
+
+Table ReportUser {
+  id Int [pk, increment]
+  userId String [not null]
+  content String [not null]
+  createdAt DateTime [not null]
+  appUser AppUser [not null]
+}
+
+Table PostReaction {
+  id Int [pk, increment]
+  userId String
+  postId Int [not null]
+  isDeleted Boolean [default: false]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  notifications Notification [not null]
+  post Post [not null]
+  user AppUser
+
+  indexes {
+    (userId, postId) [unique]
+  }
+}
+
+Table CommentReaction {
+  id Int [pk, increment]
+  userId String
+  commentId Int [not null]
+  isDeleted Boolean [default: false]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  comment Comment [not null]
+  user AppUser
+  notifications Notification [not null]
+
+  indexes {
+    (userId, commentId) [unique]
+  }
+}
+
+Table AppUser {
+  id String [pk]
+  email String [unique, not null]
+  fullName String [unique, not null]
+  userName String [unique, not null]
+  password String [not null]
+  avatarUrl String [unique]
+  bio String
+  isActive Boolean [default: false]
+  privacyMode PrivacyMode [default: 'PUBLIC']
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  isDeleted Boolean [default: false]
+  blockedUsers Block [not null]
+  blockingUsers Block [not null]
+  comments Comment [not null]
+  CommentReaction CommentReaction [not null]
+  followedUsers Follow [not null]
+  followers Follow [not null]
+  receivedNotifications Notification [not null]
+  sentNotifications Notification [not null]
+  postsByAvatarUrl Post [not null]
+  posts Post [not null]
+  postsByUserName Post [not null]
+  postReactions PostReaction [not null]
+  reports ReportUser [not null]
+  sharesReceived Share [not null]
+  sharesSent Share [not null]
+  tagsTagged Tag [not null]
+  tagsTaggedBy Tag [not null]
+}
+
+Table Attachment {
+  id Int [pk, increment]
+  postId Int [not null]
+  commentId Int [not null]
+  storageUrl String [not null]
+  soundDuration String
+  attachmentType AttachmentType
+  format AttachmentFormat
+  isDeleted Boolean [default: false]
+  contentType ContentType
+  createdAt DateTime [not null]
+  comment Comment [not null]
+  post Post [not null]
+}
+
+Table Comment {
+  id Int [pk, increment]
+  userId String
+  postId Int [not null]
+  degree Int [default: 0]
+  parentId Int
+  content String [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  isDeleted Boolean [default: false]
+  attachments Attachment [not null]
+  parentComment Comment
+  replies Comment [not null]
+  post Post [not null]
+  user AppUser
+  commentReactions CommentReaction [not null]
+  notifications Notification [not null]
+  shares Share [not null]
+  tags Tag [not null]
+}
+
+Table Follow {
+  id Int [pk, increment]
+  followerId String [not null]
+  followeeId String [not null]
+  requestStatus FollowStatus [not null, default: 'PENDING']
+  followedAt DateTime
+  acceptedAt DateTime [not null]
+  followee AppUser [not null]
+  follower AppUser [not null]
+  Notification Notification [not null]
+
+  indexes {
+    (followerId, followeeId) [unique]
+  }
+}
+
+Table Block {
+  id Int [pk, increment]
+  blockerId String [not null]
+  blockedId String [not null]
+  createdAt DateTime
+  updatedAt DateTime [not null]
+  blocked AppUser [not null]
+  blocker AppUser [not null]
+
+  indexes {
+    (blockerId, blockedId) [unique]
+  }
+}
+
+Table Tag {
+  id Int [pk, increment]
+  taggedId String [not null]
+  taggerId String [not null]
+  postId Int [not null]
+  createdAt DateTime [not null]
+  commentId Int
+  postReactionId Int
+  commentReactionId Int
+  notifications Notification [not null]
+  Comment Comment
+  post Post [not null]
+  tagged AppUser [not null]
+  tagger AppUser [not null]
+
+  indexes {
+    (taggerId, taggedId, postId) [unique]
+  }
+}
+
+Table Notification {
+  id Int [pk, increment]
+  senderId String [not null, note: 'The user who send the notification. Could be tagger, commenter, follower, reactioner']
+  receiverId String [not null, note: 'The user who receive the notification']
+  followId Int [note: 'Add id of relevants for future needs?']
+  postId Int
+  commentId Int
+  postReactionId Int
+  commentReactionId Int
+  tagId Int
+  notificationType NotificationType
+  createdAt DateTime [not null]
+  isRead Boolean [default: false]
+  receiver AppUser
+  sender AppUser
+  Comment Comment
+  Post Post
+  PostReaction PostReaction
+  CommentReaction CommentReaction
+  Tag Tag
+  Follow Follow
+}
+
+Table Post {
+  id Int [pk, increment]
+  userId String [not null]
+  userName String
+  userAvatarUrl String
+  visibility PostVisibility [not null, default: 'PUBLIC']
+  content String [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  isDeleted Boolean [default: false]
+  attachments Attachment [not null]
+  comments Comment [not null]
+  notifications Notification [not null]
+  appUserByAvatarUrl AppUser
+  user AppUser [not null]
+  appUserByUserName AppUser
+  postReactions PostReaction [not null]
+  reports ReportPost [not null]
+  shares Share [not null]
+  tags Tag [not null]
+}
+
+Table Share {
+  id Int [pk, increment]
+  senderId String
+  receiverId String
+  postId Int [not null]
+  commentId Int [not null]
+  contentType ContentType
+  createdAt DateTime [not null]
+  isDeleted Boolean [default: false]
+  comment Comment [not null]
+  post Post [not null]
+  receiver AppUser
+  sender AppUser
+}
+
+Enum AttachmentFormat {
+  AUDIO
+  IMAGE
+  VIDEO
+}
+
+Enum AttachmentType {
+  POST
+  COMMENT
+}
+
+Enum ContentType {
+  POST
+  COMMENT
+}
+
+Enum FollowStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+Enum NotificationType {
+  FOLLOW
+  FOLLOW_SUGGEST
+  TAG
+  COMMENT
+  REACT
+}
+
+Enum PostActionType {
+  SAVE
+  IGNORE
+}
+
+Enum PostVisibility {
+  PUBLIC
+  FOLLOWERS_ONLY
+  MENTIONED_ONLY
+  FANS_ONLY
+  ME_ONLY
+}
+
+Enum PrivacyMode {
+  PUBLIC
+  PRIVATE
+}
+
+Enum ReactionType {
+  LOVE
+  HATE
+}
+
+Enum ReportType {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+}
+
+Ref: ReportPost.postId > Post.id
+
+Ref: ReportUser.userId > AppUser.id
+
+Ref: PostReaction.postId > Post.id [delete: Cascade]
+
+Ref: PostReaction.userId > AppUser.id [delete: Cascade]
+
+Ref: CommentReaction.commentId > Comment.id [delete: Cascade]
+
+Ref: CommentReaction.userId > AppUser.id [delete: Cascade]
+
+Ref: Attachment.commentId > Comment.id [delete: Cascade]
+
+Ref: Attachment.postId > Post.id [delete: Cascade]
+
+Ref: Comment.parentId - Comment.id [delete: Cascade]
+
+Ref: Comment.postId > Post.id [delete: Cascade]
+
+Ref: Comment.userId > AppUser.id [delete: Cascade]
+
+Ref: Follow.followeeId > AppUser.id [delete: Cascade]
+
+Ref: Follow.followerId > AppUser.id [delete: Cascade]
+
+Ref: Block.blockedId > AppUser.id [delete: Cascade]
+
+Ref: Block.blockerId > AppUser.id [delete: Cascade]
+
+Ref: Tag.commentId > Comment.id
+
+Ref: Tag.postId > Post.id [delete: Cascade]
+
+Ref: Tag.taggedId > AppUser.id [delete: Cascade]
+
+Ref: Tag.taggerId > AppUser.id [delete: Cascade]
+
+Ref: Notification.receiverId > AppUser.id [delete: Cascade]
+
+Ref: Notification.senderId > AppUser.id [delete: Cascade]
+
+Ref: Notification.commentId > Comment.id
+
+Ref: Notification.postId > Post.id
+
+Ref: Notification.postReactionId > PostReaction.id
+
+Ref: Notification.commentReactionId > CommentReaction.id
+
+Ref: Notification.tagId > Tag.id
+
+Ref: Notification.followId > Follow.id
+
+Ref: Post.userAvatarUrl > AppUser.avatarUrl [delete: No Action]
+
+Ref: Post.userId > AppUser.id [delete: No Action]
+
+Ref: Post.userName > AppUser.userName [delete: No Action]
+
+Ref: Share.commentId > Comment.id [delete: Cascade]
+
+Ref: Share.postId > Post.id [delete: Cascade]
+
+Ref: Share.receiverId > AppUser.id [delete: Cascade]
+
+Ref: Share.senderId > AppUser.id [delete: Cascade]

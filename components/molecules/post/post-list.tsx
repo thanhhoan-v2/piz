@@ -1,7 +1,10 @@
 "use client"
 
 import Post from "@components/molecules/post"
-import { useQueryAllPosts } from "@hooks/queries/posts"
+import { POST } from "@constants/query-key"
+import type { Post as IPost } from "@prisma/client"
+import { getAllPosts } from "@prisma/functions/post"
+import { useQuery } from "@tanstack/react-query"
 
 export default function PostList() {
 	const {
@@ -10,10 +13,21 @@ export default function PostList() {
 		isError,
 		isSuccess,
 		isPending,
-	} = useQueryAllPosts()
+		isFetching,
+		error,
+	} = useQuery<IPost[]>({
+		queryKey: [POST.ALL],
+		queryFn: async () => getAllPosts(),
+		retry: 3,
+	})
 
-	if (isError) return <div>Error loading posts 😢</div>
-	if (isLoading) return <div>Loading posts...</div>
+	console.log(posts)
+
+	if (isError) {
+		console.log("Error loading posts : ", error)
+		return <div>Error loading posts 😢</div>
+	}
+	if (isLoading || isFetching) return <div>Loading posts...</div>
 	if (isSuccess)
 		return (
 			<>

@@ -1,0 +1,24 @@
+model SavedPost {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  postId    Int
+  isDeleted Boolean? @default(false)
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+}
+
+model ReportPost {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  postId    Int
+  content   String
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  post      Post     @relation(fields: [postId], references: [id])
+}
+
+model ReportUser {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  appUser   AppUser  @relation("reportUserIdToAppUser", fields: [userId], references: [id])
+}

@@ -7,4 +7,5 @@ export const useQueryAllPosts = () =>
 	useQuery<Post[]>({
 		queryKey: [POST.ALL],
 		queryFn: getAllPosts,
+		retry: 3,
 	})

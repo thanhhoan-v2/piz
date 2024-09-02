@@ -32,6 +32,7 @@ import { Textarea } from "@components/atoms/textarea"
 import WelcomeModal from "@components/molecules/modal/welcome-modal"
 import PostUserInfo from "@components/molecules/post/post-user-info"
 import { POST } from "@constants/query-key"
+import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@prisma/functions/post"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -55,28 +56,26 @@ export const PostVisibilityEnumMap = {
 	ME_ONLY: "ME_ONLY",
 }
 
+export const PostVisibilityEnumArray = [
+	"PUBLIC",
+	"FOLLOWERS_ONLY",
+	"MENTIONED_ONLY",
+	"FANS_ONLY",
+	"ME_ONLY",
+]
+
 export default function PostForm({
 	children,
 }: {
 	children: React.ReactNode
 }) {
-	// Drawer for creating a post
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
-
-	// Alert dialog for discarding comment
 	const [alertIsOpen, setOpenAlert] = React.useState<boolean>(false)
-
-	// Post
 	const [postContent, setPostContent] = React.useState("")
-
-	// Post visibility
 	const [postVisibility, setPostVisibility] =
 		React.useState<PostVisibilityEnumType>("PUBLIC")
-
-	// Reference to textarea
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-	// Handles post content
 	const handleChange = React.useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
 			setPostContent(e.target.value)
@@ -84,14 +83,12 @@ export default function PostForm({
 		[],
 	)
 
-	// Handles the discard post
 	const handleDiscard = () => {
 		setOpenDrawer(false)
 		setPostContent("")
 		setPostVisibility("PUBLIC")
 	}
 
-	// Handles the alert dialog to discard comment
 	const handleOpenAlert = () => {
 		// If the value is not empty, open the alert
 		if (postContent.length > 0) {
@@ -99,9 +96,17 @@ export default function PostForm({
 		}
 	}
 
-	const queryClient = useQueryClient()
+	const handleFakePost = () => {
+		const fake_content: string = faker.lorem.paragraphs()
+		const fake_visibility: PostVisibilityEnumType = PostVisibilityEnumArray[
+			Math.floor(Math.random() * PostVisibilityEnumArray.length)
+		] as PostVisibilityEnumType
 
-	// Get the lastet info of current user
+		setPostContent(fake_content)
+		setPostVisibility(fake_visibility)
+	}
+
+	const queryClient = useQueryClient()
 	const user = useAtomValue(userAtom)
 	const userId = user?.id
 	const userName = user?.user_metadata?.userName
@@ -142,9 +147,7 @@ export default function PostForm({
 		},
 	})
 
-	// Handles post submission
 	const handleSubmitPost = () => {
-		// Create post on server
 		const newPost: CreatePostProps = {
 			userId: userId ?? null,
 			userName: userName,
@@ -153,11 +156,8 @@ export default function PostForm({
 			visibility: postVisibility,
 		}
 		addPostMutationAsync(newPost)
-		// Close the drawer
 		setOpenDrawer(false)
-		// Reset the post content
 		setPostContent("")
-		// Reset the post visibility
 		setPostVisibility("PUBLIC")
 	}
 
@@ -264,16 +264,19 @@ export default function PostForm({
 							)}
 
 							{/* Post button */}
-							<Button
-								className="w-[100px]"
-								disabled={
-									postContent.length > last_threshold ||
-									postContent.length === 0
-								}
-								onClick={handleSubmitPost}
-							>
-								Post
-							</Button>
+							<div className="flex gap-4">
+								<Button onClick={handleFakePost}>Fake</Button>
+								<Button
+									className="w-[100px]"
+									disabled={
+										postContent.length > last_threshold ||
+										postContent.length === 0
+									}
+									onClick={handleSubmitPost}
+								>
+									Post
+								</Button>
+							</div>
 						</div>
 					</DrawerFooter>
 				</DrawerContent>
