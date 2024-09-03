@@ -2,10 +2,12 @@
 
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
 import { avatarPlaceholder } from "@constants/image-placeholder"
+import { NOTI } from "@constants/query-key"
 import { useQueryAppUser } from "@hooks/queries/app-user"
 import { useQueryAllNotifications } from "@hooks/queries/noti"
 import type { Notification, NotificationType } from "@prisma/client"
 import type { RealtimeChannel } from "@supabase/supabase-js"
+import { useQueryClient } from "@tanstack/react-query"
 import { createSupabaseClientForBrowser } from "@utils/supabase/client"
 import React from "react"
 
@@ -43,9 +45,11 @@ export default function ActivityPage() {
 
 	// Subscribe to notification changes
 	const supabase = createSupabaseClientForBrowser()
+	const queryClient = useQueryClient()
+
 	React.useEffect(() => {
 		const channel: RealtimeChannel = supabase
-			.channel("realtime notifications")
+			.channel("realtime:notifications")
 			.on(
 				"postgres_changes",
 				{
@@ -54,7 +58,12 @@ export default function ActivityPage() {
 					table: "Notification",
 				},
 				(payload: { new: Notification }) => {
-					console.log({ payload })
+					queryClient.setQueryData<Notification[] | undefined>(
+						[NOTI.ALL, user?.id],
+						(oldData) => {
+							return oldData ? [payload.new, ...oldData] : [payload.new]
+						},
+					)
 				},
 			)
 			.subscribe()
@@ -64,7 +73,7 @@ export default function ActivityPage() {
 				console.error("Error removing channel:", error)
 			})
 		}
-	}, [supabase])
+	}, [supabase, user, queryClient])
 
 	if (isUserError) return <div>Error fetching your information 😢</div>
 	if (isUserLoading) return <div>Fetching your information...</div>
