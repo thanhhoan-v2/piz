@@ -58,6 +58,7 @@
 		"next-themes": "^0.3.0",
 		"nextjs-toploader": "^3.6.15",
 		"pnpm": "^9.8.0",
+		"prisma-extension-random": "^0.2.2",
 		"react": "18.2.0",
 		"react-day-picker": "8.10.1",
 		"react-dom": "18.2.0",

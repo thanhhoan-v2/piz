@@ -137,6 +137,9 @@ importers:
       pnpm:
         specifier: ^9.8.0
         version: 9.8.0
+      prisma-extension-random:
+        specifier: ^0.2.2
+        version: 0.2.2(@prisma/client@5.19.0(prisma@5.19.0))
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -3024,6 +3027,11 @@ packages:
     hasBin: true
     peerDependencies:
       '@prisma/client': ^4.0.0 || ^5.0.0
+
+  prisma-extension-random@0.2.2:
+    resolution: {integrity: sha512-tjY5w2pSIgwQh0tDT98KTTYJ0uadUwfbTH+6QbPCfLg+gesgeLZNO4oKv8O6/udx54QvEbyXgNC1LUcjtoypcg==}
+    peerDependencies:
+      '@prisma/client': '*'
 
   prisma@5.19.0:
     resolution: {integrity: sha512-Pu7lUKpVyTx8cVwM26dYh8NdvMOkMnJXzE8L6cikFuR4JwyMU5NKofQkWyxJKlTT4fNjmcnibTvklV8oVMrn+g==}
@@ -6860,6 +6868,10 @@ snapshots:
       - supports-color
       - typescript
       - utf-8-validate
+
+  prisma-extension-random@0.2.2(@prisma/client@5.19.0(prisma@5.19.0)):
+    dependencies:
+      '@prisma/client': 5.19.0(prisma@5.19.0)
 
   prisma@5.19.0:
     dependencies:
