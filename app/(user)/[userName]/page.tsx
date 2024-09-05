@@ -14,7 +14,9 @@ import { getAllUserPosts } from "@prisma/functions/user/post"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { createSupabaseClientWithCookies } from "@utils/supabase/server"
 
-export default async function UserPage({ params }: { params: { id: string } }) {
+export default async function UserPage({
+	params,
+}: { params: { userName: string } }) {
 	// App user, the main user
 	const supabase = createSupabaseClientWithCookies()
 	const {
@@ -22,7 +24,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
 	} = await supabase.auth.getUser()
 
 	// Viewing user, another person
-	const viewingUser = await getViewingUserInfo(params.id)
+	const viewingUser = await getViewingUserInfo(params.userName)
 
 	// Get all posts by the viewing user
 	let posts: IPost[] = []

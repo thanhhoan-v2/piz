@@ -1,5 +1,6 @@
 "use client"
 
+import { Button } from "@components/atoms/button"
 import { Skeleton } from "@components/atoms/skeleton"
 import PostCommentButton from "@components/molecules/post/post-comment-button"
 import PostDropdownMenu from "@components/molecules/post/post-dropdown-menu"
@@ -10,12 +11,19 @@ import { useQueryDataAppUser } from "@hooks/queries/app-user"
 import { useQueryPostCounts, useQueryPostReaction } from "@hooks/queries/post"
 import type { Post as IPost } from "@prisma/client"
 import { cn } from "@utils/cn"
+import { MessageSquare } from "lucide-react"
+import type { Route } from "next"
+import Link from "next/link"
 import React from "react"
 import { useState } from "react"
 
 const postButtonClassName = "flex flex-none h-[30px] w-[70px] gap-2"
 const widths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
+
+type PostProps = {
+	isPostPage?: boolean
+}
 
 export default function Post({
 	id,
@@ -27,7 +35,10 @@ export default function Post({
 	createdAt,
 	updatedAt,
 	isDeleted,
-}: IPost) {
+	// If it's on User's post Page then it acts as Post Comment Button,
+	// else acts as Link to post page
+	isPostPage = false,
+}: IPost & PostProps) {
 	const [postReactionByAppUser, setPostReactionByAppUser] = useState<
 		boolean | null
 	>(null)
@@ -103,20 +114,33 @@ export default function Post({
 						) : (
 							<Skeleton className={postButtonClassName} />
 						)}
-						<PostCommentButton
-							className={postButtonClassName}
-							initialCommentCount={noComments ?? 0}
-							// User related props
-							userId={userId}
-							userName={userName}
-							userAvatarUrl={userAvatarUrl}
-							// Post related props
-							postId={id}
-							postContent={content}
-							postCreatedAt={createdAt}
-							postUpdatedAt={updatedAt}
-							postVisibility={visibility}
-						/>
+
+						{isPostPage ? (
+							<PostCommentButton
+								className={postButtonClassName}
+								initialCommentCount={noComments ?? 0}
+								// User related props
+								userId={userId}
+								userName={userName}
+								userAvatarUrl={userAvatarUrl}
+								// Post related props
+								postId={id}
+								postContent={content}
+								postCreatedAt={createdAt}
+								postUpdatedAt={updatedAt}
+								postVisibility={visibility}
+							/>
+						) : (
+							<Link href={`${userName}/post/${id}` as Route}>
+								<Button
+									variant="ghost"
+									className={cn(postButtonClassName, "max-w-[100px]")}
+								>
+									<MessageSquare />
+									<span>{noComments}</span>
+								</Button>
+							</Link>
+						)}
 						<PostShareButton
 							className={postButtonClassName}
 							userId={userId}

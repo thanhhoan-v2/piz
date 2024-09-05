@@ -7,7 +7,7 @@ export default async function SearchPage() {
 	const supabase = createSupabaseClientWithCookies()
 	const { data: user } = await supabase.auth.getUser()
 	const userId = user?.user?.id
-	const randomUserList = await getRandomUserList(userId, 10)
+	const randomUserList = await getRandomUserList(userId, 8)
 
 	return (
 		<>

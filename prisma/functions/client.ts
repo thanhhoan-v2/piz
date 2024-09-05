@@ -9,7 +9,6 @@ const globalForPrisma = globalThis as unknown as {
 // If it does, it reuses that instance
 // Otherwise, it creates a new instance of PrismaClient
 export const prisma =
-	globalForPrisma.prisma.$extends(prismaRandom()) ||
-	new PrismaClient().$extends(prismaRandom())
+	globalForPrisma.prisma || new PrismaClient().$extends(prismaRandom())
 
-// if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma

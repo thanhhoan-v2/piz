@@ -82,3 +82,16 @@ export const getAllPosts = async () => {
 	// return posts.map((post) => ({ ...post }))
 	return posts
 }
+
+export const getPost = async (postId: number) => {
+	try {
+		const post = await prisma.post.findUnique({
+			where: {
+				id: postId,
+			},
+		})
+		return post
+	} catch (error) {
+		console.error(`<< Post >> Error getting post ${postId}: `, error)
+	}
+}
