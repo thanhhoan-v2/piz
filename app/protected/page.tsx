@@ -1,5 +1,5 @@
 import { ROUTE } from "@constants/route";
-import { createSupabaseClientWithCookies } from "@utils/supabase/server";
+import { createSupabaseClientWithCookies } from "@hooks/supabase/useSupabaseServer";
 import { redirect } from "next/navigation";
 
 export default async function ProtectedPage() {

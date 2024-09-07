@@ -1,66 +1,73 @@
-import PostFormDesktop from "@components/molecules/post/post-form-desktop"
-import PostList from "@components/molecules/post/post-list"
-import { POST, USER } from "@constants/query-key"
-import { getPostComments } from "@hooks/queries/comment"
-import type { AppUser, Post as IPost } from "@prisma/client"
-import { getAllNotifications } from "@prisma/functions/noti"
-import { getAllPosts, getPostCounts } from "@prisma/functions/post"
-import { getPostReaction } from "@prisma/functions/post/reaction"
-import { getAppUser } from "@supabase/functions/fetchUser"
+import PostFormDesktop from "@components/ui/post/PostFormDesktop"
+import PostList from "@components/ui/post/PostList"
+import type { AppUser } from "@prisma/client"
+import type { Post as IPost } from "@prisma/client"
+import { getPostComments } from "@queries/server/comment"
+import { getAllNotifications } from "@queries/server/noti"
+import { getAllPosts, getPostCounts } from "@queries/server/post"
+import { getPostReaction } from "@queries/server/postReaction"
+import { useSupabaseUser } from "@queries/server/supabase/supabaseUser"
 import {
 	HydrationBoundary,
 	QueryClient,
 	dehydrate,
 } from "@tanstack/react-query"
+import { queryKey } from "@utils/queryKeyFactory"
+
+// Must be created outside of the component,
+// to avoid recreating the instance on each render
+const queryClient = new QueryClient()
+
+async function prefetchPosts() {
+	await queryClient.prefetchQuery({
+		queryKey: queryKey.post.all,
+		queryFn: async () => getAllPosts(),
+	})
+
+	const allPosts = queryClient.getQueryData<IPost[]>(queryKey.post.all)
+	if (allPosts && Array.isArray(allPosts)) {
+		await Promise.all(
+			allPosts.map(async (post) => {
+				await queryClient.prefetchQuery({
+					queryKey: [
+						queryKey.post.selectReactionByUser({
+							userId: post.userId,
+							postId: post.id,
+						}),
+					],
+					queryFn: async () =>
+						getPostReaction({ userId: post.userId, postId: post.id }),
+				})
+				await queryClient.prefetchQuery({
+					queryKey: queryKey.post.selectCount(post.id),
+					queryFn: async () => getPostCounts({ postId: post.id }),
+				})
+				await queryClient.prefetchQuery({
+					queryKey: queryKey.comment.selectPost(post.id),
+					queryFn: async () => getPostComments({ postId: post.id }),
+				})
+			}),
+		)
+	}
+}
+
+async function prefetchUser() {
+	await queryClient.prefetchQuery({
+		queryKey: queryKey.user.selectMain(),
+		queryFn: async () => useSupabaseUser,
+	})
+
+	const appUser = queryClient.getQueryData<AppUser>(queryKey.user.selectMain())
+	if (appUser) {
+		await queryClient.prefetchQuery({
+			queryKey: queryKey.noti.selectId(appUser.id),
+			queryFn: async () => getAllNotifications({ receiverId: appUser.id }),
+		})
+	}
+}
 
 export default async function HomePage() {
-	const queryClient = new QueryClient()
-
-	// Prefetch the posts
-	// TODO:
-	// Implement user custom feed for authorized userr & public feed for non-authorized users
-	// Change to prefetchInfiniteQuery
-	await queryClient.prefetchQuery({
-		queryKey: [POST.ALL],
-		queryFn: getAllPosts,
-	})
-
-	const allPosts = queryClient.getQueryData<IPost[]>([POST.ALL])
-	if (allPosts && Array.isArray(allPosts)) {
-		for (const post of allPosts) {
-			// Prefetch reactions for each post
-			await queryClient.prefetchQuery({
-				queryKey: [POST.REACTION, post.userId, post.id],
-				queryFn: () =>
-					getPostReaction({ userId: post.userId, postId: post.id }),
-			})
-			// Prefetch counts (reaction, comment, share) for each post
-			await queryClient.prefetchQuery({
-				queryKey: [POST.COUNTS, post.id],
-				queryFn: () => getPostCounts({ postId: post.id }),
-			})
-			// Prefetch comment(s)
-			await queryClient.prefetchQuery({
-				queryKey: [POST.COMMENT, post.id],
-				queryFn: () => getPostComments({ postId: post.id }),
-			})
-		}
-	}
-
-	// Prefetch the authorized user
-	await queryClient.prefetchQuery({
-		queryKey: [USER.APP],
-		queryFn: getAppUser,
-	})
-
-	const appUser = queryClient.getQueryData<AppUser>([USER.APP])
-
-	// Prefetch notifications for the authorized user
-	if (appUser)
-		await queryClient.prefetchQuery({
-			queryKey: [POST.ALL],
-			queryFn: () => getAllNotifications({ receiverId: appUser.id }),
-		})
+	await Promise.all([prefetchPosts(), prefetchUser()])
 
 	return (
 		<>

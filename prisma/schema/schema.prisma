@@ -35,19 +35,35 @@ model AppUser {
   receivedNotifications Notification[]    @relation("notificationReceiverIdToAppUser")
   sentNotifications     Notification[]    @relation("notificationSenderIdToAppUser")
   postsByAvatarUrl      Post[]            @relation("postUserAvatarUrlToAppUser")
-  posts                 Post[]
-  postsByUserName       Post[]            @relation("postUserNameToAppUser")
   postReactions         PostReaction[]
-  reports               ReportUser[]      @relation("reportUserIdToAppUser")
   sharesReceived        Share[]           @relation("shareReceiverIdToAppUser")
   sharesSent            Share[]           @relation("shareSenderIdToAppUser")
   tagsTagged            Tag[]             @relation("tagTaggedIdToAppUser")
   tagsTaggedBy          Tag[]             @relation("tagTaggerIdToAppUser")
 }
 
+model Post {
+  id                 String         @id
+  userId             String         @db.Uuid
+  userName           String?
+  userAvatarUrl      String?
+  visibility         PostVisibility @default(PUBLIC)
+  content            String
+  createdAt          DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  updatedAt          DateTime?
+  isDeleted          Boolean?       @default(false)
+  attachments        Attachment[]
+  comments           Comment[]
+  notifications      Notification[]
+  appUserByAvatarUrl AppUser?       @relation("postUserAvatarUrlToAppUser", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
+  postReactions      PostReaction[]
+  shares             Share[]
+  tags               Tag[]
+}
+
 model Attachment {
   id             Int               @id @default(autoincrement())
-  postId         Int
+  postId         String
   commentId      Int
   storageUrl     String
   soundDuration  String?
@@ -63,7 +79,9 @@ model Attachment {
 model Comment {
   id               Int               @id @default(autoincrement())
   userId           String?           @db.Uuid
-  postId           Int
+  userAvatarUrl    String?
+  userName         String?
+  postId           String
   degree           Int?              @default(0)
   parentId         Int?
   content          String
@@ -111,7 +129,7 @@ model Tag {
   id                Int            @id @default(autoincrement())
   taggedId          String         @db.Uuid
   taggerId          String         @db.Uuid
-  postId            Int
+  postId            String
   createdAt         DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
   commentId         Int?
   postReactionId    Int?
@@ -135,7 +153,7 @@ model Notification {
   receiverId        String            @db.Uuid
   /// Add id of relevants for future needs?
   followId          Int?
-  postId            Int?
+  postId            String?
   commentId         Int?
   postReactionId    Int?
   commentReactionId Int?
@@ -148,41 +166,19 @@ model Notification {
   Comment           Comment?          @relation(fields: [commentId], references: [id])
   Post              Post?             @relation(fields: [postId], references: [id])
   PostReaction      PostReaction?     @relation(fields: [postReactionId], references: [id])
-  CommentReaction   CommentReaction?  @relation(fields: [commentReactionId], references: [id])
-  Tag               Tag?              @relation(fields: [tagId], references: [id])
   Follow            Follow?           @relation(fields: [followId], references: [id])
+  Tag               Tag?              @relation(fields: [tagId], references: [id])
+  CommentReaction   CommentReaction?  @relation(fields: [commentReactionId], references: [id])
 
   /// Only one notification per type is allowed
   @@unique([senderId, receiverId, notificationType])
-}
-
-model Post {
-  id                 Int            @id @default(autoincrement())
-  userId             String         @db.Uuid
-  userName           String?
-  userAvatarUrl      String?
-  visibility         PostVisibility @default(PUBLIC)
-  content            String
-  createdAt          DateTime       @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-  updatedAt          DateTime?
-  isDeleted          Boolean?       @default(false)
-  attachments        Attachment[]
-  comments           Comment[]
-  notifications      Notification[]
-  appUserByAvatarUrl AppUser?       @relation("postUserAvatarUrlToAppUser", fields: [userAvatarUrl], references: [avatarUrl], onDelete: NoAction, onUpdate: NoAction)
-  user               AppUser        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  appUserByUserName  AppUser?       @relation("postUserNameToAppUser", fields: [userName], references: [userName], onDelete: NoAction, onUpdate: NoAction)
-  postReactions      PostReaction[]
-  reports            ReportPost[]
-  shares             Share[]
-  tags               Tag[]
 }
 
 model Share {
   id          Int          @id @default(autoincrement())
   senderId    String?      @db.Uuid
   receiverId  String?      @db.Uuid
-  postId      Int
+  postId      String
   commentId   Int
   contentType ContentType?
   createdAt   DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)

@@ -1,4 +1,4 @@
-import { createSupabaseClientWithCookies } from "@utils/supabase/server"
+import { createSupabaseClientWithCookies } from "@hooks/supabase/useSupabaseServer"
 import type { Route } from "next"
 import { revalidatePath } from "next/cache"
 import { headers } from "next/headers"

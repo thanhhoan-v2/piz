@@ -1,5 +1,5 @@
-import type { Config } from "tailwindcss";
-import plugin from "tailwindcss/plugin";
+import type { Config } from "tailwindcss"
+import plugin from "tailwindcss/plugin"
 
 const config = {
 	darkMode: ["class"],
@@ -75,6 +75,8 @@ const config = {
 				caretBlink: "caretBlink 1.25s ease-out infinite",
 				bounceOnce: "bounceOnce 1s ease-out",
 				flipWords: "flipWords 8s infinite",
+				fillHeart: "fillHeart 1s forwards",
+				unfillHeart: "unfillHeart 1s forwards",
 			},
 			keyframes: {
 				accordionDown: {
@@ -110,6 +112,14 @@ const config = {
 					"85%": { transform: "translateY(-412%)" },
 					"100%": { transform: "translateY(-400%)" },
 				},
+				fillHeart: {
+					"0%": { fill: "rgb(9, 9, 11)" },
+					"100%": { fill: "red" },
+				},
+				unfillHeart: {
+					"0%": { fill: "red" },
+					"100%": { fill: "rgb(9, 9, 11)" },
+				},
 			},
 		},
 	},
@@ -123,9 +133,9 @@ const config = {
 					padding: theme("spacing.6"),
 					boxShadow: theme("boxShadow.xl"),
 				},
-			});
+			})
 		}),
 	],
-} satisfies Config;
+} satisfies Config
 
-export default config;
+export default config

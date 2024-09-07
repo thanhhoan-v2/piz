@@ -1,4 +1,4 @@
-import { createSupabaseClientWithCookies } from "@utils/supabase/server"
+import { createSupabaseClientWithCookies } from "@hooks/supabase/useSupabaseServer"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {

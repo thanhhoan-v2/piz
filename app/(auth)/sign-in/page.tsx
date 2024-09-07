@@ -1,9 +1,5 @@
-import SignInForm from "@components/molecules/form/sign-in-form"
+import SignInForm from "@components/ui/form/SignInForm"
 
 export default function SignInPage() {
-	return (
-		<>
-			<SignInForm />
-		</>
-	)
+	return <SignInForm />
 }

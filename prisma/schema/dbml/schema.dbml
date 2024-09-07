@@ -3,34 +3,17 @@
 //// ------------------------------------------------------
 
 Table SavedPost {
-  id Int [pk, increment]
+  id String [pk]
   userId String [not null]
-  postId Int [not null]
+  postId String [not null]
   isDeleted Boolean [default: false]
   createdAt DateTime [not null]
 }
 
-Table ReportPost {
-  id Int [pk, increment]
-  userId String [not null]
-  postId Int [not null]
-  content String [not null]
-  createdAt DateTime [not null]
-  post Post [not null]
-}
-
-Table ReportUser {
-  id Int [pk, increment]
-  userId String [not null]
-  content String [not null]
-  createdAt DateTime [not null]
-  appUser AppUser [not null]
-}
-
 Table PostReaction {
   id Int [pk, increment]
-  userId String
-  postId Int [not null]
+  userId String [not null]
+  postId String [not null]
   isDeleted Boolean [default: false]
   createdAt DateTime [not null]
   updatedAt DateTime
@@ -81,19 +64,35 @@ Table AppUser {
   receivedNotifications Notification [not null]
   sentNotifications Notification [not null]
   postsByAvatarUrl Post [not null]
-  posts Post [not null]
-  postsByUserName Post [not null]
   postReactions PostReaction [not null]
-  reports ReportUser [not null]
   sharesReceived Share [not null]
   sharesSent Share [not null]
   tagsTagged Tag [not null]
   tagsTaggedBy Tag [not null]
 }
 
+Table Post {
+  id String [pk]
+  userId String [not null]
+  userName String
+  userAvatarUrl String
+  visibility PostVisibility [not null, default: 'PUBLIC']
+  content String [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  isDeleted Boolean [default: false]
+  attachments Attachment [not null]
+  comments Comment [not null]
+  notifications Notification [not null]
+  appUserByAvatarUrl AppUser
+  postReactions PostReaction [not null]
+  shares Share [not null]
+  tags Tag [not null]
+}
+
 Table Attachment {
   id Int [pk, increment]
-  postId Int [not null]
+  postId String [not null]
   commentId Int [not null]
   storageUrl String [not null]
   soundDuration String
@@ -109,7 +108,9 @@ Table Attachment {
 Table Comment {
   id Int [pk, increment]
   userId String
-  postId Int [not null]
+  userAvatarUrl String
+  userName String
+  postId String [not null]
   degree Int [default: 0]
   parentId Int
   content String [not null]
@@ -161,7 +162,7 @@ Table Tag {
   id Int [pk, increment]
   taggedId String [not null]
   taggerId String [not null]
-  postId Int [not null]
+  postId String [not null]
   createdAt DateTime [not null]
   commentId Int
   postReactionId Int
@@ -184,7 +185,7 @@ Table Notification {
   senderAvatarUrl String
   receiverId String [not null, note: 'The user who receive the notification']
   followId Int [note: 'Add id of relevants for future needs?']
-  postId Int
+  postId String
   commentId Int
   postReactionId Int
   commentReactionId Int
@@ -197,42 +198,20 @@ Table Notification {
   Comment Comment
   Post Post
   PostReaction PostReaction
-  CommentReaction CommentReaction
-  Tag Tag
   Follow Follow
+  Tag Tag
+  CommentReaction CommentReaction
 
   indexes {
     (senderId, receiverId, notificationType) [unique]
   }
 }
 
-Table Post {
-  id Int [pk, increment]
-  userId String [not null]
-  userName String
-  userAvatarUrl String
-  visibility PostVisibility [not null, default: 'PUBLIC']
-  content String [not null]
-  createdAt DateTime [not null]
-  updatedAt DateTime
-  isDeleted Boolean [default: false]
-  attachments Attachment [not null]
-  comments Comment [not null]
-  notifications Notification [not null]
-  appUserByAvatarUrl AppUser
-  user AppUser [not null]
-  appUserByUserName AppUser
-  postReactions PostReaction [not null]
-  reports ReportPost [not null]
-  shares Share [not null]
-  tags Tag [not null]
-}
-
 Table Share {
   id Int [pk, increment]
   senderId String
   receiverId String
-  postId Int [not null]
+  postId String [not null]
   commentId Int [not null]
   contentType ContentType
   createdAt DateTime [not null]
@@ -302,10 +281,6 @@ Enum ReportType {
   INAPPROPRIATE
 }
 
-Ref: ReportPost.postId > Post.id
-
-Ref: ReportUser.userId > AppUser.id
-
 Ref: PostReaction.postId > Post.id [delete: Cascade]
 
 Ref: PostReaction.userId > AppUser.id [delete: Cascade]
@@ -313,6 +288,8 @@ Ref: PostReaction.userId > AppUser.id [delete: Cascade]
 Ref: CommentReaction.commentId > Comment.id [delete: Cascade]
 
 Ref: CommentReaction.userId > AppUser.id [delete: Cascade]
+
+Ref: Post.userAvatarUrl > AppUser.avatarUrl [delete: No Action]
 
 Ref: Attachment.commentId > Comment.id [delete: Cascade]
 
@@ -350,17 +327,11 @@ Ref: Notification.postId > Post.id
 
 Ref: Notification.postReactionId > PostReaction.id
 
-Ref: Notification.commentReactionId > CommentReaction.id
+Ref: Notification.followId > Follow.id
 
 Ref: Notification.tagId > Tag.id
 
-Ref: Notification.followId > Follow.id
-
-Ref: Post.userAvatarUrl > AppUser.avatarUrl [delete: No Action]
-
-Ref: Post.userId > AppUser.id [delete: No Action]
-
-Ref: Post.userName > AppUser.userName [delete: No Action]
+Ref: Notification.commentReactionId > CommentReaction.id
 
 Ref: Share.commentId > Comment.id [delete: Cascade]
 

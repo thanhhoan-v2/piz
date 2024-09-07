@@ -2,9 +2,9 @@ import localFont from "next/font/local"
 import NextTopLoader from "nextjs-toploader"
 import "@styles/globals.css"
 import "jotai-devtools/styles.css"
-import { LoadingScreen } from "@components/molecules/loading-screen"
-import { AppLayout } from "@components/templates"
-import QueryProvider from "@providers/query-provider"
+import { AppLayout } from "@components/layout"
+import { LoadingScreen } from "@components/ui/loadings/loading-screen"
+import QueryProvider from "@providers/QueryProvider"
 import { ThemeProvider } from "next-themes"
 
 const geistSans = localFont({

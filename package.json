@@ -16,7 +16,7 @@
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.9.0",
-		"@prisma/client": "^5.19.0",
+		"@prisma/client": "^5.19.1",
 		"@radix-ui/react-alert-dialog": "^1.1.1",
 		"@radix-ui/react-avatar": "^1.1.0",
 		"@radix-ui/react-context-menu": "^2.2.1",
@@ -69,6 +69,7 @@
 		"sonner": "^1.5.0",
 		"tailwind-merge": "^2.5.2",
 		"use-dehydrated-state": "^0.1.0",
+		"uuid": "^10.0.0",
 		"vaul": "^0.9.1",
 		"zod": "^3.23.8"
 	},
@@ -79,8 +80,9 @@
 		"@types/node": "^20.16.1",
 		"@types/react": "^18.3.4",
 		"@types/react-dom": "^18.3.0",
+		"@types/uuid": "^10.0.0",
 		"postcss": "^8.4.41",
-		"prisma": "^5.19.0",
+		"prisma": "^5.19.1",
 		"prisma-dbml-generator": "^0.12.0",
 		"prisma-docs-generator": "^0.8.0",
 		"prisma-erd-generator": "^1.11.2",

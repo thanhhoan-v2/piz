@@ -1,14 +1,14 @@
 "use client"
 
 import { Avatar, AvatarImage } from "@components/atoms/avatar"
-import { avatarPlaceholder } from "@constants/image-placeholder"
+import { avatarPlaceholder } from "@utils/image.helpers"
 import { NOTI } from "@constants/query-key"
-import { useQueryAppUser } from "@hooks/queries/app-user"
-import { useQueryAllNotifications } from "@hooks/queries/noti"
+import { useQueryAppUser } from "@hooks/queries/client/appUser"
+import { useQueryAllNotifications } from "@hooks/queries/client/noti"
 import type { Notification, NotificationType } from "@prisma/client"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 import { useQueryClient } from "@tanstack/react-query"
-import { createSupabaseClientForBrowser } from "@utils/supabase/client"
+import { createSupabaseClientForBrowser } from "@supabase/client"
 import React from "react"
 
 const notiMap: Record<NotificationType, string> = {

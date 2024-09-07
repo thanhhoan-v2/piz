@@ -1,4 +1,4 @@
-import Footer from "@components/organisms/footer"
+import Footer from "@components/layout/footer"
 
 export default function AuthLayout({
 	children,
@@ -6,9 +6,7 @@ export default function AuthLayout({
 	return (
 		<>
 			<div className="h-screen w-screen">
-				<main className="h-[87vh] w-full flex-center">
-					{children}
-				</main>
+				<main className="h-[87vh] w-full flex-center">{children}</main>
 				<Footer />
 			</div>
 		</>
