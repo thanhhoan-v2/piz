@@ -1,6 +1,5 @@
 "use client"
-
-import { Button } from "@components/ui/Button"
+import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import PostCommentButton from "@components/ui/post/PostCommentButton"
 import PostDropdownMenu from "@components/ui/post/PostDropdownMenu"
@@ -11,9 +10,7 @@ import type { Post as IPost } from "@prisma/client"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { useQueryPostCounts, useQueryPostReaction } from "@queries/client/post"
 import { cn } from "@utils/cn"
-import { MessageSquare } from "lucide-react"
-import type { Route } from "next"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
 export const postButtonWrapperClassName = "flex-y-center gap-2"
@@ -21,10 +18,13 @@ export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
 
 type PostProps = {
-	isPostPage?: boolean
+	postIndex: number
+	postsLength: number
 }
 
 export default function Post({
+	postIndex,
+	postsLength,
 	id,
 	userId, // id of the poster
 	userName, // username of the poster
@@ -34,9 +34,9 @@ export default function Post({
 	createdAt,
 	updatedAt,
 	isDeleted,
-	// If it's user/post/ page then it acts as Post Comment Button, else acts as Link to post page
-	isPostPage = false,
 }: IPost & PostProps) {
+	const router = useRouter()
+
 	// Get the app user byt query data
 	const { data: user } = useQueryAppUser()
 	const appUserName = user?.user_metadata.userName
@@ -61,36 +61,48 @@ export default function Post({
 		postId: id,
 	})
 
+	const handlePostClick = () => {
+		router.push(`/${userName}/post/${id}`)
+	}
+
+	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		if (event.key === "Enter") handlePostClick()
+	}
+
 	if (isDeleted) return null
 
 	return (
-		<div
-			key={id}
-			className={cn(
-				"mb-2 flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3",
-				postWidths,
-			)}
-		>
-			<div className="flex justify-between">
-				<PostUserInfo
-					userName={userName}
-					userAvatarUrl={userAvatarUrl}
-					content={content}
-					visibility={visibility}
-					createdAt={createdAt}
-					updatedAt={updatedAt}
-					appUserName={appUserName}
-				/>
+		<>
+			<div
+				key={id}
+				onClick={handlePostClick}
+				onKeyUp={handlePostKeyUp}
+				className={cn(
+					"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3 transition-transform hover:scale-103",
+					postWidths,
+				)}
+			>
+				<div className="flex justify-between">
+					<PostUserInfo
+						userName={userName}
+						userAvatarUrl={userAvatarUrl}
+						content={content}
+						visibility={visibility}
+						createdAt={createdAt}
+						updatedAt={updatedAt}
+						appUserName={appUserName}
+					/>
 
-				<PostDropdownMenu
-					userId={userId}
-					postId={id}
-					userName={userName}
-					content={content}
-				/>
+					<PostDropdownMenu
+						userId={userId}
+						postId={id}
+						userName={userName}
+						content={content}
+					/>
+				</div>
 			</div>
-
-			<div className="mx-2 mt-6 flex h-[30px] gap-5">
+			<div className="mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6">
+				{/* Query for post counts is loading */}
 				{isPostCountsQueryLoading && (
 					<>
 						<Skeleton className={postButtonClassName} />
@@ -98,7 +110,9 @@ export default function Post({
 						<Skeleton className={postButtonClassName} />
 					</>
 				)}
-				{isPostCountsQuerySuccess && (
+
+				{/* Query for post counts is successful (or not) */}
+				{isPostCountsQuerySuccess ? (
 					<>
 						{isPostReactionQuerySuccess ? (
 							<PostReactButton
@@ -113,38 +127,21 @@ export default function Post({
 							<Skeleton className={postButtonClassName} />
 						)}
 
-						{/* comment button on user feed -> link */}
-						{/*  comment button on (individual) post page -> comment button */}
-						{isPostPage ? (
-							<PostCommentButton
-								className={postButtonClassName}
-								wrapperClassName={postButtonWrapperClassName}
-								initialCommentCount={noComments ?? 0}
-								// User related props
-								userId={userId}
-								userName={userName}
-								userAvatarUrl={userAvatarUrl}
-								// Post related props
-								postId={id}
-								postContent={content}
-								postCreatedAt={createdAt}
-								postUpdatedAt={updatedAt}
-								postVisibility={visibility}
-							/>
-						) : (
-							<Link
-								href={`${userName}/post/${id}` as Route}
-								className={postButtonWrapperClassName}
-							>
-								<Button
-									variant="ghost"
-									className={cn(postButtonClassName, "max-w-[100px]")}
-								>
-									<MessageSquare />
-								</Button>
-								<span>{noComments}</span>
-							</Link>
-						)}
+						<PostCommentButton
+							className={postButtonClassName}
+							wrapperClassName={postButtonWrapperClassName}
+							initialCommentCount={noComments ?? 0}
+							// User related props
+							userId={userId}
+							userName={userName}
+							userAvatarUrl={userAvatarUrl}
+							// Post related props
+							postId={id}
+							postContent={content}
+							postCreatedAt={createdAt}
+							postUpdatedAt={updatedAt}
+							postVisibility={visibility}
+						/>
 
 						<PostShareButton
 							className={postButtonClassName}
@@ -154,8 +151,16 @@ export default function Post({
 							initialShareCount={noShares ?? 0}
 						/>
 					</>
+				) : (
+					<>Something is wrong here 😢</>
 				)}
 			</div>
-		</div>
+
+			{postIndex < postsLength - 1 ? (
+				<Separator className="my-4" />
+			) : (
+				<div className="mb-8" />
+			)}
+		</>
 	)
 }

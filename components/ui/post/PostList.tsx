@@ -38,18 +38,23 @@ export default function PostList() {
 			<>
 				<div>
 					{posts?.map(
-						({
-							id,
-							userId,
-							userName,
-							userAvatarUrl,
-							content,
-							visibility,
-							createdAt,
-							updatedAt,
-							isDeleted,
-						}) => (
+						(
+							{
+								id,
+								userId,
+								userName,
+								userAvatarUrl,
+								content,
+								visibility,
+								createdAt,
+								updatedAt,
+								isDeleted,
+							},
+							index,
+						) => (
 							<Post
+								postIndex={index}
+								postsLength={posts.length}
 								key={id}
 								id={id}
 								userId={userId}
