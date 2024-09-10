@@ -37,6 +37,7 @@ import { type CreatePostProps, createPost } from "@queries/server/post"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
+import { generateBase64uuid } from "@utils/uuid.helpers"
 import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
@@ -113,36 +114,29 @@ export default function PostForm({
 	const fullName = user?.user_metadata?.fullName
 	const userAvatarUrl = user?.user_metadata?.avatarUrl
 
-	// React Query mutation to update the posts
-	// Update both on server and client (optimistic update)
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
 		mutationFn: async (newPost: CreatePostProps) => await createPost(newPost),
-		// Always refetch when the mutation is successful
-		onSuccess: () => {
-			// Invalidate the posts query to ensure consistency with the server
-			queryClient.invalidateQueries({ queryKey: queryKey.post.all })
-		},
-		// Always refetch after error or success
-		onSettled: async () => {
-			return await queryClient.invalidateQueries({
-				queryKey: queryKey.post.all,
-			})
-		},
-		// // Optimistic update
 		onMutate: async (newPost) => {
-			// Cancel any outgoing refetches
-			// (so they don't overwrite our optimistic update)
+			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({ queryKey: queryKey.post.all })
 
 			// Snapshot the previous value
 			const previousPosts = queryClient.getQueryData(queryKey.post.all)
 
-			// Optimistically update to the new value
 			queryClient.setQueryData(queryKey.post.all, (old: Post[]) => [
 				newPost,
 				...old,
 			])
+			queryClient.setQueryData(queryKey.post.selectCount(newPost.id), {
+				noReactions: 0,
+				noShares: 0,
+				noComments: 0,
+			})
+			queryClient.setQueryData(
+				queryKey.post.selectReactionByUser({ userId, postId: newPost.id }),
+				null,
+			)
 
 			// Return a context object with the snapshotted value
 			return { previousPosts }
@@ -150,24 +144,39 @@ export default function PostForm({
 		onError: (error) => {
 			console.error("Error creating post:", error)
 		},
+		onSettled: (newPost) => {
+			if (newPost) {
+				queryClient.invalidateQueries({
+					queryKey: [
+						queryKey.post.selectId(newPost.id),
+						queryKey.post.selectCount(newPost.id),
+						queryKey.post.selectReactionByUser({
+							userId: newPost.userId,
+							postId: newPost.id,
+						}),
+					],
+				})
+			}
+		},
 	})
 
 	const handleSubmitPost = () => {
+		const date = new Date()
+
 		const newPost: CreatePostProps = {
+			id: generateBase64uuid(),
 			userId: userId ?? null,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: postContent,
 			visibility: postVisibility,
+			createdAt: date,
 		}
-		addPostMutationAsync(newPost)
+		addPostMutation.mutate(newPost)
 		setOpenDrawer(false)
 		setPostContent("")
 		setPostVisibility("PUBLIC")
 	}
-
-	const addPostMutationAsync = async (newPost: CreatePostProps) =>
-		await addPostMutation.mutateAsync(newPost)
 
 	// Post length, mid warning
 	const mid_threshold = 500

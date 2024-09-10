@@ -1,5 +1,5 @@
 import type { Post } from "@prisma/client"
-import { getAllPosts, getPostCounts } from "@queries/server/post"
+import { getAllPosts, getPost, getPostCounts } from "@queries/server/post"
 import { getPostReaction } from "@queries/server/postReaction"
 import { useQuery } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -22,8 +22,16 @@ export const useQueryPostReaction = ({
 		enabled: !!userId && !!postId,
 	})
 
+export const useQueryPost = ({ postId }: { postId: string }) =>
+	useQuery({
+		queryKey: queryKey.post.selectId(postId),
+		queryFn: async () => getPost(postId),
+		enabled: !!postId,
+	})
+
 export const useQueryAllPosts = () =>
 	useQuery<Post[]>({
 		queryKey: queryKey.post.all,
 		queryFn: async () => getAllPosts(),
+		staleTime: Number.POSITIVE_INFINITY,
 	})

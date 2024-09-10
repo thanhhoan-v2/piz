@@ -1,18 +1,23 @@
-import PostComment from "@components/molecules/comment"
-import Post from "@components/molecules/post"
-import { getPostComments } from "@prisma/functions/comment"
-import { getPost } from "@prisma/functions/post"
+"use client"
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-	const postId = Number.parseInt(params.id)
-	const post = await getPost(postId)
+import PostComment, { type CommentWithChildren } from "@components/ui/comment"
+import Post from "@components/ui/post"
+import type { Comment as IComment } from "@prisma/client"
+import { useQueryAllComments } from "@queries/client/comment"
+import { useQueryPost } from "@queries/client/post"
 
-	const comments = await getPostComments({ postId })
-	console.log(comments)
+export default function PostPage({ params }: { params: { id: string } }) {
+	const postId = params.id
+	const { data: post } = useQueryPost({ postId })
+	const { data: unstructuredComments } = useQueryAllComments({ postId })
+
+	const comments = unstructuredComments
+		? buildCommentTree(unstructuredComments)
+		: null
 
 	return (
 		<>
-			{post && (
+			{post ? (
 				<div className="flex-col">
 					<Post
 						id={postId}
@@ -27,28 +32,62 @@ export default async function PostPage({ params }: { params: { id: string } }) {
 						isPostPage
 					/>
 
-					{comments && comments.length > 0 && (
+					{comments && comments.length > 0 ? (
 						<>
 							{comments.map((comment) => (
 								<PostComment
+									childrenComment={{
+										...comment,
+										children: comment.children ?? [],
+									}}
 									key={comment.id}
-									id={comment.id}
-									userId={comment.userId}
-									postId={comment.postId}
-									parentId={comment.parentId}
-									degree={comment.degree}
-									content={comment.content}
-									createdAt={comment.createdAt}
-									updatedAt={comment.updatedAt}
-									isDeleted={comment.isDeleted}
-									userName={comment.userName}
-									userAvatarUrl={comment.userAvatarUrl}
+									{...comment}
 								/>
 							))}
 						</>
+					) : (
+						<>No comments</>
 					)}
 				</div>
+			) : (
+				<>Failed to load post 😢</>
 			)}
 		</>
 	)
+}
+
+const buildCommentTree = (comments: IComment[]) => {
+	const commentMap: { [key: string]: CommentWithChildren } = {}
+	const roots: CommentWithChildren[] = []
+
+	// Initialize all comments in a map (for quick access)
+	for (const comment of comments) {
+		commentMap[comment.id] = { ...comment, children: [] }
+	}
+
+	for (const comment of comments) {
+		if (comment.id === comment.parentId) {
+			// Initialize roots
+			roots.push(commentMap[comment.id])
+		} else {
+			// and link children to their respective parents
+			commentMap[comment.parentId].children.push(commentMap[comment.id])
+		}
+	}
+
+	// Append children to their respective parents recursively
+	// Traverses the tree & ensures that all nested comments are correctly added to their parents
+	function addChildren(parent: CommentWithChildren) {
+		for (const child of parent.children) {
+			if (commentMap[child.id].children.length > 0) {
+				addChildren(commentMap[child.id])
+			}
+		}
+	}
+
+	for (const root of roots) {
+		addChildren(root)
+	}
+
+	return roots
 }

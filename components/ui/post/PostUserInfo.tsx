@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { avatarPlaceholder } from "@utils/image.helpers"
-import { calculateTimeDiff } from "@utils/time.helpers"
+import { getTimeDiffStatus } from "@utils/time.helpers"
 import { Sparkles } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
@@ -50,7 +50,7 @@ export default function PostUserInfo({
 								{appUserName === userName && <Sparkles className="size-4" />}
 							</Link>
 							<p className="text-slate-500 text-sm italic">
-								{!isWriteOnly && calculateTimeDiff(createdAt, updatedAt)}
+								{!isWriteOnly && getTimeDiffStatus(createdAt, updatedAt)}
 							</p>
 						</div>
 						{visibility && <PostVisibilityBadge visibility={visibility} />}

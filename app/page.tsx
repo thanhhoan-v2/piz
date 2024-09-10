@@ -2,22 +2,19 @@ import PostFormDesktop from "@components/ui/post/PostFormDesktop"
 import PostList from "@components/ui/post/PostList"
 import type { AppUser } from "@prisma/client"
 import type { Post as IPost } from "@prisma/client"
-import { getPostComments } from "@queries/server/comment"
+import { getQueryClient } from "@queries/getQueryClient"
+import { getAllCommentsByPost } from "@queries/server/comment"
 import { getAllNotifications } from "@queries/server/noti"
 import { getAllPosts, getPostCounts } from "@queries/server/post"
 import { getPostReaction } from "@queries/server/postReaction"
 import { useSupabaseUser } from "@queries/server/supabase/supabaseUser"
-import {
-	HydrationBoundary,
-	QueryClient,
-	dehydrate,
-} from "@tanstack/react-query"
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
 
 // Must be created outside of the component,
 // to avoid recreating the instance on each render
-const queryClient = new QueryClient()
 
+const queryClient = getQueryClient()
 async function prefetchPosts() {
 	await queryClient.prefetchQuery({
 		queryKey: queryKey.post.all,
@@ -44,7 +41,7 @@ async function prefetchPosts() {
 				})
 				await queryClient.prefetchQuery({
 					queryKey: queryKey.comment.selectPost(post.id),
-					queryFn: async () => getPostComments({ postId: post.id }),
+					queryFn: async () => getAllCommentsByPost({ postId: post.id }),
 				})
 			}),
 		)

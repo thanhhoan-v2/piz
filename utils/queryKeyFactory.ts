@@ -28,23 +28,35 @@ export const queryKey = {
 	},
 	comment: {
 		all: ["comments"] as const,
+		// comments - insert
+		insert: () => [...queryKey.comment.all, "insert"] as const,
 		// comments - post - { postId }
 		selectPost: (postId: string) =>
 			[...queryKey.comment.all, "post", postId] as const,
-		// comments - insert
-		insert: () => [...queryKey.comment.all, "insert"] as const,
+		// comments - post - { postId } - parent - { parentId }
+		selectParent: ({
+			postId,
+			parentId,
+		}: { postId: string; parentId: string }) =>
+			[...queryKey.comment.selectPost(postId), "parent", parentId] as const,
 		// comments - select
 		selects: () => [...queryKey.comment.all, "select"] as const,
 		// comments - select - { id }
 		selectId: (id: string) => [...queryKey.comment.selects(), id] as const,
-		// comments - select - { id } - counts
-		selectCount: (id: string) =>
+		// comments - select - { id } - count
+		selectCountByPost: (id: string) =>
 			[...queryKey.comment.selectId(id), "count"] as const,
+		// comments - select - { id } - count - { parentId }
+		selectCountByComment: ({
+			commentId,
+			parentId,
+		}: { commentId: string; parentId: string }) =>
+			[...queryKey.comment.selectId(commentId), "count", parentId] as const,
 		// comments - select - { id } - reactions - { userId }
 		selectReactionByUser: ({
 			userId,
 			commentId,
-		}: { userId: string; commentId: string }) =>
+		}: { userId?: string; commentId: string }) =>
 			[...queryKey.comment.selectId(commentId), "reaction", userId] as const,
 	},
 	noti: {
@@ -52,7 +64,6 @@ export const queryKey = {
 		// notis - select
 		selects: () => [...queryKey.noti.all, "select"] as const,
 		// notis - select - { userId }
-		selectId: (userId: string) =>
-			[...queryKey.noti.selects(), userId] as const,
+		selectId: (userId: string) => [...queryKey.noti.selects(), userId] as const,
 	},
 }

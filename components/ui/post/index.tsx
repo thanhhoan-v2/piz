@@ -15,9 +15,9 @@ import { MessageSquare } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 
-const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
-const postButtonWrapperClassName = "flex-y-center gap-2"
-const widths =
+export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
+export const postButtonWrapperClassName = "flex-y-center gap-2"
+export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
 
 type PostProps = {
@@ -34,8 +34,7 @@ export default function Post({
 	createdAt,
 	updatedAt,
 	isDeleted,
-	// If it's user/post/ page then it acts as Post Comment Button,
-	// else acts as Link to post page
+	// If it's user/post/ page then it acts as Post Comment Button, else acts as Link to post page
 	isPostPage = false,
 }: IPost & PostProps) {
 	// Get the app user byt query data
@@ -69,7 +68,7 @@ export default function Post({
 			key={id}
 			className={cn(
 				"mb-2 flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3",
-				widths,
+				postWidths,
 			)}
 		>
 			<div className="flex justify-between">

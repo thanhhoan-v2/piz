@@ -8,7 +8,6 @@ export type PostReactionProps = {
 	postId: string
 }
 
-// GET a post reaction by userId and postId
 export const getPostReaction = async ({
 	userId,
 	postId,
@@ -35,7 +34,7 @@ export const createPostReaction = async ({
 				const newPostReaction = await prisma.postReaction.create({
 					data: { userId, postId },
 				})
-				console.log("[POST_REACTION] Created: ", newPostReaction)
+				return newPostReaction
 			}
 		} else {
 			console.log("[POST_REACTION] User ID not found")

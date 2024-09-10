@@ -1,4 +1,4 @@
-export const calculateTimeDiff = (createdAt: Date, updatedAt: Date | null) => {
+export const getTimeDiffStatus = (createdAt: Date, updatedAt: Date | null) => {
 	const currentTime = new Date()
 	const givenTime = updatedAt ?? createdAt
 
@@ -29,7 +29,7 @@ export const calculateTimeDiff = (createdAt: Date, updatedAt: Date | null) => {
 	}
 
 	// If post in being saved on db (createdAt is currently null)
-	if (!createdAt) return "Just now"
+	if (!createdAt || seconds === 0) return "Just now"
 
 	return timeAgo
 }

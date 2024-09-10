@@ -1,8 +1,9 @@
 "use client"
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { getQueryClient } from "@queries/getQueryClient"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import React from "react"
+import type React from "react"
 
 /*
  * NEVER DO THIS:
@@ -17,20 +18,20 @@ export default function QueryProvider({
 	children,
 }: { children: React.ReactNode }) {
 	// -> Instead do this, which ensures each request has its own cache:
-	const [queryClient] = React.useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: {
-						/*
-						 * With SSR, we usually want to set some default staleTime
-						 * above 0 to avoid refetching immediately on the client
-						 */
-						staleTime: 1000 * 20, // how long it stays "fresh" -> marked as "stale" -> refetch
-					},
-				},
-			}),
-	)
+	// const [queryClient] = React.useState(
+	// 	() =>
+	// 		new QueryClient({
+	// 			defaultOptions: {
+	// 				queries: {
+	// 					/*
+	// 					 * With SSR, we usually want to set some default staleTime
+	// 					 * above 0 to avoid refetching immediately on the client
+	// 					 */
+	// 					staleTime: 1000 * 20, // how long it stays "fresh" -> marked as "stale" -> refetch
+	// 				},
+	// 			},
+	// 		}),
+	// )
 
 	/*
 	 * Reference the same queryClient in both atomWithQuery and other parts of the app.
@@ -40,6 +41,8 @@ export default function QueryProvider({
 	// 	useHydrateAtoms([[queryClientAtom, queryClient]])
 	// 	return children
 	// }
+
+	const queryClient = getQueryClient()
 
 	return (
 		<QueryClientProvider client={queryClient}>

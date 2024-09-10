@@ -2,17 +2,19 @@
 
 import type { $Enums } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
-import { generateBase64uuid } from "@utils/uuid.helpers"
 
 export type CreatePostProps = {
+	id: string
 	userId: string | null
 	userName: string | null
 	userAvatarUrl: string | null
 	content: string
 	visibility: $Enums.PostVisibility
+	createdAt: Date
 }
 
 export const createPost = async ({
+	id,
 	userId,
 	userName,
 	userAvatarUrl,
@@ -23,7 +25,7 @@ export const createPost = async ({
 		if (userId) {
 			const newPost = await prisma.post.create({
 				data: {
-					id: generateBase64uuid(),
+					id: id,
 					userId: userId,
 					userName: userName,
 					userAvatarUrl: userAvatarUrl,

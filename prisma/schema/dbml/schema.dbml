@@ -28,13 +28,12 @@ Table PostReaction {
 
 Table CommentReaction {
   id Int [pk, increment]
-  userId String
-  commentId Int [not null]
+  userId String [not null]
+  commentId String [not null]
   isDeleted Boolean [default: false]
   createdAt DateTime [not null]
   updatedAt DateTime
   comment Comment [not null]
-  user AppUser
   notifications Notification [not null]
 
   indexes {
@@ -57,8 +56,6 @@ Table AppUser {
   isDeleted Boolean [default: false]
   blockedUsers Block [not null]
   blockingUsers Block [not null]
-  comments Comment [not null]
-  CommentReaction CommentReaction [not null]
   followedUsers Follow [not null]
   followers Follow [not null]
   receivedNotifications Notification [not null]
@@ -93,7 +90,7 @@ Table Post {
 Table Attachment {
   id Int [pk, increment]
   postId String [not null]
-  commentId Int [not null]
+  commentId String [not null]
   storageUrl String [not null]
   soundDuration String
   attachmentType AttachmentType
@@ -106,14 +103,14 @@ Table Attachment {
 }
 
 Table Comment {
-  id Int [pk, increment]
-  userId String
-  userAvatarUrl String
-  userName String
+  id String [pk]
+  parentId String [not null]
   postId String [not null]
-  degree Int [default: 0]
-  parentId Int
+  degree Int [not null, default: 0]
   content String [not null]
+  userId String [not null]
+  userName String
+  userAvatarUrl String
   createdAt DateTime [not null]
   updatedAt DateTime
   isDeleted Boolean [default: false]
@@ -121,7 +118,6 @@ Table Comment {
   parentComment Comment
   replies Comment [not null]
   post Post [not null]
-  user AppUser
   commentReactions CommentReaction [not null]
   notifications Notification [not null]
   shares Share [not null]
@@ -164,7 +160,7 @@ Table Tag {
   taggerId String [not null]
   postId String [not null]
   createdAt DateTime [not null]
-  commentId Int
+  commentId String
   postReactionId Int
   commentReactionId Int
   notifications Notification [not null]
@@ -186,7 +182,7 @@ Table Notification {
   receiverId String [not null, note: 'The user who receive the notification']
   followId Int [note: 'Add id of relevants for future needs?']
   postId String
-  commentId Int
+  commentId String
   postReactionId Int
   commentReactionId Int
   tagId Int
@@ -212,7 +208,7 @@ Table Share {
   senderId String
   receiverId String
   postId String [not null]
-  commentId Int [not null]
+  commentId String [not null]
   contentType ContentType
   createdAt DateTime [not null]
   isDeleted Boolean [default: false]
@@ -287,8 +283,6 @@ Ref: PostReaction.userId > AppUser.id [delete: Cascade]
 
 Ref: CommentReaction.commentId > Comment.id [delete: Cascade]
 
-Ref: CommentReaction.userId > AppUser.id [delete: Cascade]
-
 Ref: Post.userAvatarUrl > AppUser.avatarUrl [delete: No Action]
 
 Ref: Attachment.commentId > Comment.id [delete: Cascade]
@@ -298,8 +292,6 @@ Ref: Attachment.postId > Post.id [delete: Cascade]
 Ref: Comment.parentId - Comment.id [delete: Cascade]
 
 Ref: Comment.postId > Post.id [delete: Cascade]
-
-Ref: Comment.userId > AppUser.id [delete: Cascade]
 
 Ref: Follow.followeeId > AppUser.id [delete: Cascade]
 

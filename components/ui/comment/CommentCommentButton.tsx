@@ -23,47 +23,45 @@ import { generateBase64uuid } from "@utils/uuid.helpers"
 import { HashIcon, ImageIcon, MenuIcon, MessageSquare } from "lucide-react"
 import React from "react"
 
-type PostCommentButtonProps = {
+type CommentCommentButtonProps = {
 	initialCommentCount: number
 	className?: string
 	wrapperClassName?: string
-	// user related
 	userId: string
 	userAvatarUrl: string | null
 	userName: string | null
-	// post related
 	postId: string
 	postContent: string
 	postVisibility?: PostVisibilityEnumType
 	postCreatedAt: Date
 	postUpdatedAt: Date | null
+	parentId: string
+	degree: number
 }
 
 // Comment characters limit
 const charsLimit = 550
 
-export default function PostCommentButton({
+export default function CommentCommentButton({
 	className,
 	wrapperClassName,
 	initialCommentCount,
-	// user related props
 	userId,
 	userAvatarUrl,
 	userName,
-	// post related props
 	postId,
 	postContent,
 	postVisibility,
 	postCreatedAt,
 	postUpdatedAt,
-}: PostCommentButtonProps) {
+	parentId,
+	degree,
+}: CommentCommentButtonProps) {
 	const [modalIsOpen, setOpenModal] = React.useState<boolean>(false)
 	const [discardAlertIsOpen, setOpenDiscardAlert] =
 		React.useState<boolean>(false)
 	const [userInput, setUserInput] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
-	const [commentCount, setCommentCount] =
-		React.useState<number>(initialCommentCount)
 
 	const handleInputChange = React.useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -94,11 +92,17 @@ export default function PostCommentButton({
 			// 	(old: Comment[]) => [newComment, ...old],
 			// )
 
-			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {
-				noReactions: 0,
-				noShares: 0,
-				noComments: 0,
-			})
+			queryClient.setQueryData(
+				queryKey.comment.selectCountByComment({
+					commentId: newComment.id,
+					parentId,
+				}),
+				{
+					noReactions: 0,
+					noShares: 0,
+					noComments: 0,
+				},
+			)
 			queryClient.setQueryData(
 				queryKey.comment.selectReactionByUser({
 					userId,
@@ -113,16 +117,18 @@ export default function PostCommentButton({
 	})
 
 	const handleSubmitComment = () => {
-		const newPostCommentId = generateBase64uuid()
 		const newComment: CreateCommentProps = {
-			id: newPostCommentId,
-			parentId: newPostCommentId,
+			id: generateBase64uuid(),
 			postId: postId,
+			parentId: parentId,
+			degree: degree + 1,
 			userId: userId,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: userInput,
 		}
+
+		console.log(newComment)
 
 		if (userName !== null) {
 			addCommentMutation.mutate(newComment)
@@ -161,7 +167,7 @@ export default function PostCommentButton({
 				>
 					<MessageSquare />
 				</Button>
-				<span>{commentCount}</span>
+				<span>{initialCommentCount}</span>
 			</div>
 
 			<Dialog open={modalIsOpen} onOpenChange={setOpenModal}>

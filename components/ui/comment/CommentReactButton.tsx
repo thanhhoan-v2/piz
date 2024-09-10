@@ -1,9 +1,11 @@
 "use client"
 
-import { Button } from "@components/atoms/button"
-import { POST } from "@constants/query-key"
-import { createPostReaction } from "@prisma/functions/post/reaction"
+import { Button } from "@components/ui/Button"
+import type { PostCounts } from "@components/ui/post/PostReactButton"
+import { createCommentReaction } from "@queries/server/comment"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { cn } from "@utils/cn"
+import { queryKey } from "@utils/queryKeyFactory"
 import { Heart } from "lucide-react"
 import React from "react"
 
@@ -12,92 +14,99 @@ type PostReactButtonProps = {
 	initialReactionCount: number
 	isReacted: boolean
 	userId?: string
-	postId: number
-	parentId: number
+	parentId: string
+	commentId: string
 	className?: string
-}
-
-// Types for local state of post item
-type PostReactButtonState = {
-	reactionCount: number
-	isReacted: boolean
+	wrapperClassName?: string
 }
 
 export default function CommentReactButton({
 	userId,
-	postId,
+	commentId,
 	parentId,
 	initialReactionCount,
 	isReacted,
 	className,
+	wrapperClassName,
 }: PostReactButtonProps) {
+	const [localIsReacted, setReactionStatus] = React.useState(isReacted)
 	const queryClient = useQueryClient()
 
-	// Initialize local state for post item
-	const initialState: PostReactButtonState = {
-		reactionCount: initialReactionCount,
-		isReacted: isReacted,
-	}
-
-	const [localState, setLocalState] =
-		React.useState<PostReactButtonState>(initialState)
-
-	const mutation = useMutation({
-		mutationKey: [POST.REACTION, postId],
-		mutationFn: () => createPostReaction({ userId, postId }),
+	const commentReactMutation = useMutation({
+		mutationKey: queryKey.comment.selectReactionByUser({
+			userId: userId,
+			commentId: commentId,
+		}),
+		mutationFn: () => createCommentReaction({ userId, commentId: commentId }),
 		onMutate: async () => {
 			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-			await queryClient.cancelQueries({ queryKey: [POST.SINGLE, postId] })
-
-			// Snapshot the previous value
-			const previousPost = queryClient.getQueryData([POST.SINGLE, postId])
-
-			// Optimistically update to the new value
-			setLocalState((prev) => {
-				const newState = { ...prev }
-				if (prev.isReacted) {
-					newState.reactionCount -= 1
-					newState.isReacted = false
-				} else {
-					newState.reactionCount += 1
-					newState.isReacted = true
-				}
-				return newState
+			await queryClient.cancelQueries({
+				queryKey: [
+					queryKey.comment.selectReactionByUser({ userId, commentId }),
+					queryKey.comment.selectCountByComment({ commentId, parentId }),
+				],
 			})
 
+			// Snapshot the previous value
+			const previousReaction = queryClient.getQueryData(
+				queryKey.comment.selectReactionByUser({ userId, commentId }),
+			)
+			const previousCounts = queryClient.getQueryData(
+				queryKey.comment.selectCountByComment({ commentId, parentId }),
+			)
+
+			queryClient.setQueryData(
+				queryKey.comment.selectCountByComment({ commentId, parentId }),
+				(prev: PostCounts) => ({
+					...prev,
+					noReactions: localIsReacted
+						? prev.noReactions - 1
+						: prev.noReactions + 1,
+				}),
+			)
+
 			// Return a context object with the snapshotted value
-			return { previousPost }
+			return { previousReaction, previousCounts }
 		},
 		onError: (err, variables, context) => {
 			// Revert to the previous value
-			if (context?.previousPost) {
-				setLocalState((prev) => {
-					const revertedState = { ...prev }
-					if (prev.isReacted) {
-						revertedState.reactionCount += 1
-						revertedState.isReacted = true
-					} else {
-						revertedState.reactionCount -= 1
-						revertedState.isReacted = false
-					}
-					return revertedState
-				})
+			if (context) {
+				queryClient.setQueryData(
+					queryKey.comment.selectCountByComment({ commentId, parentId }),
+					context.previousCounts,
+				)
+				queryClient.setQueryData(
+					queryKey.comment.selectReactionByUser({ userId, commentId }),
+					context.previousReaction,
+				)
 			}
 		},
 		onSettled: () => {
-			// Invalidate the query to ensure the data is up-to-date
-			queryClient.invalidateQueries({ queryKey: [POST.SINGLE, postId] })
+			queryClient.invalidateQueries({
+				queryKey: [
+					queryKey.comment.selectCountByComment({ commentId, parentId }),
+					queryKey.comment.selectReactionByUser({ userId, commentId }),
+				],
+			})
 		},
 	})
 
-	const handleClick = () => {
-		mutation.mutate()
+	const handleReact = () => {
+		commentReactMutation.mutate()
+		setReactionStatus(!localIsReacted)
 	}
 
 	return (
-		<Button variant="ghost" className={className} onClick={handleClick}>
-			<Heart fill={localState.isReacted ? "red" : "rgb(9,9,11)"} />
-			<span>{localState.reactionCount}</span>
-		</Button>
+		<div className={wrapperClassName}>
+			<Button variant="ghost" className={className} onClick={handleReact}>
+				<Heart
+					className={cn(
+						"w-[20px]",
+						localIsReacted ? "animate-fillHeart" : "animate-unfillHeart",
+					)}
+				/>
+			</Button>
+			<span>{initialReactionCount}</span>
+		</div>
 	)
 }

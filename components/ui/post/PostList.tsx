@@ -1,5 +1,4 @@
 "use client"
-
 import Post from "@components/ui/post"
 import { useQueryAllPosts } from "@queries/client/post"
 
@@ -32,11 +31,11 @@ export default function PostList() {
 		console.log("Error loading posts : ", error)
 		return <div>Error loading posts 😢</div>
 	}
-	if (isLoading || isFetching) return <div>Loading posts...</div>
+
+	// if (isLoading || isFetching) return <div>Loading posts...</div>
 	if (isSuccess)
 		return (
 			<>
-				{isPending && <div>Creating new post...</div>}
 				<div>
 					{posts?.map(
 						({

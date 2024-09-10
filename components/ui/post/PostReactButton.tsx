@@ -8,7 +8,6 @@ import { queryKey } from "@utils/queryKeyFactory"
 import { Heart } from "lucide-react"
 import React from "react"
 
-// Types for props passing to post item component
 type PostReactButtonProps = {
 	initialReactionCount: number
 	isReacted: boolean
@@ -18,13 +17,7 @@ type PostReactButtonProps = {
 	wrapperClassName?: string
 }
 
-// Types for local state of post item
-type PostReactButtonState = {
-	reactionCount: number
-	isReacted: boolean
-}
-
-type PostCounts = {
+export type PostCounts = {
 	noReactions: number
 	noShares: number
 	noComments: number
@@ -39,21 +32,26 @@ export default function PostReactButton({
 	wrapperClassName,
 }: PostReactButtonProps) {
 	const [localIsReacted, setReactionStatus] = React.useState(isReacted)
-
 	const queryClient = useQueryClient()
 
-	const mutation = useMutation({
+	const postReactMutation = useMutation({
 		mutationKey: queryKey.post.selectReactionByUser({ userId, postId }),
 		mutationFn: () => createPostReaction({ userId, postId }),
 		onMutate: async () => {
 			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
 			await queryClient.cancelQueries({
-				queryKey: queryKey.post.selectId(postId),
+				queryKey: [
+					queryKey.post.selectReactionByUser({ userId, postId }),
+					queryKey.post.selectCount(postId),
+				],
 			})
 
 			// Snapshot the previous value
-			const previousPost = queryClient.getQueryData(
-				queryKey.post.selectId(postId),
+			const previousPostReaction = queryClient.getQueryData(
+				queryKey.post.selectReactionByUser({ userId, postId }),
+			)
+			const previousPostCounts = queryClient.getQueryData(
+				queryKey.post.selectCount(postId),
 			)
 
 			queryClient.setQueryData(
@@ -66,27 +64,34 @@ export default function PostReactButton({
 				}),
 			)
 
-			return { previousPost }
+			return { previousPostReaction, previousPostCounts }
+		},
+		onError: (err, newReaction, context) => {
+			if (context) {
+				queryClient.setQueryData(
+					queryKey.post.selectCount(postId),
+					context.previousPostCounts,
+				)
+				queryClient.setQueryData(
+					queryKey.post.selectReactionByUser({ userId, postId }),
+					context.previousPostReaction,
+				)
+			}
 		},
 		onSettled: () => {
-			// Refetch the latest data from the server
 			queryClient.invalidateQueries({
-				queryKey: queryKey.post.selectId(postId),
-			})
-			queryClient.invalidateQueries({
-				queryKey: queryKey.post.selectReactionByUser({ userId, postId }),
+				queryKey: [
+					queryKey.post.selectCount(postId),
+					queryKey.post.selectReactionByUser({ userId, postId }),
+				],
 			})
 		},
-		// TODO: Roll back to previous state if mutation fails
-		onError: (err, context) => {},
 	})
 
 	const handleReact = () => {
-		mutation.mutate()
+		postReactMutation.mutate()
 		setReactionStatus(!localIsReacted)
 	}
-
-	console.log(localIsReacted)
 
 	return (
 		<div className={wrapperClassName}>
