@@ -1,17 +1,13 @@
 "use client"
 
-import { Avatar, AvatarImage } from "@components/atoms/avatar"
+import { Avatar, AvatarImage } from "@components/ui/Avatar"
+import { useSupabaseBrowser } from "@hooks/supabase/browser"
+import { useQueryAppUser } from "@queries/client/appUser"
+import { useQueryAllNotifications } from "@queries/client/noti"
 import { avatarPlaceholder } from "@utils/image.helpers"
-import { NOTI } from "@constants/query-key"
-import { useQueryAppUser } from "@hooks/queries/client/appUser"
-import { useQueryAllNotifications } from "@hooks/queries/client/noti"
-import type { Notification, NotificationType } from "@prisma/client"
-import type { RealtimeChannel } from "@supabase/supabase-js"
-import { useQueryClient } from "@tanstack/react-query"
-import { createSupabaseClientForBrowser } from "@supabase/client"
 import React from "react"
 
-const notiMap: Record<NotificationType, string> = {
+const notiMap: Record<string, string> = {
 	FOLLOW: "followed",
 	FOLLOW_SUGGEST: "should follow",
 	COMMENT: "commented",
@@ -44,7 +40,7 @@ export default function ActivityPage() {
 	}, [notiList])
 
 	// Subscribe to notification changes
-	const supabase = createSupabaseClientForBrowser()
+	const supabase = useSupabaseBrowser()
 	const queryClient = useQueryClient()
 
 	React.useEffect(() => {

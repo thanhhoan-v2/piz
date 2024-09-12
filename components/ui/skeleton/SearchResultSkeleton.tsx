@@ -1,4 +1,4 @@
-import { Skeleton } from "@components/atoms/skeleton"
+import { Skeleton } from "@components/ui/Skeleton"
 
 export default function SearchSkeleton() {
 	return (

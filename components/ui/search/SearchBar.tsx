@@ -1,26 +1,23 @@
 "use client"
-
-import { userAtom } from "@atoms/user"
-import { Input } from "@components/atoms/input"
+import { Input } from "@components/ui/Input"
 import SearchList, {
 	type SearchResultProps,
-} from "@components/molecules/search/search-list"
-import SearchSkeleton from "@components/molecules/skeleton/search-skeleton"
-import { useDebounce } from "@hooks/use-debounce"
-import { supabasePartialSearch } from "@supabase/functions/partial-search"
-import { searchUsersByUserNamePrefix } from "@supabase/prefix-functions"
-import { useAtomValue } from "jotai"
+} from "@components/ui/search/SearchList"
+import SearchSkeleton from "@components/ui/skeleton/SearchResultSkeleton"
+import { useQueryAppUser } from "@queries/client/appUser"
+import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
+import { useDebounce } from "@uidotdev/usehooks"
 import { SearchIcon } from "lucide-react"
 import React from "react"
 
 export default function SearchBar() {
 	const [searchValue, setSearchValue] = React.useState<string>("")
+	const [isSearching, setIsSearching] = React.useState<boolean>(false)
 	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
 		[],
 	)
-	const [isSearching, setIsSearching] = React.useState<boolean>(false)
 
-	const user = useAtomValue(userAtom)
+	const { data: user } = useQueryAppUser()
 	const appUserId = user?.id
 
 	const handleSearch = React.useCallback(
@@ -28,11 +25,11 @@ export default function SearchBar() {
 			try {
 				setIsSearching(true)
 				// Partial search using Supabase API
-				const data = await supabasePartialSearch({
+				const data = await usePartialSearch({
 					// user input value
 					prefix: value,
 					// prefix function created on Supabase
-					prefixFunction: searchUsersByUserNamePrefix,
+					prefixFunction: "user_name",
 				})
 				setSearchResults(data)
 				setIsSearching(false)
@@ -66,7 +63,7 @@ export default function SearchBar() {
 				</div>
 
 				{/* Display search results */}
-				{isSearching ? (
+				{isSearching && searchValue ? (
 					<>
 						<SearchSkeleton />
 						<SearchSkeleton />

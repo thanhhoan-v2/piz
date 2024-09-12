@@ -33,16 +33,13 @@ export const queryKey = {
 		// comments - post - { postId }
 		selectPost: (postId: string) =>
 			[...queryKey.comment.all, "post", postId] as const,
-		// comments - post - { postId } - parent - { parentId }
-		selectParent: ({
-			postId,
-			parentId,
-		}: { postId: string; parentId: string }) =>
-			[...queryKey.comment.selectPost(postId), "parent", parentId] as const,
 		// comments - select
 		selects: () => [...queryKey.comment.all, "select"] as const,
 		// comments - select - { id }
 		selectId: (id: string) => [...queryKey.comment.selects(), id] as const,
+		// comments - select - { id } - child
+		selectIdChild: (id: string) =>
+			[...queryKey.comment.selects(), id, "child"] as const,
 		// comments - select - { id } - count
 		selectCountByPost: (id: string) =>
 			[...queryKey.comment.selectId(id), "count"] as const,

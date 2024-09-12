@@ -1,5 +1,5 @@
-import { Avatar, AvatarImage } from "@components/atoms/avatar"
-import FollowButton from "@components/molecules/button/follow-button"
+import { Avatar, AvatarImage } from "@components/ui/Avatar"
+import FollowButton from "@components/ui/button/FollowButton"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import type { Route } from "next"
 import Link from "next/link"

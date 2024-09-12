@@ -3,20 +3,6 @@ import Post from "@components/ui/post"
 import { useQueryAllPosts } from "@queries/client/post"
 
 export default function PostList() {
-	// const {
-	// 	data: posts,
-	// 	isLoading,
-	// 	isError,
-	// 	isSuccess,
-	// 	isPending,
-	// 	isFetching,
-	// 	error,
-	// } = useQuery<IPost[]>({
-	// 	queryKey: [POST.ALL],
-	// 	queryFn: async () => getAllPosts(),
-	// 	retry: 3,
-	// })
-
 	const {
 		data: posts,
 		isLoading,

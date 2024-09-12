@@ -42,8 +42,12 @@ const ThemeToggle = ({
 			</>
 		)
 
+	const handleThemeToggle = () => {
+		setTheme(theme === "light" ? "dark" : "light")
+	}
+
 	return (
-		<Button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+		<Button onClick={handleThemeToggle}>
 			{theme === "light" ? (
 				<>
 					<Sun size={iconSize} className={iconClassName} />

@@ -79,18 +79,16 @@ export default function CommentCommentButton({
 		onMutate: async (newComment) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({
-				queryKey: queryKey.comment.selectPost(postId),
+				queryKey: queryKey.comment.all,
 			})
 
 			// Snapshot the previous value
-			const previousComments = queryClient.getQueryData(
-				queryKey.comment.selectPost(postId),
-			)
+			const previousComments = queryClient.getQueryData(queryKey.comment.all)
 
-			// queryClient.setQueryData(
-			// 	queryKey.comment.selectParent(postId),
-			// 	(old: Comment[]) => [newComment, ...old],
-			// )
+			queryClient.setQueryData(queryKey.comment.all, (old: Comment[]) => [
+				newComment,
+				...old,
+			])
 
 			queryClient.setQueryData(
 				queryKey.comment.selectCountByComment({

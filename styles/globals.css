@@ -78,6 +78,15 @@ body {
 	color: black;
 }
 
+/* TEXT */
+.text.wrap-balance {
+	text-wrap: balance;
+}
+
+.text-wrap-pretty {
+	text-wrap: pretty;
+}
+
 /* FLEX */
 .flex-col {
 	display: flex;

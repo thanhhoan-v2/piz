@@ -56,7 +56,9 @@ export default function PostUserInfo({
 						{visibility && <PostVisibilityBadge visibility={visibility} />}
 					</div>
 					<div className="flex flex-col gap-4">
-						<div className="whitespace-pre-wrap">{content}</div>
+						<div className="whitespace-pre-wrap text-wrap-pretty">
+							{content}
+						</div>
 					</div>
 				</div>
 			</div>

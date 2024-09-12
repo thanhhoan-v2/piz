@@ -1,10 +1,10 @@
-import SearchBar from "@components/molecules/search/search-bar"
-import SearchList from "@components/molecules/search/search-list"
-import { getRandomUserList } from "@prisma/functions/user"
-import { createSupabaseClientWithCookies } from "@hooks/supabase/useSupabaseServer"
+import SearchBar from "@components/ui/search/SearchBar"
+import SearchList from "@components/ui/search/SearchList"
+import { useSupabaseServer } from "@hooks/supabase/server"
+import { getRandomUserList } from "@queries/server/user"
 
 export default async function SearchPage() {
-	const supabase = createSupabaseClientWithCookies()
+	const supabase = useSupabaseServer()
 	const { data: user } = await supabase.auth.getUser()
 	const userId = user?.user?.id
 	const randomUserList = await getRandomUserList(userId, 8)

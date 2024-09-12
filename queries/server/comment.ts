@@ -57,6 +57,32 @@ export const createComment = async ({
 	}
 }
 
+export const getComment = async (commentId: string) => {
+	try {
+		const comment = await prisma.comment.findUnique({
+			where: {
+				id: commentId,
+			},
+		})
+		return comment
+	} catch (error) {
+		console.error(`<< Comment >> Error getting comment ${commentId}: `, error)
+	}
+}
+
+export const getAllChildComments = async (parentId: string) => {
+	try {
+		const childComments = await prisma.comment.findMany({
+			where: {
+				parentId: parentId,
+			},
+		})
+		return childComments
+	} catch (error) {
+		console.error("<< Comment >> Error getting all child comments: ", error)
+	}
+}
+
 export const getCommentCounts = async ({
 	commentId,
 	parentId,

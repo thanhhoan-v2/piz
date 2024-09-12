@@ -14,6 +14,7 @@ import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
 import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
+import type { PostCounts } from "@components/ui/post/PostReactButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -63,8 +64,6 @@ export default function PostCommentButton({
 		React.useState<boolean>(false)
 	const [userInput, setUserInput] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
-	const [commentCount, setCommentCount] =
-		React.useState<number>(initialCommentCount)
 
 	const handleInputChange = React.useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -82,18 +81,16 @@ export default function PostCommentButton({
 		onMutate: async (newComment) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({
-				queryKey: queryKey.comment.selectPost(postId),
+				queryKey: queryKey.comment.all,
 			})
 
 			// Snapshot the previous value
-			const previousComments = queryClient.getQueryData(
-				queryKey.comment.selectPost(postId),
-			)
+			const previousComments = queryClient.getQueryData(queryKey.comment.all)
 
-			// queryClient.setQueryData(
-			// 	queryKey.comment.selectParent(postId),
-			// 	(old: Comment[]) => [newComment, ...old],
-			// )
+			queryClient.setQueryData(queryKey.comment.all, (old: Comment[]) => [
+				newComment,
+				...old,
+			])
 
 			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {
 				noReactions: 0,
@@ -106,6 +103,13 @@ export default function PostCommentButton({
 					commentId: newComment.id,
 				}),
 				null,
+			)
+			queryClient.setQueryData(
+				queryKey.post.selectCount(postId),
+				(prev: PostCounts) => ({
+					...prev,
+					noComments: prev.noComments + 1,
+				}),
 			)
 
 			// Return a context object with the snapshotted value
@@ -162,7 +166,7 @@ export default function PostCommentButton({
 				>
 					<MessageSquare />
 				</Button>
-				<span>{commentCount}</span>
+				<span>{initialCommentCount}</span>
 			</div>
 
 			<Dialog open={modalIsOpen} onOpenChange={setOpenModal}>

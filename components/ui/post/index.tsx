@@ -13,13 +13,15 @@ import { cn } from "@utils/cn"
 import { useRouter } from "next/navigation"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
+export const postButtonSkeletonClassName =
+	"flex flex-none h-[30px] w-[70px] gap-2"
 export const postButtonWrapperClassName = "flex-y-center gap-2"
 export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
 
 type PostProps = {
-	postIndex: number
-	postsLength: number
+	postIndex?: number
+	postsLength?: number
 }
 
 export default function Post({
@@ -101,18 +103,20 @@ export default function Post({
 					/>
 				</div>
 			</div>
-			<div className="mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6">
-				{/* Query for post counts is loading */}
-				{isPostCountsQueryLoading && (
-					<>
-						<Skeleton className={postButtonClassName} />
-						<Skeleton className={postButtonClassName} />
-						<Skeleton className={postButtonClassName} />
-					</>
-				)}
-
-				{/* Query for post counts is successful (or not) */}
-				{isPostCountsQuerySuccess ? (
+			{isPostCountsQueryLoading && (
+				<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
+					<Skeleton className={postButtonSkeletonClassName} />
+					<Skeleton className={postButtonSkeletonClassName} />
+					<Skeleton className={postButtonSkeletonClassName} />
+				</div>
+			)}
+			{isPostCountsQuerySuccess ? (
+				<div
+					className={cn(
+						"mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6",
+						postWidths,
+					)}
+				>
 					<>
 						{isPostReactionQuerySuccess ? (
 							<PostReactButton
@@ -151,15 +155,22 @@ export default function Post({
 							initialShareCount={noShares ?? 0}
 						/>
 					</>
-				) : (
-					<>Something is wrong here 😢</>
-				)}
-			</div>
-
-			{postIndex < postsLength - 1 ? (
-				<Separator className="my-4" />
+				</div>
 			) : (
-				<div className="mb-8" />
+				<>Something is wrong here 😢</>
+			)}
+
+			{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
+			{postIndex! < postsLength! - 1 && <Separator className="my-4" />}
+			{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
+			{postIndex === postsLength! - 1 ? (
+				<div className="mb-[100px]">
+					<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">
+						No more posts for you
+					</div>
+				</div>
+			) : (
+				<div className="mb-2" />
 			)}
 		</>
 	)

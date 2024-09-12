@@ -1,9 +1,13 @@
+"use client"
+
+import DownRightArrowSVG from "@assets/images/down-right-arrow.svg"
 import { Skeleton } from "@components/ui/Skeleton"
 import CommentCommentButton from "@components/ui/comment/CommentCommentButton"
 import CommentReactButton from "@components/ui/comment/CommentReactButton"
 import CommentShareButton from "@components/ui/comment/CommentShareButton"
 import {
 	postButtonClassName,
+	postButtonSkeletonClassName,
 	postButtonWrapperClassName,
 } from "@components/ui/post"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
@@ -14,8 +18,10 @@ import {
 	useQueryCommentReaction,
 } from "@queries/client/comment"
 import { cn } from "@utils/cn"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-export type CommentWithChildren = Comment & { children: CommentWithChildren[] }
+export type CommentWithChildren = Comment & { children?: CommentWithChildren[] }
 
 export default function PostComment({
 	id,
@@ -30,7 +36,9 @@ export default function PostComment({
 	userName,
 	userAvatarUrl,
 	childrenComment,
-}: CommentWithChildren & { childrenComment: CommentWithChildren }) {
+}: CommentWithChildren & { childrenComment?: CommentWithChildren }) {
+	const router = useRouter()
+
 	// Get the app user byt query data
 	const { data: user } = useQueryAppUser()
 	const appUserId = user?.id
@@ -54,35 +62,47 @@ export default function PostComment({
 		commentId: id,
 	})
 
+	const handleCommentClick = () => {
+		router.push(`/${userName}/post/${postId}/comment/${id}`)
+	}
+
+	const handleCommentKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		if (event.key === "Enter") handleCommentClick()
+	}
+
 	if (isDeleted) return null
 
 	return (
 		<>
 			<div className="flex-col gap-2">
-				<div
-					key={id}
-					className={cn(
-						"flex min-h-[100px] w-full flex-col justify-between rounded-lg bg-background-item px-5 py-3",
-					)}
-				>
-					<PostUserInfo
-						isWriteOnly
-						userName={userName}
-						userAvatarUrl={userAvatarUrl}
-						appUserName={userName}
-						createdAt={new Date()}
-						updatedAt={null}
-						content={content}
-					/>
-					<div className="mx-2 mt-6 flex h-[30px] gap-5">
-						{isCommentCountsQueryLoading && (
-							<>
-								<Skeleton className={postButtonClassName} />
-								<Skeleton className={postButtonClassName} />
-								<Skeleton className={postButtonClassName} />
-							</>
+				<div>
+					<div
+						key={id}
+						onClick={handleCommentClick}
+						onKeyUp={handleCommentKeyUp}
+						className={cn(
+							"flex min-h-[100px] w-full cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3",
 						)}
-						{isCommentCountsQuerySuccess && (
+					>
+						<PostUserInfo
+							isWriteOnly
+							userName={userName}
+							userAvatarUrl={userAvatarUrl}
+							appUserName={userName}
+							createdAt={new Date()}
+							updatedAt={null}
+							content={content}
+						/>
+					</div>
+					{isCommentCountsQueryLoading && (
+						<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
+							<Skeleton className={postButtonSkeletonClassName} />
+							<Skeleton className={postButtonSkeletonClassName} />
+							<Skeleton className={postButtonSkeletonClassName} />
+						</div>
+					)}
+					{isCommentCountsQuerySuccess && (
+						<div className="mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6">
 							<>
 								{isCommentReactionQuerySuccess ? (
 									<CommentReactButton
@@ -121,22 +141,42 @@ export default function PostComment({
 									initialShareCount={noShares ?? 0}
 								/>
 							</>
-						)}
-					</div>
+						</div>
+					)}
 				</div>
 
 				{/* Recursive child comments */}
-				<div className=" ml-[30px] flex-col">
-					{childrenComment.children?.map((child) => (
-						<>
-							<PostComment
-								key={child.id}
-								{...child}
-								childrenComment={{ ...child, children: child.children ?? [] }}
-							/>
-						</>
-					))}
-				</div>
+				{degree < 2 && childrenComment ? (
+					<div className=" ml-[30px] flex gap-4">
+						{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
+						{childrenComment!.children!.length > 0 && (
+							<div>
+								<Image
+									src={DownRightArrowSVG}
+									width={35}
+									height={35}
+									alt=" Comment arrow"
+								/>
+							</div>
+						)}
+						<div className="w-full flex-col">
+							{childrenComment?.children?.map((child) => (
+								<>
+									<PostComment
+										key={child.id}
+										{...child}
+										childrenComment={{
+											...child,
+											children: child.children ?? [],
+										}}
+									/>
+								</>
+							))}
+						</div>
+					</div>
+				) : (
+					<div />
+				)}
 			</div>
 		</>
 	)
