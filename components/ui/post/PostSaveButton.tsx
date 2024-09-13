@@ -1,4 +1,4 @@
-import { Button } from "@components/atoms/button"
+import { Button } from "@components/ui/Button"
 
 export default function PostSaveButton({
 	userId,

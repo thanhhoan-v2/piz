@@ -1,7 +1,9 @@
 "use server"
 
 import type { SearchResultProps } from "@components/ui/search/SearchList"
+import { PrismaClient } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
+import prismaRandom from "prisma-extension-random"
 
 export const getViewingUserInfo = async (userName: string) => {
 	try {
@@ -20,8 +22,9 @@ export const getRandomUserList = async (
 ) => {
 	try {
 		if (appUserId !== null && appUserId !== undefined) {
-			const randomUserList: SearchResultProps =
-				await prisma.appUser.findManyRandom(no_users, {
+			const randomUserList: SearchResultProps = await new PrismaClient()
+				.$extends(prismaRandom())
+				.appUser.findManyRandom(no_users, {
 					where: {
 						NOT: {
 							id: appUserId,

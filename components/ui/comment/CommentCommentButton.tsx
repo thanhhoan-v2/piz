@@ -14,6 +14,7 @@ import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
 import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
+import type { PostCounts } from "@components/ui/post/PostReactButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -90,23 +91,24 @@ export default function CommentCommentButton({
 				...old,
 			])
 
-			queryClient.setQueryData(
-				queryKey.comment.selectCountByComment({
-					commentId: newComment.id,
-					parentId,
-				}),
-				{
-					noReactions: 0,
-					noShares: 0,
-					noComments: 0,
-				},
-			)
+			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {
+				noReactions: 0,
+				noShares: 0,
+				noComments: 0,
+			})
 			queryClient.setQueryData(
 				queryKey.comment.selectReactionByUser({
 					userId,
 					commentId: newComment.id,
 				}),
 				null,
+			)
+			queryClient.setQueryData(
+				queryKey.post.selectCount(postId),
+				(prev: PostCounts) => ({
+					...prev,
+					noComments: prev.noComments + 1,
+				}),
 			)
 
 			// Return a context object with the snapshotted value
@@ -125,8 +127,6 @@ export default function CommentCommentButton({
 			userAvatarUrl: userAvatarUrl,
 			content: userInput,
 		}
-
-		console.log(newComment)
 
 		if (userName !== null) {
 			addCommentMutation.mutate(newComment)

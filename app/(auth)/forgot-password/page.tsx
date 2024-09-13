@@ -1,7 +1,7 @@
-import { Button } from "@components/atoms/button"
-import { Card, CardContent, CardHeader } from "@components/atoms/card"
-import { Input } from "@components/atoms/input"
-import { Label } from "@components/atoms/label"
+import { Button } from "@components/ui/Button"
+import { Card, CardContent, CardHeader } from "@components/ui/Card"
+import { Input } from "@components/ui/Input"
+import { Label } from "@components/ui/Label"
 import Link from "next/link"
 
 export default function ForgotPasswordPage() {
@@ -13,8 +13,8 @@ export default function ForgotPasswordPage() {
 						Forgot your password?
 					</h2>
 					<p className="mt-2 text-center text-gray-600 text-sm dark:text-gray-400">
-						Enter the email address associated with your account and
-						we'll send you a link to reset your password.
+						Enter the email address associated with your account and we'll send
+						you a link to reset your password.
 					</p>
 				</CardHeader>
 				<CardContent>

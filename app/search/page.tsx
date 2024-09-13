@@ -7,7 +7,7 @@ export default async function SearchPage() {
 	const supabase = useSupabaseServer()
 	const { data: user } = await supabase.auth.getUser()
 	const userId = user?.user?.id
-	const randomUserList = await getRandomUserList(userId, 8)
+	const randomUserList = await getRandomUserList(userId, 1)
 
 	return (
 		<>

@@ -2,9 +2,16 @@
 
 import { Avatar, AvatarImage } from "@components/ui/Avatar"
 import { useSupabaseBrowser } from "@hooks/supabase/browser"
+import type {
+	Notification as INotification,
+	NotificationType,
+} from "@prisma/client"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { useQueryAllNotifications } from "@queries/client/noti"
+import type { RealtimeChannel } from "@supabase/supabase-js"
+import { useQueryClient } from "@tanstack/react-query"
 import { avatarPlaceholder } from "@utils/image.helpers"
+import { queryKey } from "@utils/queryKeyFactory"
 import React from "react"
 
 const notiMap: Record<string, string> = {
@@ -17,7 +24,7 @@ const notiMap: Record<string, string> = {
 
 export default function ActivityPage() {
 	const [notifications, setNotifications] = React.useState<
-		Notification[] | undefined
+		INotification[] | undefined
 	>([])
 
 	const {
@@ -55,7 +62,7 @@ export default function ActivityPage() {
 				},
 				(payload: { new: Notification }) => {
 					queryClient.setQueryData<Notification[] | undefined>(
-						[NOTI.ALL, user?.id],
+						queryKey.noti.all,
 						(oldData) => {
 							return oldData ? [payload.new, ...oldData] : [payload.new]
 						},
@@ -69,7 +76,7 @@ export default function ActivityPage() {
 				console.error("Error removing channel:", error)
 			})
 		}
-	}, [supabase, user, queryClient])
+	}, [supabase, queryClient])
 
 	if (isUserError) return <div>Error fetching your information 😢</div>
 	if (isUserLoading) return <div>Fetching your information...</div>

@@ -1,6 +1,6 @@
 "use client"
-import { Button } from "@components/atoms/button"
-import { Input } from "@components/atoms/input"
+import { Button } from "@components/ui/Button"
+import { Input } from "@components/ui/Input"
 import { X } from "lucide-react"
 import React, { type ChangeEvent } from "react"
 

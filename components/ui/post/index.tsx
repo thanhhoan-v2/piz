@@ -10,12 +10,14 @@ import type { Post as IPost } from "@prisma/client"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { useQueryPostCounts, useQueryPostReaction } from "@queries/client/post"
 import { cn } from "@utils/cn"
-import { useRouter } from "next/navigation"
+import { Sparkles } from "lucide-react"
+import { useRouter } from "nextjs-toploader/app"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
 export const postButtonSkeletonClassName =
 	"flex flex-none h-[30px] w-[70px] gap-2"
-export const postButtonWrapperClassName = "flex-y-center gap-2"
+export const postButtonWrapperClassName =
+	"flex-y-center gap-2 bg-background-item"
 export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
 
@@ -128,7 +130,9 @@ export default function Post({
 								isReacted={!!queriedPostReactionByAppUser}
 							/>
 						) : (
-							<Skeleton className={postButtonClassName} />
+							<div className={postButtonWrapperClassName}>
+								<Skeleton className={postButtonSkeletonClassName} />
+							</div>
 						)}
 
 						<PostCommentButton
@@ -160,9 +164,16 @@ export default function Post({
 				<>Something is wrong here 😢</>
 			)}
 
-			{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
-			{postIndex! < postsLength! - 1 && <Separator className="my-4" />}
-			{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
+			{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}
+			{postIndex! < postsLength! - 1 && (
+				<div className="my-4 flex-center gap-3">
+					<Separator className="w-1/3" />
+					<Sparkles color="#272727" size={15} />
+					<Separator className="w-1/3" />
+				</div>
+			)}
+
+			{/* biome-ignore lint/style/noNonNullAssertion: Last post */}
 			{postIndex === postsLength! - 1 ? (
 				<div className="mb-[100px]">
 					<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">

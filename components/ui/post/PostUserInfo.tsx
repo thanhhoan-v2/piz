@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { getTimeDiffStatus } from "@utils/time.helpers"
-import { Sparkles } from "lucide-react"
+import { CircleUserRound } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 import type { PostVisibilityEnumType } from "../form/PostForm"
@@ -47,7 +47,9 @@ export default function PostUserInfo({
 								className="flex items-center gap-2 font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
 							>
 								<p>{userName}</p>
-								{appUserName === userName && <Sparkles className="size-4" />}
+								{appUserName === userName && (
+									<CircleUserRound className="size-4" />
+								)}
 							</Link>
 							<p className="text-slate-500 text-sm italic">
 								{!isWriteOnly && getTimeDiffStatus(createdAt, updatedAt)}

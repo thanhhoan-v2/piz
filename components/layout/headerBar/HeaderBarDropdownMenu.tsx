@@ -23,7 +23,7 @@ import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 
 const iconClass = "mr-2 h-4 w-4"
 

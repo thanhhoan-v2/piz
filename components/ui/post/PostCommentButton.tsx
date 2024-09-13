@@ -47,7 +47,6 @@ export default function PostCommentButton({
 	className,
 	wrapperClassName,
 	initialCommentCount,
-	handleOpenModalFromPost,
 	// user related props
 	userId,
 	userAvatarUrl,

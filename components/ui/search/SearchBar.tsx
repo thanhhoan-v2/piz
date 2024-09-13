@@ -6,7 +6,6 @@ import SearchList, {
 import SearchSkeleton from "@components/ui/skeleton/SearchResultSkeleton"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
-import { useDebounce } from "@uidotdev/usehooks"
 import { SearchIcon } from "lucide-react"
 import React from "react"
 
@@ -20,33 +19,27 @@ export default function SearchBar() {
 	const { data: user } = useQueryAppUser()
 	const appUserId = user?.id
 
-	const handleSearch = React.useCallback(
-		useDebounce(async (value: string) => {
-			try {
-				setIsSearching(true)
-				// Partial search using Supabase API
-				const data = await usePartialSearch({
-					// user input value
-					prefix: value,
-					// prefix function created on Supabase
-					prefixFunction: "user_name",
-				})
-				setSearchResults(data)
-				setIsSearching(false)
-			} catch (error) {
-				console.error("Error searching: ", error)
-			}
-		}, 500), // Debounce time in milliseconds
-		[],
-	)
+	const handleSearchvalue = async (value: string) => {
+		try {
+			setIsSearching(true)
+			const data = await usePartialSearch({
+				prefix: value,
+			})
+			setSearchResults(data)
+			setIsSearching(false)
+		} catch (error) {
+			console.error("Error searching: ", error)
+		}
+	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
 	React.useEffect(() => {
-		if (searchValue) {
-			handleSearch(searchValue)
+		if (searchValue.length > 0) {
+			handleSearchvalue(searchValue.toLowerCase())
 		} else {
 			setSearchResults([])
 		}
-	}, [searchValue, handleSearch])
+	}, [searchValue])
 
 	return (
 		<>

@@ -26,7 +26,6 @@ import {
 	DropdownMenuTrigger,
 } from "@components/ui/DropdownMenu"
 import { Textarea } from "@components/ui/Textarea"
-import { createReportedPost } from "@queries/server/report"
 import { createSavedPost } from "@queries/server/saved"
 import { useCopyToClipboard } from "@uidotdev/usehooks"
 import { BookMarked, Copy, Ellipsis, FlagTriangleRight } from "lucide-react"
@@ -90,7 +89,7 @@ export default function PostDropdownMenu({
 
 	// Handles submitting the report
 	const handleReportSubmit = async () => {
-		await createReportedPost({ userId, postId, content: reportContent })
+		// await createReportedPost({ userId, postId, content: reportContent })
 		// Reset the report
 		setReportContent("")
 		// Close the report dialog

@@ -19,7 +19,7 @@ import {
 } from "@queries/client/comment"
 import { cn } from "@utils/cn"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 
 export type CommentWithChildren = Comment & { children?: CommentWithChildren[] }
 
@@ -115,7 +115,9 @@ export default function PostComment({
 										isReacted={!!queriedCommentReactionByAppUser}
 									/>
 								) : (
-									<Skeleton className={postButtonClassName} />
+									<div className={postButtonWrapperClassName}>
+										<Skeleton className={postButtonClassName} />
+									</div>
 								)}
 
 								<CommentCommentButton
@@ -147,7 +149,7 @@ export default function PostComment({
 
 				{/* Recursive child comments */}
 				{degree < 2 && childrenComment ? (
-					<div className=" ml-[30px] flex gap-4">
+					<div className=" ml-[10px] flex gap-4">
 						{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
 						{childrenComment!.children!.length > 0 && (
 							<div>
