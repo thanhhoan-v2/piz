@@ -1,4 +1,5 @@
 "use client"
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/ui/Button"
 import {
 	Card,
@@ -16,6 +17,7 @@ import { faker } from "@faker-js/faker"
 import { useSignUp } from "@hooks/auth/useSignUp"
 import { useQueryClient } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
+import { useSetAtom } from "jotai"
 import { TriangleAlert, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "nextjs-toploader/app"
@@ -32,6 +34,7 @@ export default function SignUpForm() {
 
 	const router = useRouter()
 	const queryClient = useQueryClient()
+	const setUserAtom = useSetAtom(userAtom)
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -50,6 +53,7 @@ export default function SignUpForm() {
 			setError(error.message)
 		} else if (user) {
 			queryClient.setQueryData(queryKey.user.selectMain(), user)
+			setUserAtom(user)
 			router.push(ROUTE.HOME)
 		}
 		setLoading(false)

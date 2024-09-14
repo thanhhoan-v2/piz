@@ -4,6 +4,7 @@ import "@styles/globals.css"
 import "jotai-devtools/styles.css"
 import { AppLayout } from "@components/layout"
 import { LoadingScreen } from "@components/ui/loadings/loading-screen"
+import { Toaster } from "@components/ui/toast/Toaster"
 import QueryProvider from "@providers/QueryProvider"
 import { ThemeProvider } from "next-themes"
 
@@ -60,6 +61,7 @@ export default function RootLayout({
 						enableSystem
 						disableTransitionOnChange
 					>
+						<Toaster />
 						<AppLayout>{children}</AppLayout>
 					</ThemeProvider>
 				</QueryProvider>

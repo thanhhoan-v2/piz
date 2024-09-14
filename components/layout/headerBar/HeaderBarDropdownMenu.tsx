@@ -1,4 +1,5 @@
 "use client"
+import { userAtom } from "@atoms/user"
 import { Button } from "@components/ui/Button"
 import {
 	DropdownMenu,
@@ -11,7 +12,6 @@ import {
 import { ThemeToggle } from "@components/ui/toggle/ThemeToggle"
 import { ROUTE } from "@constants/route"
 import { useSupabaseBrowser } from "@hooks/supabase/browser"
-import { useQueryAppUser } from "@queries/client/appUser"
 import {
 	useQueryClientClearCache,
 	useQueryClientRemoveQueries,
@@ -19,6 +19,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
+import { useAtomValue } from "jotai"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
@@ -51,8 +52,7 @@ export default function HeaderDropdownMenu() {
 	)
 
 	const queryClient = useQueryClient()
-	// const [user, setUser] = useAtom(userAtom)
-	const user = useQueryAppUser()
+	const user = useAtomValue(userAtom)
 
 	const handleSignOut = async () => {
 		try {

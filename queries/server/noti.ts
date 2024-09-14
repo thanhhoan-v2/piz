@@ -42,7 +42,7 @@ export const createNotification = async ({
 						senderAvatarUrl: sender.avatarUrl,
 					},
 				})
-				console.log("Notification: ", noti)
+				console.log("<< Noti >> Created: \n", noti)
 			} else {
 				console.error("<< Noti >> Missing receiverId when creating")
 			}
@@ -54,13 +54,59 @@ export const createNotification = async ({
 	}
 }
 
-export const getAllNotifications = async ({ receiverId }: NotiProps) => {
+export const getNotification = async ({
+	notificationId,
+}: { notificationId: number }) => {
+	try {
+		if (notificationId) {
+			console.log(`Getting notification with ID ${notificationId} ...`)
+			const noti = await prisma.notification.findUnique({
+				where: {
+					id: notificationId,
+				},
+				include: {
+					sender: {
+						select: {
+							userName: true,
+							avatarUrl: true,
+						},
+					},
+				},
+			})
+			if (noti) {
+				console.log(
+					`Got notification with ID ${notificationId}:\n${JSON.stringify(noti, null, 2)}`,
+				)
+				return noti
+			}
+			console.error(
+				`<< Noti >> Notification with ID ${notificationId} not found`,
+			)
+		} else {
+			console.error("<< Noti >> Missing notificationId when getting")
+		}
+	} catch (error) {
+		console.error("[NOTI] Error getting notification: ", error)
+	}
+}
+
+export const getAllNotifications = async ({
+	receiverId,
+}: { receiverId: string }) => {
 	try {
 		if (receiverId) {
 			console.log(`Getting all notifications for user ${receiverId} ...`)
 			const notis = await prisma.notification.findMany({
 				where: {
 					receiverId: receiverId,
+				},
+				include: {
+					sender: {
+						select: {
+							userName: true,
+							avatarUrl: true,
+						},
+					},
 				},
 			})
 			console.log(`Got all notifications for user ${receiverId}:\n${notis}`)

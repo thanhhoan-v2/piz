@@ -1,3 +1,4 @@
+"use server"
 import SearchBar from "@components/ui/search/SearchBar"
 import SearchList from "@components/ui/search/SearchList"
 import { useSupabaseServer } from "@hooks/supabase/server"
@@ -7,7 +8,7 @@ export default async function SearchPage() {
 	const supabase = useSupabaseServer()
 	const { data: user } = await supabase.auth.getUser()
 	const userId = user?.user?.id
-	const randomUserList = await getRandomUserList(userId, 1)
+	const randomUserList = await getRandomUserList(userId, 10)
 
 	return (
 		<>

@@ -60,7 +60,7 @@ export const queryKey = {
 		all: ["notis"] as const,
 		// notis - select
 		selects: () => [...queryKey.noti.all, "select"] as const,
-		// notis - select - { userId }
-		selectId: (userId: string) => [...queryKey.noti.selects(), userId] as const,
+		// notis - select - { id }
+		selectId: (id: number) => [...queryKey.noti.selects(), id] as const,
 	},
 }
