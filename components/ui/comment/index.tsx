@@ -74,10 +74,9 @@ export default function PostComment({
 
 	return (
 		<>
-			<div className="flex-col gap-2">
+			<div key={id + userId} className="flex-col gap-2">
 				<div>
 					<div
-						key={id}
 						onClick={handleCommentClick}
 						onKeyUp={handleCommentKeyUp}
 						className={cn(
@@ -96,9 +95,18 @@ export default function PostComment({
 					</div>
 					{isCommentCountsQueryLoading && (
 						<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
-							<Skeleton className={postButtonSkeletonClassName} />
-							<Skeleton className={postButtonSkeletonClassName} />
-							<Skeleton className={postButtonSkeletonClassName} />
+							<Skeleton
+								key={`${id}1`}
+								className={postButtonSkeletonClassName}
+							/>
+							<Skeleton
+								key={`${id}2`}
+								className={postButtonSkeletonClassName}
+							/>
+							<Skeleton
+								key={`${id}3`}
+								className={postButtonSkeletonClassName}
+							/>
 						</div>
 					)}
 					{isCommentCountsQuerySuccess && (
@@ -149,7 +157,7 @@ export default function PostComment({
 
 				{/* Recursive child comments */}
 				{degree < 2 && childrenComment ? (
-					<div className=" ml-[10px] flex gap-4">
+					<div key={userId + id} className=" ml-[10px] flex gap-4">
 						{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
 						{childrenComment!.children!.length > 0 && (
 							<div>
@@ -162,10 +170,10 @@ export default function PostComment({
 							</div>
 						)}
 						<div className="w-full flex-col">
-							{childrenComment?.children?.map((child) => (
+							{childrenComment?.children?.map((child, index) => (
 								<>
 									<PostComment
-										key={child.id}
+										key={child.id + child.userId + index}
 										{...child}
 										childrenComment={{
 											...child,

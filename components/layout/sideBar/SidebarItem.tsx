@@ -61,11 +61,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 					variant="ghost"
 					className={cn(sideBarItemClass, !userName && "pointer-events-none")}
 				>
-					{!userName ? (
-						<UserRoundX className="w-full" fill={iconFill} />
-					) : (
-						<Icon fill={iconFill} />
-					)}
+					{!userName ? <UserRoundX className="w-full" /> : <Icon />}
 				</Button>
 			</Link>
 		)

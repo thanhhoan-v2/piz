@@ -11,6 +11,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@components/ui/AlertDialog"
+import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
 import {
 	Drawer,
@@ -31,9 +32,12 @@ import {
 import { Textarea } from "@components/ui/Textarea"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
+import type { SearchResultProps } from "@components/ui/search/SearchList"
+import SearchList from "@components/ui/search/SearchList"
 import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@queries/server/post"
+import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -65,6 +69,11 @@ export const PostVisibilityEnumArray = [
 	"ME_ONLY",
 ]
 
+type IMentionedResult = {
+	id: string
+	userName: string
+}
+
 export default function PostForm({
 	children,
 }: {
@@ -73,28 +82,177 @@ export default function PostForm({
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
 	const [alertIsOpen, setOpenAlert] = React.useState<boolean>(false)
 	const [postContent, setPostContent] = React.useState("")
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 	const [postVisibility, setPostVisibility] =
 		React.useState<PostVisibilityEnumType>("PUBLIC")
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-	const handleChange = React.useCallback(
-		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-			setPostContent(e.target.value)
-		},
+	const [showMentionSuggestions, setShowMentionSuggestions] =
+		React.useState<boolean>(false)
+	const [startMentionIndex, setStartMentionIndex] = React.useState<number>(-1)
+	const [lastMentionIndexes, setLastMentionIndexes] = React.useState<number[]>(
 		[],
 	)
+	const [mentionSearchValue, setMentionSearchValue] = React.useState<string>("")
+	const [mentionedUsers, setMentionedUsers] = React.useState<
+		IMentionedResult[]
+	>([])
+	const [isSearching, setIsSearching] = React.useState<boolean>(false)
+	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
+		[],
+	)
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		const newValue = e.target.value
+		setPostContent(newValue)
+
+		const lastAtIndex = newValue.lastIndexOf("@")
+		if (lastAtIndex !== -1 && lastAtIndex === newValue.length - 1) {
+			// Show suggestions when '@' is the last character typed
+			setShowMentionSuggestions(true)
+			setStartMentionIndex(lastAtIndex)
+			setMentionSearchValue("")
+		} else if (lastAtIndex === -1 || lastAtIndex < startMentionIndex) {
+			// Reset if "@" is removed or not valid for mentioning anymore
+			setShowMentionSuggestions(false)
+			setMentionSearchValue("")
+			setLastMentionIndexes([])
+			setStartMentionIndex(-1)
+			deleteLastMentionedUser()
+		} else {
+			// Extract mention and handle if space exists after "@" (i.e., invalidating the mention)
+			const mention = newValue.substring(lastAtIndex + 1)
+			if (mention.includes(" ")) {
+				setMentionSearchValue("")
+			} else {
+				setMentionSearchValue(mention)
+			}
+		}
+
+		// Handling previous mentions stored in lastMentionIndexes
+		if (lastMentionIndexes.length > 0) {
+			const lastMentionIndex = lastMentionIndexes[lastMentionIndexes.length - 1]
+			const substringFromLastMentionIndex = newValue.slice(lastMentionIndex)
+
+			// Check if we are still in mention mode after the last stored "@" mention
+			if (
+				newValue.length > lastMentionIndex &&
+				!substringFromLastMentionIndex.includes(" ")
+			) {
+				setMentionSearchValue(substringFromLastMentionIndex)
+				setShowMentionSuggestions(true)
+			}
+
+			if (
+				postContent.length <
+				lastMentionIndexes[lastMentionIndexes.length - 1] + 2
+			) {
+				deleteLastMentionedUser()
+				deleteLastMentionIndex()
+			}
+		}
+	}
+
+	const deleteLastMentionedUser = () => {
+		setMentionedUsers((prevMentionedUsers) => {
+			const updatedMentionedUsers = [...prevMentionedUsers]
+			updatedMentionedUsers.pop()
+			return updatedMentionedUsers
+		})
+	}
+
+	const deleteLastMentionIndex = () => {
+		setLastMentionIndexes((prevIndexes) => {
+			const updatedIndexes = [...prevIndexes]
+			updatedIndexes.pop()
+			return updatedIndexes
+		})
+	}
+
+	console.log("\n------")
+	console.log("Start mention index: ", startMentionIndex)
+	console.log("Last mention index: ", lastMentionIndexes)
+	console.log("Post length:", postContent.length)
+	console.log("Mention search value: ", mentionSearchValue)
+	console.log("Search results: ", searchResults[0]?.userName)
+	console.log("Show mention suggestions: ", showMentionSuggestions)
+	console.log("Mentioned users: ", mentionedUsers)
+
+	const handleSelectUser = (id: string, userName: string) => {
+		setMentionedUsers((prevMentionedUsers) => {
+			const userExists = prevMentionedUsers.some((user) => user.id === id)
+			if (!userExists) {
+				return [
+					...prevMentionedUsers,
+					{
+						id: id,
+						userName: userName,
+					},
+				]
+			}
+			return prevMentionedUsers
+		})
+
+		setLastMentionIndexes((prevIndexes) => {
+			const newIndex = startMentionIndex + userName.length
+			const uniqueIndexes = new Set(prevIndexes)
+			uniqueIndexes.add(newIndex)
+			return Array.from(uniqueIndexes)
+		})
+
+		const beforeMention = postContent.slice(0, startMentionIndex)
+		setPostContent(`${beforeMention}@${userName} `)
+		setShowMentionSuggestions(false)
+		setSearchResults([])
+		setMentionSearchValue("")
+		textareaRef.current?.focus()
+	}
+
+	React.useEffect(() => {
+		if (mentionSearchValue.localeCompare(searchResults[0]?.userName) === 0) {
+			handleSelectUser(searchResults[0].id, searchResults[0].userName)
+		}
+	}, [handleSelectUser, mentionSearchValue, searchResults])
+
+	const handleSearchvalue = async (value: string) => {
+		try {
+			setIsSearching(true)
+			const data = await usePartialSearch({
+				prefix: value,
+			})
+			setSearchResults(data)
+			setIsSearching(false)
+		} catch (error) {
+			console.error("Error searching: ", error)
+		}
+	}
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
+	React.useEffect(() => {
+		if (mentionSearchValue.length > 0) {
+			handleSearchvalue(mentionSearchValue.toLowerCase())
+		} else {
+			setSearchResults([])
+		}
+	}, [mentionSearchValue])
 
 	const handleDiscard = () => {
 		setOpenDrawer(false)
 		setPostContent("")
 		setPostVisibility("PUBLIC")
+		setSearchResults([])
+		setMentionedUsers([])
+		setShowMentionSuggestions(false)
+		setStartMentionIndex(-1)
+		setLastMentionIndexes([])
 	}
 
-	const handleOpenAlert = () => {
+	const handleTouchOutsideModal = () => {
 		// If the value is not empty, open the alert
-		if (postContent.length > 0) {
-			setOpenAlert(true)
-		}
+		if (postContent.length > 0) setOpenAlert(true)
+
+		setSearchResults([])
+		setMentionedUsers([])
+		setShowMentionSuggestions(false)
 	}
 
 	const handleFakePost = () => {
@@ -201,7 +359,7 @@ export default function PostForm({
 
 				<DrawerContent
 					className="h-[90vh] bg-background-item dark:bg-background-item"
-					onPointerDownOutside={handleOpenAlert}
+					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					{/* header */}
 					<DrawerHeader>
@@ -218,12 +376,22 @@ export default function PostForm({
 							createdAt={new Date()}
 							updatedAt={null}
 						/>
+						<div className="flex-y-center gap-2">
+							{mentionedUsers.length > 0 &&
+								mentionedUsers.map((mentionedUser) => (
+									<>
+										<Badge variant="outline" key={mentionedUser.id}>
+											@{mentionedUser.userName}
+										</Badge>
+									</>
+								))}
+						</div>
 						<div className="mb-8 w-full flex-start flex-col gap-2">
 							<Textarea
 								autoFocus
 								ref={textareaRef}
 								value={postContent}
-								onChange={handleChange}
+								onChange={handleInputChange}
 								placeholder={cn("Dear ", fullName, ", what is in your mind ?")}
 								className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
 							/>
@@ -234,6 +402,19 @@ export default function PostForm({
 							</div>
 						</div>
 					</div>
+
+					{/* Mention suggestions */}
+					{showMentionSuggestions && searchResults.length > 0 && (
+						<div className="mt-[20px] h-fit w-full flex-center">
+							<SearchList
+								searchResults={searchResults}
+								appUserId={userId}
+								isMention
+								containerClassname="my-0 w-[90%] rounded-lg border-2 border-white"
+								onSearchResultClick={handleSelectUser}
+							/>
+						</div>
+					)}
 
 					<DrawerFooter>
 						<div className="flex-between ">

@@ -98,9 +98,9 @@ export const getAllUserPosts = async (userId: string) => {
 		const posts = await prisma.post.findMany({
 			where: { userId: userId },
 		})
-		console.log(`<< Post >> Got posts of user ${userId}: `, posts)
+		console.log(`<< Post >> Got all posts of user ${userId}:\n`, posts)
 		return posts
 	} catch (error) {
-		console.error(`<< Post >> Error getting posts of user ${userId}: `, error)
+		console.error(`<< Post >> Error getting posts of user ${userId}:\n`, error)
 	}
 }

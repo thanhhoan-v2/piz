@@ -1,12 +1,13 @@
 "use client"
 import { Input } from "@components/ui/Input"
+import { Separator } from "@components/ui/Separator"
 import SearchList, {
 	type SearchResultProps,
 } from "@components/ui/search/SearchList"
 import SearchSkeleton from "@components/ui/skeleton/SearchResultSkeleton"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
-import { SearchIcon } from "lucide-react"
+import { SearchIcon, Sparkles } from "lucide-react"
 import React from "react"
 
 export default function SearchBar() {
@@ -21,16 +22,20 @@ export default function SearchBar() {
 
 	const handleSearchvalue = async (value: string) => {
 		try {
-			setIsSearching(true)
-			const data = await usePartialSearch({
-				prefix: value,
-			})
-			setSearchResults(data)
-			setIsSearching(false)
+			if (value.length > 0) {
+				setIsSearching(true)
+				const data = await usePartialSearch({
+					prefix: value,
+				})
+				setIsSearching(false)
+				setSearchResults(data)
+			}
 		} catch (error) {
 			console.error("Error searching: ", error)
 		}
 	}
+
+	console.log(isSearching)
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
 	React.useEffect(() => {
@@ -56,17 +61,28 @@ export default function SearchBar() {
 				</div>
 
 				{/* Display search results */}
-				{isSearching && searchValue ? (
+				{isSearching && (
 					<>
 						<SearchSkeleton />
 						<SearchSkeleton />
 						<SearchSkeleton />
 					</>
-				) : (
-					<SearchList
-						searchResults={searchResults}
-						appUserId={appUserId ?? null}
-					/>
+				)}
+
+				{searchValue.length > 0 && (
+					<>
+						<div className="w-full">
+							<SearchList
+								searchResults={searchResults}
+								appUserId={appUserId ?? null}
+							/>
+							<div className="my-1 flex-center gap-3">
+								<Separator className="w-1/3" />
+								<Sparkles color="#272727" size={15} />
+								<Separator className="w-1/3" />
+							</div>
+						</div>
+					</>
 				)}
 			</div>
 		</>

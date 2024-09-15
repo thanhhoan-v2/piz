@@ -11,12 +11,15 @@ import {
 } from "@queries/server/follow"
 import { getAllUserPosts } from "@queries/server/post"
 import { getViewingUserInfo } from "@queries/server/user"
+import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
 
 export default async function UserPage({
 	params,
 }: { params: { userName: string } }) {
+	const userName = params.userName
+
 	// App user, the main user
 	const supabase = useSupabaseServer()
 	const {
@@ -24,7 +27,7 @@ export default async function UserPage({
 	} = await supabase.auth.getUser()
 
 	// Viewing user, another person
-	const viewingUser = await getViewingUserInfo(params.userName)
+	const viewingUser = await getViewingUserInfo(userName)
 
 	// Get all posts by the viewing user
 	let posts: IPost[] = []
@@ -44,14 +47,13 @@ export default async function UserPage({
 	let noFollowers = 0
 	if (appUser) {
 		const data = await countUserFollowers({ userId: appUser.id })
-		console.log(data)
 		if (data) noFollowers = data
 	}
 
 	return (
 		<>
 			<div>
-				<div className="mt-5 flex-between px-4">
+				<div className={cn("mt-5 laptop:w-[650px] flex-between gap-5 px-4")}>
 					<div className="text-start">
 						<h1 className="text-3xl text-bold">
 							{viewingUser
