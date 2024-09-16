@@ -5,6 +5,8 @@ import { AppLayout } from "@components/layout"
 import { LoadingScreen } from "@components/ui/loadings/loading-screen"
 import { Toaster } from "@components/ui/toast/Toaster"
 import QueryProvider from "@providers/QueryProvider"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "next-themes"
 
 const geistSans = localFont({
@@ -39,6 +41,8 @@ export default function RootLayout({
 			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background" suppressHydrationWarning>
+				<Analytics />
+				<SpeedInsights />
 				<QueryProvider>
 					<LoadingScreen duration={200} />
 					<ThemeProvider
