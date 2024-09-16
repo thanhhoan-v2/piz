@@ -1,4 +1,3 @@
-import type { User } from "@supabase/supabase-js"
 import { atomWithStorage } from "jotai/utils"
 
 type ICustomTheme = {
@@ -25,20 +24,22 @@ export const customThemes: ICustomTheme[] = [
 	},
 	{
 		group: "dark",
+		label: "Small Squares",
+		value: "dark_small_squares",
+	},
+	{
+		group: "dark",
 		label: "Gradient Violet",
 		value: "dark_gradient_violet",
 	},
 	{
 		group: "dark",
-		label: "Small Squares",
-		value: "dark_small_squares",
+		label: "Dots",
+		value: "dark_dots",
 	},
 ]
 
-export const userAtom = atomWithStorage<User | null>("piz_current_user", null)
 export const customThemeAtom = atomWithStorage<ICustomTheme>(
 	"piz_custom_theme",
 	customThemes[0],
 )
-
-userAtom.debugLabel = "user"

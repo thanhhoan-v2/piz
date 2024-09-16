@@ -168,14 +168,14 @@ export default function PostForm({
 		})
 	}
 
-	console.log("\n------")
-	console.log("Start mention index: ", startMentionIndex)
-	console.log("Last mention index: ", lastMentionIndexes)
-	console.log("Post length:", postContent.length)
-	console.log("Mention search value: ", mentionSearchValue)
-	console.log("Search results: ", searchResults[0]?.userName)
-	console.log("Show mention suggestions: ", showMentionSuggestions)
-	console.log("Mentioned users: ", mentionedUsers)
+	// console.log("\n------")
+	// console.log("Start mention index: ", startMentionIndex)
+	// console.log("Last mention index: ", lastMentionIndexes)
+	// console.log("Post length:", postContent.length)
+	// console.log("Mention search value: ", mentionSearchValue)
+	// console.log("Search results: ", searchResults[0]?.userName)
+	// console.log("Show mention suggestions: ", showMentionSuggestions)
+	// console.log("Mentioned users: ", mentionedUsers)
 
 	const handleSelectUser = (id: string, userName: string) => {
 		setMentionedUsers((prevMentionedUsers) => {
@@ -207,11 +207,12 @@ export default function PostForm({
 		textareaRef.current?.focus()
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSelectUser changes on every render
 	React.useEffect(() => {
 		if (mentionSearchValue.localeCompare(searchResults[0]?.userName) === 0) {
 			handleSelectUser(searchResults[0].id, searchResults[0].userName)
 		}
-	}, [handleSelectUser, mentionSearchValue, searchResults])
+	}, [mentionSearchValue, searchResults])
 
 	const handleSearchvalue = async (value: string) => {
 		try {
@@ -226,7 +227,7 @@ export default function PostForm({
 		}
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue changes on every render
 	React.useEffect(() => {
 		if (mentionSearchValue.length > 0) {
 			handleSearchvalue(mentionSearchValue.toLowerCase())

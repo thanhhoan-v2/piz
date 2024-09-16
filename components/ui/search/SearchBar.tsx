@@ -35,8 +35,6 @@ export default function SearchBar() {
 		}
 	}
 
-	console.log(isSearching)
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
 	React.useEffect(() => {
 		if (searchValue.length > 0) {

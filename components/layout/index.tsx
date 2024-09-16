@@ -1,5 +1,5 @@
 "use client"
-
+import { customThemeAtom } from "@atoms/theme"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
 import { Avatar, AvatarImage } from "@components/ui/Avatar"
@@ -11,6 +11,9 @@ import type { RealtimeChannel } from "@supabase/supabase-js"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
+import { useAtomValue } from "jotai"
+import { useTheme } from "next-themes"
+import NextTopLoader from "nextjs-toploader"
 import React from "react"
 import { useEffect } from "react"
 
@@ -101,9 +104,44 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 		;() => setNewNotiId(null)
 	}, [isSuccess, newNoti, toast])
 
+	const { theme } = useTheme()
+	const customTheme = useAtomValue(customThemeAtom)
+
 	return (
 		<>
-			<div className="flex w-full flex-col pt-[70px] text-foreground transition-colors duration-300">
+			<NextTopLoader
+				color={theme === "dark" ? "#fff" : "#000"}
+				initialPosition={0.1}
+				crawlSpeed={200}
+				height={5}
+				crawl={true}
+				showSpinner={false}
+				easing="ease"
+				speed={400}
+				shadow={false}
+				zIndex={1600}
+				showAtBottom={false}
+			/>
+			<div className="relative flex h-screen-auto w-full flex-col pt-[70px] text-foreground transition-colors duration-300">
+				{customTheme.value === "light_small_squares" && (
+					<div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] bg-white" />
+				)}
+				{customTheme.value === "light_big_squares" && (
+					<div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] bg-white" />
+				)}
+				{customTheme.value === "light_gradient_violet" && (
+					<div className="-z-10 absolute inset-0 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]" />
+				)}
+				{customTheme.value === "dark_gradient_violet" && (
+					<div className="-z-10 absolute inset-0 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]" />
+				)}
+				{customTheme.value === "dark_small_squares" && (
+					<div className="absolute top-0 right-0 bottom-0 left-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+				)}
+				{customTheme.value === "dark_dots" && (
+					<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" />
+				)}
+
 				<HeaderBar
 					className={cn(
 						"fixed top-0 right-0 left-0 z-50 flex-between bg-background px-3 py-2 shadow-md transition-transform duration-300 ease-in-out",

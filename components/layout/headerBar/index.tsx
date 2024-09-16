@@ -1,5 +1,6 @@
 "use client"
 
+import { HeaderBarCustomTheme } from "@components/layout/headerBar/HeaderBarCustomTheme"
 import { Logo } from "@components/ui/Logo"
 import HeaderDropdownMenu from "./HeaderBarDropdownMenu"
 import HeaderBarLogo from "./HeaderBarLogo"
@@ -22,6 +23,7 @@ export default function HeaderBar({ className }: { className: string }) {
 
 				{/* righty */}
 				<div className="ml-auto flex items-center gap-4">
+					<HeaderBarCustomTheme />
 					<HeaderDropdownMenu />
 				</div>
 			</header>

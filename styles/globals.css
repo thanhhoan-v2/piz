@@ -78,6 +78,13 @@ body {
 	color: black;
 }
 
+/* HEIGHT */
+.h-screen-auto {
+	min-height: 100vh;
+	overflow: auto;
+	height: auto;
+}
+
 /* TEXT */
 .text.wrap-balance {
 	text-wrap: balance;
