@@ -57,7 +57,7 @@ async function prefetchUser() {
 	const appUser = queryClient.getQueryData<AppUser>(queryKey.user.selectMain())
 	if (appUser) {
 		await queryClient.prefetchQuery({
-			queryKey: queryKey.noti.selectId(appUser.id),
+			queryKey: queryKey.noti.all,
 			queryFn: async () => getAllNotifications({ receiverId: appUser.id }),
 		})
 	}
