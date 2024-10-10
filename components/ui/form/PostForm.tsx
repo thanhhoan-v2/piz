@@ -209,6 +209,7 @@ export default function PostForm({
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSelectUser changes on every render
 	React.useEffect(() => {
+		// If search value matches search result
 		if (mentionSearchValue.localeCompare(searchResults[0]?.userName) === 0) {
 			handleSelectUser(searchResults[0].id, searchResults[0].userName)
 		}
@@ -405,7 +406,7 @@ export default function PostForm({
 					</div>
 
 					{/* Mention suggestions */}
-					{showMentionSuggestions && searchResults.length > 0 && (
+					{showMentionSuggestions && searchResults?.length > 0 && (
 						<div className="mt-[20px] h-fit w-full flex-center">
 							<SearchList
 								searchResults={searchResults}

@@ -58,7 +58,7 @@ export default function SignInForm() {
 		setLoading(true)
 		setError(null)
 
-		const { user, session, errorMessage, foundUser } = await useSignIn({
+		const { user, errorMessage, foundUser } = await useSignIn({
 			email,
 			password,
 		})
@@ -71,9 +71,7 @@ export default function SignInForm() {
 			setError(translatedErrorMessage)
 		} else if (user) {
 			queryClient.setQueryData(queryKey.user.selectMain(), user)
-
 			setUserAtom(user)
-
 			setLoading(false)
 
 			router.push(ROUTE.HOME)
