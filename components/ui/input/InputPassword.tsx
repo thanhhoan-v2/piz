@@ -1,37 +1,59 @@
 "use client"
+
 import { Button } from "@components/ui/Button"
-import { Input } from "@components/ui/Input"
-import { X } from "lucide-react"
-import React, { type ChangeEvent } from "react"
+import { Input, type InputProps } from "@components/ui/Input"
+import { cn } from "@utils/cn"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import * as React from "react"
 
-export default function InputPassword() {
-	const [password, setPassword] = React.useState("")
+const InputPassword = React.forwardRef<HTMLInputElement, InputProps>(
+	({ className, ...props }, ref) => {
+		const [showPassword, setShowPassword] = React.useState(false)
+		const disabled =
+			props.value === "" || props.value === undefined || props.disabled
 
-	const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-		setPassword(event.target.value)
-	}
-
-	const clearPassword = () => setPassword("")
-
-	return (
-		<>
-			<div className="flex gap-1">
+		return (
+			<div className="relative">
 				<Input
-					id="password"
 					name="password"
-					type="password"
-					value={password}
-					onChange={handlePasswordChange}
-					placeholder=""
+					id="password"
 					required
+					type={showPassword ? "text" : "password"}
+					className={cn("hide-password-toggle pr-10", className)}
+					ref={ref}
+					{...props}
 				/>
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+					onClick={() => setShowPassword((prev) => !prev)}
+					disabled={disabled}
+				>
+					{showPassword && !disabled ? (
+						<EyeIcon className="h-4 w-4" aria-hidden="true" />
+					) : (
+						<EyeOffIcon className="h-4 w-4" aria-hidden="true" />
+					)}
+					<span className="sr-only">
+						{showPassword ? "Hide password" : "Show password"}
+					</span>
+				</Button>
 
-				{password.length > 0 && (
-					<Button variant="ghost" onClick={clearPassword}>
-						<X className="size-4" />
-					</Button>
-				)}
+				{/* hides browsers password toggles */}
+				<style>{`
+					.hide-password-toggle::-ms-reveal,
+					.hide-password-toggle::-ms-clear {
+						visibility: hidden;
+						pointer-events: none;
+						display: none;
+					}
+				`}</style>
 			</div>
-		</>
-	)
-}
+		)
+	},
+)
+InputPassword.displayName = "InputPassword"
+
+export { InputPassword }

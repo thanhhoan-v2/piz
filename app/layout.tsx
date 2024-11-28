@@ -1,5 +1,6 @@
 import localFont from "next/font/local"
 import "@styles/globals.css"
+import NextTopLoader from "nextjs-toploader"
 import "jotai-devtools/styles.css"
 import { AppLayout } from "@components/layout"
 import { LoadingScreen } from "@components/ui/loadings/loading-screen"
@@ -41,6 +42,19 @@ export default function RootLayout({
 			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background" suppressHydrationWarning>
+				<NextTopLoader
+					color="#ff006e"
+					initialPosition={0.1}
+					crawlSpeed={200}
+					height={5}
+					crawl={true}
+					showSpinner={false}
+					easing="ease"
+					speed={400}
+					shadow={false}
+					zIndex={1600}
+					showAtBottom={false}
+				/>
 				<Analytics />
 				<SpeedInsights />
 				<QueryProvider>

@@ -14,6 +14,19 @@ import { getViewingUserInfo } from "@queries/server/user"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
+import type { Metadata } from "next"
+
+export async function generateMetadata({
+	params,
+}: {
+	params: { userName: string }
+}): Promise<Metadata> {
+	const userName = params.userName
+	return {
+		title: `${userName} ✧ Piz`,
+		description: `Profile page of user ${userName}.`,
+	}
+}
 
 export default async function UserPage({
 	params,
@@ -53,7 +66,9 @@ export default async function UserPage({
 	return (
 		<>
 			<div>
-				<div className={cn("mt-5 laptop:w-[650px] flex-between gap-5 px-4")}>
+				<div
+					className={cn("mt-[100px] laptop:w-[650px] flex-between gap-5 px-4")}
+				>
 					<div className="text-start">
 						<h1 className="text-3xl text-bold">
 							{viewingUser

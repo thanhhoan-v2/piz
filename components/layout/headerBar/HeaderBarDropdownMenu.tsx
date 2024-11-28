@@ -19,7 +19,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
-import { useAtomValue } from "jotai"
+import { useAtom } from "jotai"
+import { RESET } from "jotai/utils"
 import { Archive, LogOut, MenuIcon, SettingsIcon } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
@@ -52,7 +53,7 @@ export default function HeaderDropdownMenu() {
 	)
 
 	const queryClient = useQueryClient()
-	const user = useAtomValue(userAtom)
+	const [user, setUser] = useAtom(userAtom)
 
 	const handleSignOut = async () => {
 		try {
@@ -61,7 +62,7 @@ export default function HeaderDropdownMenu() {
 			// Remove queries from cache
 			useQueryClientRemoveQueries(queryClient, queryKey.user.all.toString())
 			// Reset user atom
-			// setUser(RESET)
+			setUser(RESET)
 			// Sign out
 			await supabase.auth.signOut()
 			// Redirect to sign-in page
@@ -74,7 +75,7 @@ export default function HeaderDropdownMenu() {
 	if (!user)
 		return (
 			<>
-				<Link href={ROUTE.SIGN_UP}>
+				<Link href={ROUTE.SIGN_UP} className="desktop-only">
 					<Button variant="link">Create account</Button>
 				</Link>
 				<Link href={ROUTE.SIGN_IN}>

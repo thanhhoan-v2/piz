@@ -4,6 +4,13 @@ const nextConfig = {
 	experimental: {
 		typedRoutes: true,
 	},
+	reactStrictMode: true,
+	rewrites: async () => [
+		{
+			source: "/doc",
+			destination: "/doc/index.html",
+		},
+	],
 }
 
 export default nextConfig

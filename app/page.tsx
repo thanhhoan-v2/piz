@@ -68,7 +68,7 @@ export default async function HomePage() {
 
 	return (
 		<>
-			<div className="flex-col gap-2">
+			<div className="mt-[100px] flex-col gap-2">
 				<PostFormDesktop />
 				<HydrationBoundary state={dehydrate(queryClient)}>
 					<PostList />

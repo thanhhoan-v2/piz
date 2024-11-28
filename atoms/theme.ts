@@ -41,5 +41,5 @@ export const customThemes: ICustomTheme[] = [
 
 export const customThemeAtom = atomWithStorage<ICustomTheme>(
 	"piz_custom_theme",
-	customThemes[0],
+	customThemes[5],
 )

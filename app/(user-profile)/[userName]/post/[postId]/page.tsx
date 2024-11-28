@@ -23,7 +23,7 @@ export default function PostPage({ params }: { params: { postId: string } }) {
 	return (
 		<>
 			{post ? (
-				<div className="flex-col">
+				<div className="mt-[100px] flex-col">
 					<Post {...post} />
 
 					{comments && comments.length > 0 ? (

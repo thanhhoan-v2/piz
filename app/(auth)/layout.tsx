@@ -5,8 +5,9 @@ export default function AuthLayout({
 }: { children: React.ReactNode }) {
 	return (
 		<>
-			<div className="h-screen w-screen">
-				<main className="h-[87vh] w-full flex-center">{children}</main>
+      {/* h-screen -> signin page OK, singup NOT OK */}
+			<div className="h-screen w-screen flex-center">
+				<main className="w-full flex-center px-4">{children}</main>
 				<Footer />
 			</div>
 		</>

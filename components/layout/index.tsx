@@ -13,7 +13,6 @@ import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { useAtomValue } from "jotai"
 import { useTheme } from "next-themes"
-import NextTopLoader from "nextjs-toploader"
 import React from "react"
 import { useEffect } from "react"
 
@@ -109,20 +108,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<>
-			<NextTopLoader
-				color={theme === "dark" ? "#fff" : "#000"}
-				initialPosition={0.1}
-				crawlSpeed={200}
-				height={5}
-				crawl={true}
-				showSpinner={false}
-				easing="ease"
-				speed={400}
-				shadow={false}
-				zIndex={1600}
-				showAtBottom={false}
-			/>
-			<div className="relative flex h-screen-auto w-full flex-col pt-[70px] text-foreground transition-colors duration-300">
+			<div className="relative flex h-screen-auto w-full flex-col text-foreground transition-colors duration-300">
 				{customTheme.value === "light_small_squares" && (
 					<div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] bg-white" />
 				)}

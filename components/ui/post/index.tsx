@@ -65,13 +65,15 @@ export default function Post({
 		postId: id,
 	})
 
-	const handlePostClick = () => {
-		router.push(`/${userName}/post/${id}`)
+	const handlePostClick = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		const targetTag = (event.target as HTMLElement).tagName.toLowerCase()
+		console.log(targetTag)
+		if (targetTag === "div") {
+			router.push(`/${userName}/post/${id}`)
+		}
 	}
 
-	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		if (event.key === "Enter") handlePostClick()
-	}
+	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {}
 
 	if (isDeleted) return null
 

@@ -38,7 +38,7 @@ export default function ActivityPage() {
 	if (isSuccess)
 		return (
 			<>
-				<div className="flex-col gap-3">
+				<div className="mt-[100px] flex-col gap-3">
 					{notiList?.map((noti) => {
 						return (
 							<div

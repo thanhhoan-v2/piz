@@ -12,6 +12,7 @@ import {
 import { Input } from "@components/ui/Input"
 import { Label } from "@components/ui/Label"
 import AuthButton from "@components/ui/button/AuthButton"
+import InputStrongPassword from "@components/ui/input/InputStrongPassword"
 import { ROUTE } from "@constants/route"
 import { faker } from "@faker-js/faker"
 import { useSignUp } from "@hooks/auth/useSignUp"
@@ -28,7 +29,10 @@ export default function SignUpForm() {
 	const [lastName, setLastName] = React.useState<string>("")
 	const [userName, setUserName] = React.useState<string>("")
 	const [email, setEmail] = React.useState<string>("")
+
 	const [password, setPassword] = React.useState<string>("")
+	const [isPasswordStrong, setPasswordIsStrong] = React.useState<boolean>(false)
+
 	const [loading, setLoading] = React.useState<boolean>(false)
 	const [error, setError] = React.useState<string | null>(null)
 
@@ -41,13 +45,15 @@ export default function SignUpForm() {
 		setLoading(true)
 		setError(null)
 
-		const { user, error } = await useSignUp({
+		const signUpValues = {
 			email,
 			password,
 			firstName,
 			lastName,
 			userName,
-		})
+		}
+
+		const { user, error } = await useSignUp(signUpValues)
 
 		if (error) {
 			setError(error.message)
@@ -75,9 +81,11 @@ export default function SignUpForm() {
 
 	return (
 		<>
-			<Card className="h-screen w-full max-w-sm flex-col justify-center border-none">
+			<Card className="w-full max-w-sm flex-col justify-center border-none">
 				<CardHeader>
-					<CardTitle className="text-2xl">Sign Up</CardTitle>
+					<CardTitle className="text-2xl" onClick={() => handleFakeUser()}>
+						Sign Up
+				</CardTitle>
 					<CardDescription>
 						Create a new Piz account to get started.
 					</CardDescription>
@@ -100,7 +108,7 @@ export default function SignUpForm() {
 										required
 									/>
 									{firstName.length > 0 && (
-										<Button variant="ghost" onClick={() => setPassword("")}>
+										<Button variant="ghost" onClick={() => setFirstName("")}>
 											<X className="size-4" />
 										</Button>
 									)}
@@ -120,7 +128,7 @@ export default function SignUpForm() {
 										required
 									/>
 									{lastName.length > 0 && (
-										<Button variant="ghost" onClick={() => setPassword("")}>
+										<Button variant="ghost" onClick={() => setLastName("")}>
 											<X className="size-4" />
 										</Button>
 									)}
@@ -141,7 +149,7 @@ export default function SignUpForm() {
 									required
 								/>
 								{userName.length > 0 && (
-									<Button variant="ghost" onClick={() => setPassword("")}>
+									<Button variant="ghost" onClick={() => setUserName("")}>
 										<X className="size-4" />
 									</Button>
 								)}
@@ -161,36 +169,22 @@ export default function SignUpForm() {
 									required
 								/>
 								{email.length > 0 && (
-									<Button variant="ghost" onClick={() => setPassword("")}>
+									<Button variant="ghost" onClick={() => setEmail("")}>
 										<X className="size-4" />
 									</Button>
 								)}
 							</div>
 						</div>
 						{/* password */}
-						<div className="grid gap-2">
-							<Label htmlFor="password">Password</Label>
-
-							<div className="flex">
-								<Input
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									id="password"
-									name="password"
-									type="password"
-									required
-								/>
-								{password.length > 0 && (
-									<Button variant="ghost" onClick={() => setPassword("")}>
-										<X className="size-4" />
-									</Button>
-								)}
-							</div>
-						</div>
+						<InputStrongPassword
+							onPasswordChange={(password) => setPassword(password)}
+							onSignalStrong={(signal) => setPasswordIsStrong(signal)}
+						/>
 						<div className="grid gap-2">
 							<AuthButton
 								isLoading={loading}
-								normalLabel="Sign Up"
+								isPasswordStrong={isPasswordStrong}
+								normalLabel="Create account"
 								loadingLabel="Signing Up"
 							/>
 						</div>
@@ -214,7 +208,6 @@ export default function SignUpForm() {
 							</div>
 						</div>
 					)}
-					<Button onClick={handleFakeUser}>Fake user</Button>
 				</CardFooter>
 			</Card>
 		</>

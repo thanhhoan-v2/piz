@@ -1,15 +1,15 @@
 import { ROUTE } from "@constants/route"
+import Link from "next/link"
+import React from "react"
+import { Button } from "../Button"
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
+	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@radix-ui/react-dialog"
-import Link from "next/link"
-import React from "react"
-import { Button } from "../Button"
-import { DialogHeader } from "../Dialog"
+} from "../Dialog"
 
 export default function WelcomeModal({
 	children,
