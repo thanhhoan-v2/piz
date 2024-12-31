@@ -4,10 +4,9 @@ import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
 import { Avatar, AvatarImage } from "@components/ui/Avatar"
 import { useToast } from "@components/ui/toast/useToast"
-import { useSupabaseBrowser } from "@hooks/supabase/browser"
-import type { Notification as INotification } from "@prisma/client"
+import { useQueryCreateUser } from "@queries/client/appUser"
 import { useQueryNotification } from "@queries/client/noti"
-import type { RealtimeChannel } from "@supabase/supabase-js"
+import { useUser } from "@stackframe/stack"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
@@ -43,39 +42,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const sideBarIsVisible = isVisible ? "transform-y-0" : "translate-y-full"
 
 	// Subscribe to notification changes
-	const supabase = useSupabaseBrowser()
 	const queryClient = useQueryClient()
 	const { toast } = useToast()
-	React.useEffect(() => {
-		const channel: RealtimeChannel = supabase
-			.channel("realtime:notifications")
-			.on(
-				"postgres_changes",
-				{
-					event: "INSERT",
-					schema: "public",
-					table: "Notification",
-				},
-				(payload: { new: INotification }) => {
-					console.log(payload)
-					// queryClient.setQueryData<INotification[] | undefined>(
-					// 	queryKey.noti.all,
-					// 	(oldData) => {
-					// 		return oldData ? [payload.new, ...oldData] : [payload.new]
-					// 	},
-					// )
-
-					setNewNotiId(payload.new.id)
-				},
-			)
-			.subscribe()
-
-		return () => {
-			supabase.removeChannel(channel).catch((error) => {
-				console.error("<< Noti << client >> Error removing channel:", error)
-			})
-		}
-	}, [supabase])
 
 	const { data: newNoti, isSuccess } = useQueryNotification({
 		notificationId: newNotiId,
@@ -105,6 +73,21 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 	const { theme } = useTheme()
 	const customTheme = useAtomValue(customThemeAtom)
+
+	const user = useUser()
+	if (user) {
+		const {
+			id,
+			displayName: userName,
+			displayName: fullName,
+			primaryEmail: email,
+		} = user
+
+		if (userName && email && fullName) {
+			const newUser = useQueryCreateUser(id, userName, email, fullName)
+			console.log(newUser)
+		}
+	}
 
 	return (
 		<>

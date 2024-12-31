@@ -26,34 +26,37 @@ export const createComment = async ({
 }: CreateCommentProps) => {
 	try {
 		if (parentId) {
-			if (degree)
-				return await prisma.comment.create({
+			if (degree) {
+				const newChildComment = await prisma.comment.create({
 					data: {
 						id: id,
 						userId: userId,
-						userName: userName,
-						userAvatarUrl: userAvatarUrl,
 						postId: postId,
 						content: content,
 						parentId: parentId,
 						degree: degree,
 					},
 				})
-			return await prisma.comment.create({
+				console.log("<< Comment >> Created child comment: ", newChildComment)
+			}
+
+			const newComment = await prisma.comment.create({
 				data: {
 					id: id,
 					userId: userId,
-					userName: userName,
-					userAvatarUrl: userAvatarUrl,
 					postId: postId,
 					parentId: parentId,
 					content: content,
 				},
 			})
+			console.log("<< Comment >> Created comment: ", newComment)
 		}
 		console.error("<< Comment >> Missing parentId when creating")
 	} catch (error) {
-		console.error("<< Comment >> Error creating:\n", error)
+		console.error(
+			"<< Comment >> Error creating:\n",
+			JSON.stringify(error, null, 2),
+		)
 	}
 }
 
@@ -98,21 +101,21 @@ export const getCommentCounts = async ({
 				where: { parentId: commentId },
 			})
 
-		const noShares = await prisma.share.count({
-			where: { commentId: commentId },
-		})
+		// const noShares = await prisma.share.count({
+		// 	where: { commentId: commentId },
+		// })
 
 		return {
 			noReactions: noReactions || 0,
 			noComments: noComments || 0,
-			noShares: noShares || 0,
+			// noShares: noShares || 0,
 		}
 	} catch (error) {
 		console.error("<< Comment >> Error fetching comment counts:", error)
 		return {
 			noReactions: 0,
 			noComments: 0,
-			noShares: 0,
+			// noShares: 0,
 		}
 	}
 }

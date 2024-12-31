@@ -7,8 +7,8 @@ import PostReactButton from "@components/ui/post/PostReactButton"
 import PostShareButton from "@components/ui/post/PostShareButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { Post as IPost } from "@prisma/client"
-import { useQueryAppUser } from "@queries/client/appUser"
 import { useQueryPostCounts, useQueryPostReaction } from "@queries/client/post"
+import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import { Sparkles } from "lucide-react"
 import { useRouter } from "nextjs-toploader/app"
@@ -42,8 +42,8 @@ export default function Post({
 	const router = useRouter()
 
 	// Get the app user byt query data
-	const { data: user } = useQueryAppUser()
-	const appUserName = user?.user_metadata.userName
+	const user = useUser()
+	const appUserName = user?.displayName
 	const appUserId = user?.id
 
 	// Get the post counts by query data
@@ -54,7 +54,7 @@ export default function Post({
 	} = useQueryPostCounts({ postId: id })
 	const noReactions = postCounts?.noReactions
 	const noComments = postCounts?.noComments
-	const noShares = postCounts?.noShares
+	// const noShares = postCounts?.noShares
 
 	// Get the reaction of the post by the app user by query data
 	const {
@@ -65,7 +65,10 @@ export default function Post({
 		postId: id,
 	})
 
-	const handlePostClick = (event: React.KeyboardEvent<HTMLDivElement>) => {
+	/*
+	 ** Avoid click on not-content part of the post
+	 */
+	const handlePostClick = (event: React.MouseEvent<HTMLDivElement>) => {
 		const targetTag = (event.target as HTMLElement).tagName.toLowerCase()
 		console.log(targetTag)
 		if (targetTag === "div") {
@@ -158,7 +161,7 @@ export default function Post({
 							wrapperClassName={postButtonWrapperClassName}
 							userId={userId}
 							postId={id}
-							initialShareCount={noShares ?? 0}
+							// initialShareCount={noShares ?? 0}
 						/>
 					</>
 				</div>

@@ -1,7 +1,0 @@
-model SavedPost {
-  id        String   @id
-  userId    String   @db.Uuid
-  postId    String
-  isDeleted Boolean? @default(false)
-  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
-}

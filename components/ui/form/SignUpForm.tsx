@@ -13,11 +13,8 @@ import { Input } from "@components/ui/Input"
 import { Label } from "@components/ui/Label"
 import AuthButton from "@components/ui/button/AuthButton"
 import InputStrongPassword from "@components/ui/input/InputStrongPassword"
-import { ROUTE } from "@constants/route"
 import { faker } from "@faker-js/faker"
-import { useSignUp } from "@hooks/auth/useSignUp"
 import { useQueryClient } from "@tanstack/react-query"
-import { queryKey } from "@utils/queryKeyFactory"
 import { useSetAtom } from "jotai"
 import { TriangleAlert, X } from "lucide-react"
 import Link from "next/link"
@@ -40,30 +37,30 @@ export default function SignUpForm() {
 	const queryClient = useQueryClient()
 	const setUserAtom = useSetAtom(userAtom)
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		setLoading(true)
-		setError(null)
+	// const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	// 	e.preventDefault()
+	// 	setLoading(true)
+	// 	setError(null)
+		//
+		// const signUpValues = {
+		// 	email,
+		// 	password,
+		// 	firstName,
+		// 	lastName,
+		// 	userName,
+		// }
 
-		const signUpValues = {
-			email,
-			password,
-			firstName,
-			lastName,
-			userName,
-		}
+		// const { user, error } = await useSignUp(signUpValues)
 
-		const { user, error } = await useSignUp(signUpValues)
-
-		if (error) {
-			setError(error.message)
-		} else if (user) {
-			queryClient.setQueryData(queryKey.user.selectMain(), user)
-			setUserAtom(user)
-			router.push(ROUTE.HOME)
-		}
-		setLoading(false)
-	}
+	// 	if (error) {
+	// 		setError(error.message)
+	// 	} else if (user) {
+	// 		queryClient.setQueryData(queryKey.user.selectMain(), user)
+	// 		setUserAtom(user)
+	// 		router.push(ROUTE.HOME)
+	// 	}
+	// 	setLoading(false)
+	// }
 
 	const handleFakeUser = () => {
 		const fake_email: string = faker.internet.email()

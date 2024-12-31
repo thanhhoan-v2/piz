@@ -1,6 +1,4 @@
 "use client"
-
-import { userAtom } from "@atoms/user"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -37,12 +35,11 @@ import SearchList from "@components/ui/search/SearchList"
 import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@queries/server/post"
-import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
+import { useUser } from "@stackframe/stack"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { useAtomValue } from "jotai"
 import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
 import React from "react"
 
@@ -215,23 +212,10 @@ export default function PostForm({
 		}
 	}, [mentionSearchValue, searchResults])
 
-	const handleSearchvalue = async (value: string) => {
-		try {
-			setIsSearching(true)
-			const data = await usePartialSearch({
-				prefix: value,
-			})
-			setSearchResults(data)
-			setIsSearching(false)
-		} catch (error) {
-			console.error("Error searching: ", error)
-		}
-	}
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue changes on every render
 	React.useEffect(() => {
 		if (mentionSearchValue.length > 0) {
-			handleSearchvalue(mentionSearchValue.toLowerCase())
+			// handleSearchvalue(mentionSearchValue.toLowerCase())
 		} else {
 			setSearchResults([])
 		}
@@ -268,11 +252,11 @@ export default function PostForm({
 	}
 
 	const queryClient = useQueryClient()
-	const user = useAtomValue(userAtom)
+	const user = useUser()
 	const userId = user?.id
-	const userName = user?.user_metadata?.userName
-	const fullName = user?.user_metadata?.fullName
-	const userAvatarUrl = user?.user_metadata?.avatarUrl
+	const userName = user?.displayName
+	const fullName = user?.displayName
+	const userAvatarUrl = user?.profileImageUrl
 
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
@@ -304,20 +288,20 @@ export default function PostForm({
 		onError: (error) => {
 			console.error("Error creating post:", error)
 		},
-		onSettled: (newPost) => {
-			if (newPost) {
-				queryClient.invalidateQueries({
-					queryKey: [
-						queryKey.post.selectId(newPost.id),
-						queryKey.post.selectCount(newPost.id),
-						queryKey.post.selectReactionByUser({
-							userId: newPost.userId,
-							postId: newPost.id,
-						}),
-					],
-				})
-			}
-		},
+		// onSettled: (newPost) => {
+		// 	if (newPost) {
+		// 		queryClient.invalidateQueries({
+		// 			queryKey: [
+		// 				queryKey.post.selectId(newPost.id),
+		// 				queryKey.post.selectCount(newPost.id),
+		// 				queryKey.post.selectReactionByUser({
+		// 					userId: newPost.userId,
+		// 					postId: newPost.id,
+		// 				}),
+		// 			],
+		// 		})
+		// 	}
+		// },
 	})
 
 	const handleSubmitPost = () => {
@@ -325,7 +309,7 @@ export default function PostForm({
 
 		const newPost: CreatePostProps = {
 			id: generateBase64uuid(),
-			userId: userId ?? null,
+			userId: userId,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: postContent,

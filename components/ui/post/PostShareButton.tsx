@@ -2,12 +2,11 @@
 
 import { Button } from "@components/ui/Button"
 import { Forward } from "lucide-react"
-import React from "react"
 
 type PostShareButtonProps = {
 	userId: string
 	postId: string
-	initialShareCount: number
+	initialShareCount?: number
 	className?: string
 	wrapperClassName?: string
 }
@@ -24,14 +23,14 @@ export default function PostShareButton({
 	className,
 	wrapperClassName,
 }: PostShareButtonProps) {
-	const [shareCount, setShareCount] = React.useState(initialShareCount)
+	// const [shareCount, setShareCount] = React.useState(initialShareCount)
 
 	return (
 		<div className={wrapperClassName}>
 			<Button variant="ghost" className={className}>
 				<Forward />
 			</Button>
-			<span>{shareCount}</span>
+			{/* <span>{shareCount}</span> */}
 		</div>
 	)
 }

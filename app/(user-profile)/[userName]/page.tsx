@@ -1,21 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { AvatarStack } from "@components/ui/AvatarStack"
-import { Button } from "@components/ui/Button"
-import FollowButton from "@components/ui/button/FollowButton"
 import Post from "@components/ui/post"
-import { useSupabaseServer } from "@hooks/supabase/server"
 import type { Post as IPost } from "@prisma/client"
-import {
-	countUserFollowers,
-	getFirstThreeFollowerAvatarUrls,
-} from "@queries/server/follow"
 import { getAllUserPosts } from "@queries/server/post"
-import { getViewingUserInfo } from "@queries/server/user"
+import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import type { Metadata } from "next"
 
+	
 export async function generateMetadata({
 	params,
 }: {
@@ -34,13 +28,13 @@ export default async function UserPage({
 	const userName = params.userName
 
 	// App user, the main user
-	const supabase = useSupabaseServer()
-	const {
-		data: { user: appUser },
-	} = await supabase.auth.getUser()
+	// const {
+	// 	data: { user: appUser },
+	// } = await supabase.auth.getUser()
 
 	// Viewing user, another person
-	const viewingUser = await getViewingUserInfo(userName)
+	// const viewingUser = await getViewingUserInfo(userName)
+	const viewingUser = useUser()
 
 	// Get all posts by the viewing user
 	let posts: IPost[] = []
@@ -50,18 +44,18 @@ export default async function UserPage({
 	}
 
 	// Get the first three follower avatar urls for AvatarStack
-	let firstThreeAvatarUrls: { name: string; image: string }[] = []
-	if (appUser) {
-		const data = await getFirstThreeFollowerAvatarUrls({ userId: appUser.id })
-		if (data) firstThreeAvatarUrls = data
-	}
+	const firstThreeAvatarUrls: { name: string; image: string }[] = []
+	// if (appUser) {
+	// 	const data = await getFirstThreeFollowerAvatarUrls({ userId: appUser.id })
+	// 	if (data) firstThreeAvatarUrls = data
+	// }
 
 	// Get number of followers
-	let noFollowers = 0
-	if (appUser) {
-		const data = await countUserFollowers({ userId: appUser.id })
-		if (data) noFollowers = data
-	}
+	const noFollowers = 0
+	// if (appUser) {
+	// 	const data = await countUserFollowers({ userId: appUser.id })
+	// 	if (data) noFollowers = data
+	// }
 
 	return (
 		<>
@@ -97,22 +91,22 @@ export default async function UserPage({
 				</div>
 
 				{/* if the user viewing profile is the main user */}
-				{viewingUser?.id === appUser?.id ? (
-					<Button variant="outline" className="mt-5 w-full">
-						Edit profile
-					</Button>
-				) : (
-					<>
-						{appUser && viewingUser ? (
-							<FollowButton
-								followerId={appUser.id} // Follower is the main user
-								followeeId={viewingUser.id} // Followee is the viewing user, the person is requested to follow
-							/>
-						) : (
-							<Button disabled>Follow</Button>
-						)}
-					</>
-				)}
+				{/* {viewingUser?.id === appUser?.id ? ( */}
+				{/* 	<Button variant="outline" className="mt-5 w-full"> */}
+				{/* 		Edit profile */}
+				{/* 	</Button> */}
+				{/* ) : ( */}
+				{/* 	<> */}
+				{/* 		{appUser && viewingUser ? ( */}
+				{/* 			<FollowButton */}
+				{/* 				followerId={appUser.id} // Follower is the main user */}
+				{/* 				followeeId={viewingUser.id} // Followee is the viewing user, the person is requested to follow */}
+				{/* 			/> */}
+				{/* 		) : ( */}
+				{/* 			<Button disabled>Follow</Button> */}
+				{/* 		)} */}
+				{/* 	</> */}
+				{/* )} */}
 
 				{/* user posts */}
 				<div className="mt-5">

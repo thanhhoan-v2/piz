@@ -6,7 +6,6 @@ import SearchList, {
 } from "@components/ui/search/SearchList"
 import SearchSkeleton from "@components/ui/skeleton/SearchResultSkeleton"
 import { useQueryAppUser } from "@queries/client/appUser"
-import { usePartialSearch } from "@queries/server/supabase/supabasePartialSearch"
 import { SearchIcon, Sparkles } from "lucide-react"
 import React from "react"
 
@@ -18,17 +17,17 @@ export default function SearchBar() {
 	)
 
 	const { data: user } = useQueryAppUser()
-	const appUserId = user?.id
+	// const appUserId = user?.id
 
 	const handleSearchvalue = async (value: string) => {
 		try {
 			if (value.length > 0) {
 				setIsSearching(true)
-				const data = await usePartialSearch({
-					prefix: value,
-				})
+				// const data = await usePartialSearch({
+				// 	prefix: value,
+				// })
 				setIsSearching(false)
-				setSearchResults(data)
+				// setSearchResults(data)
 			}
 		} catch (error) {
 			console.error("Error searching: ", error)
@@ -68,19 +67,17 @@ export default function SearchBar() {
 				)}
 
 				{searchValue.length > 0 && (
-					<>
-						<div className="w-full">
-							<SearchList
-								searchResults={searchResults}
-								appUserId={appUserId ?? null}
-							/>
-							<div className="my-1 flex-center gap-3">
-								<Separator className="w-1/3" />
-								<Sparkles color="#272727" size={15} />
-								<Separator className="w-1/3" />
-							</div>
+					<div className="w-full">
+						<SearchList
+							searchResults={searchResults}
+							// appUserId={appUserId ?? null}
+						/>
+						<div className="my-1 flex-center gap-3">
+							<Separator className="w-1/3" />
+							<Sparkles color="#272727" size={15} />
+							<Separator className="w-1/3" />
 						</div>
-					</>
+					</div>
 				)}
 			</div>
 		</>

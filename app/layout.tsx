@@ -1,4 +1,6 @@
+import { StackProvider, StackTheme } from "@stackframe/stack"
 import localFont from "next/font/local"
+import { stackServerApp } from "../stack"
 import "@styles/globals.css"
 import NextTopLoader from "nextjs-toploader"
 import "jotai-devtools/styles.css"
@@ -9,6 +11,7 @@ import QueryProvider from "@providers/QueryProvider"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "next-themes"
+import { Suspense } from "react"
 
 const geistSans = localFont({
 	src: "../assets/fonts/GeistVF.woff",
@@ -42,33 +45,39 @@ export default function RootLayout({
 			className={`${geistSans.variable}${geistMono.variable}`}
 		>
 			<body className="bg-background" suppressHydrationWarning>
-				<NextTopLoader
-					color="#ff006e"
-					initialPosition={0.1}
-					crawlSpeed={200}
-					height={5}
-					crawl={true}
-					showSpinner={false}
-					easing="ease"
-					speed={400}
-					shadow={false}
-					zIndex={1600}
-					showAtBottom={false}
-				/>
-				<Analytics />
-				<SpeedInsights />
-				<QueryProvider>
-					<LoadingScreen duration={200} />
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="system"
-						enableSystem
-						disableTransitionOnChange
-					>
-						<Toaster />
-						<AppLayout>{children}</AppLayout>
-					</ThemeProvider>
-				</QueryProvider>
+				<StackProvider app={stackServerApp}>
+					<StackTheme>
+						<NextTopLoader
+							color="#ff006e"
+							initialPosition={0.1}
+							crawlSpeed={200}
+							height={5}
+							crawl={true}
+							showSpinner={false}
+							easing="ease"
+							speed={400}
+							shadow={false}
+							zIndex={1600}
+							showAtBottom={false}
+						/>
+						<Analytics />
+						<SpeedInsights />
+						<QueryProvider>
+							<LoadingScreen duration={200} />
+							<ThemeProvider
+								attribute="class"
+								defaultTheme="system"
+								enableSystem
+								disableTransitionOnChange
+							>
+								<Toaster />
+								<Suspense>
+									<AppLayout>{children}</AppLayout>
+								</Suspense>
+							</ThemeProvider>
+						</QueryProvider>
+					</StackTheme>
+				</StackProvider>
 			</body>
 		</html>
 	)

@@ -1,12 +1,10 @@
 "use client"
-
-import { userAtom } from "@atoms/user"
 import { Button } from "@components/ui/Button"
 import PostForm from "@components/ui/form/PostForm"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import { ROUTE } from "@constants/route"
+import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
-import { useAtomValue } from "jotai"
 import { type LucideIcon, UserRoundX } from "lucide-react"
 import type { Route } from "next"
 import { useTheme } from "next-themes"
@@ -31,8 +29,8 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const { theme } = useTheme()
 
 	// Get user data from query cache
-	const user = useAtomValue(userAtom)
-	const userName = user?.user_metadata?.userName
+	const user = useUser()
+	const userName = user?.displayName
 
 	// Icon fill for different pages
 	const iconFill =

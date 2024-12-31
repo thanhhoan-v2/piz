@@ -40,7 +40,10 @@ export const createPostReaction = async ({
 			console.log("[POST_REACTION] User ID not found")
 		}
 	} catch (error) {
-		console.error("[POST_REACTION] Error creating: ", error)
+		console.error(
+			"[POST_REACTION] Error creating: ",
+			JSON.stringify(error, null, 2),
+		)
 	}
 }
 

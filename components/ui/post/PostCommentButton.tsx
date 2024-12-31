@@ -11,12 +11,14 @@ import {
 	AlertDialogTitle,
 } from "@components/ui/AlertDialog"
 import { Button } from "@components/ui/Button"
-import { Dialog, DialogContent } from "@components/ui/Dialog"
+import { Dialog, DialogContent, DialogTitle } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
 import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
 import type { PostCounts } from "@components/ui/post/PostReactButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
+import type { Comment } from "@prisma/client"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -88,7 +90,7 @@ export default function PostCommentButton({
 
 			queryClient.setQueryData(queryKey.comment.all, (old: Comment[]) => [
 				newComment,
-				...old,
+				...(old ?? []),
 			])
 
 			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {
@@ -128,7 +130,7 @@ export default function PostCommentButton({
 			content: userInput,
 		}
 
-		if (userName !== null) {
+		if (userName !== null && newPostCommentId) {
 			addCommentMutation.mutate(newComment)
 		} else {
 			throw new Error("Comment failed: User name or user avatar url is unknown")
@@ -169,6 +171,9 @@ export default function PostCommentButton({
 			</div>
 
 			<Dialog open={modalIsOpen} onOpenChange={setOpenModal}>
+				<VisuallyHidden.Root>
+					<DialogTitle />
+				</VisuallyHidden.Root>
 				<DialogContent
 					className="flex-col rounded-lg border-0"
 					onPointerDownOutside={handleOpenDiscardAlert}

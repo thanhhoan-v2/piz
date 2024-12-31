@@ -12,11 +12,11 @@ import {
 } from "@components/ui/post"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
-import { useQueryAppUser } from "@queries/client/appUser"
 import {
 	useQueryCommentCounts,
 	useQueryCommentReaction,
 } from "@queries/client/comment"
+import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import Image from "next/image"
 import { useRouter } from "nextjs-toploader/app"
@@ -33,15 +33,15 @@ export default function PostComment({
 	createdAt,
 	updatedAt,
 	isDeleted,
-	userName,
-	userAvatarUrl,
 	childrenComment,
 }: CommentWithChildren & { childrenComment?: CommentWithChildren }) {
 	const router = useRouter()
 
 	// Get the app user byt query data
-	const { data: user } = useQueryAppUser()
+	const user = useUser()
 	const appUserId = user?.id
+	const userName = user?.displayName
+	const userAvatarUrl = user?.profileImageUrl
 
 	// Get the post counts by query data
 	const {

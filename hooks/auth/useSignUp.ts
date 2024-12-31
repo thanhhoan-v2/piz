@@ -1,7 +1,5 @@
 "use server"
 
-import { useSupabaseServer } from "@hooks/supabase/server"
-
 type signUpProps = {
 	email: string
 	password: string
@@ -17,22 +15,19 @@ export const useSignUp = async ({
 	lastName,
 	userName,
 }: signUpProps) => {
-	const supabase = useSupabaseServer()
-
-	const {
-		data: { user, session },
-		error,
-	} = await supabase.auth.signUp({
-		email,
-		password,
-		options: {
-			data: {
-				userName: userName,
-				fullName: `${firstName} ${lastName}`,
-				password: password, // for development only
-			},
-		},
-	})
-
-	return { user, session, error }
+	// const {
+	// 	data: { user, session },
+	// 	error,
+	// } = await supabase.auth.signUp({
+	// 	email,
+	// 	password,
+	// 	options: {
+	// 		data: {
+	// 			userName: userName,
+	// 			fullName: `${firstName} ${lastName}`,
+	// 			password: password, // for development only
+	// 		},
+	// 	},
+	// })
+	// return { user, session, error }
 }

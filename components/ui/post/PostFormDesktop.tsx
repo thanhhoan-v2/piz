@@ -21,7 +21,7 @@ export default function PostFormDesktop() {
 							}
 						/>
 					</Avatar>
-					<Input placeholder="What's happening?" className="" />
+					<Input placeholder="Share your new idea" className="" />
 				</div>
 			</PostForm>
 		</>

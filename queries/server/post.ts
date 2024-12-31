@@ -5,14 +5,42 @@ import { prisma } from "@prisma/createClient"
 
 export type CreatePostProps = {
 	id: string
-	userId: string | null
-	userName: string | null
-	userAvatarUrl: string | null
+	userId?: string | null
+	userName?: string | null
+	userAvatarUrl?: string | null
 	content: string
 	visibility: $Enums.PostVisibility
 	createdAt: Date
 }
 
+// export const createPost = async ({
+// 	id,
+// 	userId,
+// 	userName,
+// 	userAvatarUrl,
+// 	content,
+// 	visibility,
+// }: CreatePostProps) => {
+// 	try {
+// 		if (userId) {
+// 			const newPost = await prisma.post.create({
+// 				data: {
+// 					id: id,
+// 					userId: userId,
+// 					userName: userName,
+// 					userAvatarUrl: userAvatarUrl,
+// 					content: content,
+// 					visibility: visibility,
+// 			},
+// 			})
+// 			console.log("Created post: ", newPost)
+// 			return newPost
+// 		}
+// 		console.log("[POST] Missing userId when creating post")
+// 	} catch (error) {
+// 		console.error("[POST] Error when creating: ", error)
+// 	}
+// }
 export const createPost = async ({
 	id,
 	userId,
@@ -22,23 +50,48 @@ export const createPost = async ({
 	visibility,
 }: CreatePostProps) => {
 	try {
-		if (userId) {
-			const newPost = await prisma.post.create({
-				data: {
-					id: id,
-					userId: userId,
-					userName: userName,
-					userAvatarUrl: userAvatarUrl,
-					content: content,
-					visibility: visibility,
-				},
-			})
-			console.log("Created post: ", newPost)
-			return newPost
+		if (!userId) {
+			console.log("[POST] Missing userId when creating post")
+			return
 		}
-		console.log("[POST] Missing userId when creating post")
+
+		if (
+			!id ||
+			!userId ||
+			!userName ||
+			!userAvatarUrl ||
+			!content ||
+			!visibility
+		) {
+			console.log("[POST] Missing required fields when creating post")
+			return
+		}
+
+		console.log("Creating post with the following data:")
+		console.log("id:", id)
+		console.log("userId:", userId)
+		console.log("userName:", userName)
+		console.log("userAvatarUrl:", userAvatarUrl)
+		console.log("content:", content)
+		console.log("visibility:", visibility)
+
+		const newPost = await prisma.post.create({
+			data: {
+				id: id,
+				userId: userId,
+				userName: userName,
+				userAvatarUrl: userAvatarUrl,
+				content: content,
+				visibility: visibility,
+			},
+		})
+		console.log("Created post: ", newPost)
+		return newPost
 	} catch (error) {
-		console.error("[POST] Error when creating: ", error)
+		console.error(
+			"[POST] Error when creating: ",
+			JSON.stringify(error, null, 2),
+		)
 	}
 }
 
@@ -52,14 +105,14 @@ export const getPostCounts = async ({ postId }: { postId: string }) => {
 			where: { postId: postId },
 		})
 
-		const noShares = await prisma.share.count({
-			where: { postId: postId },
-		})
+		// const noShares = await prisma.share.count({
+		// 	where: { postId: postId },
+		// })
 
 		return {
 			noReactions: noReactions || 0,
 			noComments: noComments || 0,
-			noShares: noShares || 0,
+			// noShares: noShares || 0,
 		}
 	} catch (error) {
 		console.error("Error fetching post counts:", error)
