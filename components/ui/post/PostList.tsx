@@ -13,6 +13,8 @@ export default function PostList() {
 		error,
 	} = useQueryAllPosts()
 
+	console.log("Posts: ", posts)
+
 	if (isError) {
 		console.log("Error loading posts : ", error)
 		return <div>Error loading posts 😢</div>
@@ -30,6 +32,7 @@ export default function PostList() {
 								userId,
 								userName,
 								userAvatarUrl,
+								title,
 								content,
 								visibility,
 								createdAt,
@@ -46,6 +49,7 @@ export default function PostList() {
 								userId={userId}
 								userName={userName}
 								userAvatarUrl={userAvatarUrl}
+								title={title}
 								content={content}
 								visibility={visibility}
 								createdAt={createdAt}

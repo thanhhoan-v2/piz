@@ -7,6 +7,9 @@ export const queryKey = {
 		selectMain: () => [...queryKey.user.all, "select", "main"] as const,
 		// user - select - { id }
 		selectId: (id: string) => [...queryKey.user.selects(), id] as const,
+		// user - select - { userName }
+		selectUserName: (userName: string) =>
+			[...queryKey.user.selects(), userName] as const,
 	},
 	post: {
 		all: ["posts"] as const,
@@ -16,6 +19,9 @@ export const queryKey = {
 		selects: () => [...queryKey.post.all, "select"] as const,
 		// posts - select - { id }
 		selectId: (id: string) => [...queryKey.post.selects(), id] as const,
+		// posts - select - { userId }
+		selectUser: (userId: string) =>
+			[...queryKey.post.selects(), userId] as const,
 		// posts - select - { id } - counts
 		selectCount: (id: string) =>
 			[...queryKey.post.selectId(id), "count"] as const,
@@ -47,7 +53,7 @@ export const queryKey = {
 		selectCountByComment: ({
 			commentId,
 			parentId,
-		}: { commentId: string; parentId: string }) =>
+		}: { commentId: string; parentId: string | null }) =>
 			[...queryKey.comment.selectId(commentId), "count", parentId] as const,
 		// comments - select - { id } - reactions - { userId }
 		selectReactionByUser: ({

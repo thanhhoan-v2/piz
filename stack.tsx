@@ -7,5 +7,6 @@ export const stackServerApp = new StackServerApp({
 	urls: {
 		signIn: "/sign-in",
 		signUp: "/sign-up",
+		accountSettings: "/settings",
 	},
 })

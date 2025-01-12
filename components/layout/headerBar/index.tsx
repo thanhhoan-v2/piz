@@ -6,6 +6,13 @@ import HeaderDropdownMenu from "./HeaderBarDropdownMenu"
 import HeaderBarLogo from "./HeaderBarLogo"
 import HeaderBarNavigation from "./HeaderBarNavigation"
 
+/**
+ * A header bar component that displays a logo, navigation links, a custom theme toggle, and a dropdown menu.
+ *
+ * @prop {string} className - The class name for the header element.
+ *
+ * @returns A JSX element representing the header bar.
+ */
 export default function HeaderBar({ className }: { className: string }) {
 	return (
 		<>

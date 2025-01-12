@@ -2,6 +2,12 @@ import { ROUTE } from "@constants/route"
 import { useSupabaseServer } from "@hooks/supabase/server"
 import { redirect } from "next/navigation"
 
+/**
+ * A protected page that redirects to sign-in page if the user is not authenticated.
+ * The page renders a simple text when the user is authenticated.
+ *
+ * @returns A `NextResponse` object if the user is not authenticated, otherwise a React component.
+ */
 export default async function ProtectedPage() {
 	const supabase = useSupabaseServer()
 

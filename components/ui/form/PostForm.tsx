@@ -20,18 +20,11 @@ import {
 	DrawerTitle,
 	DrawerTrigger,
 } from "@components/ui/Drawer"
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@components/ui/Select"
 import { Textarea } from "@components/ui/Textarea"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
-import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
 import SearchList from "@components/ui/search/SearchList"
+import { useToast } from "@components/ui/toast/useToast"
 import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@queries/server/post"
@@ -40,8 +33,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { HashIcon, ImageIcon, MenuIcon } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import React from "react"
+import { getUserById } from "../../../app/actions/user"
+import { Input } from "../Input"
+import { Separator } from "../Separator"
 
 export type PostVisibilityEnumType =
 	| "PUBLIC"
@@ -78,6 +74,7 @@ export default function PostForm({
 }) {
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
 	const [alertIsOpen, setOpenAlert] = React.useState<boolean>(false)
+	const [postTitle, setPostTitle] = React.useState("")
 	const [postContent, setPostContent] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 	const [postVisibility, setPostVisibility] =
@@ -97,6 +94,26 @@ export default function PostForm({
 	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
 		[],
 	)
+	const [posterInfo, setPosterInfo] = React.useState<{
+		userName: string
+		avatarUrl: string
+		userId: string
+	}>()
+	const user = useUser()
+	const userId = user?.id
+	const userAvatarUrl = user?.profileImageUrl
+	const { toast } = useToast()
+
+	// Fetch user info when userId changes
+	React.useEffect(() => {
+		const fetchUserInfo = async () => {
+			if (userId) {
+				const userInfo = await getUserById(userId)
+				setPosterInfo(userInfo)
+			}
+		}
+		fetchUserInfo()
+	}, [userId])
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		const newValue = e.target.value
@@ -223,6 +240,7 @@ export default function PostForm({
 
 	const handleDiscard = () => {
 		setOpenDrawer(false)
+		setPostTitle("")
 		setPostContent("")
 		setPostVisibility("PUBLIC")
 		setSearchResults([])
@@ -243,20 +261,17 @@ export default function PostForm({
 
 	const handleFakePost = () => {
 		const fake_content: string = faker.lorem.paragraphs()
+		const fake_title: string = faker.lorem.sentence(10)
 		const fake_visibility: PostVisibilityEnumType = PostVisibilityEnumArray[
 			Math.floor(Math.random() * PostVisibilityEnumArray.length)
 		] as PostVisibilityEnumType
 
+		setPostTitle(fake_title)
 		setPostContent(fake_content)
 		setPostVisibility(fake_visibility)
 	}
 
 	const queryClient = useQueryClient()
-	const user = useUser()
-	const userId = user?.id
-	const userName = user?.displayName
-	const fullName = user?.displayName
-	const userAvatarUrl = user?.profileImageUrl
 
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
@@ -285,8 +300,19 @@ export default function PostForm({
 			// Return a context object with the snapshotted value
 			return { previousPosts }
 		},
+		onSuccess: () => {
+			toast({
+				title: "Success!",
+				description: "Your post has been created.",
+				className: "bg-green-500",
+			})
+		},
 		onError: (error) => {
-			console.error("Error creating post:", error)
+			toast({
+				title: "Error",
+				description: "Failed to create post. Please try again.",
+				variant: "destructive",
+			})
 		},
 		// onSettled: (newPost) => {
 		// 	if (newPost) {
@@ -310,8 +336,9 @@ export default function PostForm({
 		const newPost: CreatePostProps = {
 			id: generateBase64uuid(),
 			userId: userId,
-			userName: userName,
-			userAvatarUrl: userAvatarUrl,
+			userName: posterInfo?.userName ?? "",
+			userAvatarUrl: posterInfo?.avatarUrl ?? "",
+			title: postTitle,
 			content: postContent,
 			visibility: postVisibility,
 			createdAt: date,
@@ -353,15 +380,15 @@ export default function PostForm({
 						<DrawerDescription>What are you thinking?</DrawerDescription>
 					</DrawerHeader>
 					<div className="flex-col items-start gap-3 p-4">
-						<PostUserInfo
+						{/* <PostUserInfo
 							isWriteOnly
-							userName={userName}
+							userName={posterInfo?.userName}
 							userAvatarUrl={userAvatarUrl}
 							visibility={postVisibility}
-							appUserName={userName}
+							appUserName={posterInfo?.userName}
 							createdAt={new Date()}
 							updatedAt={null}
-						/>
+						/> */}
 						<div className="flex-y-center gap-2">
 							{mentionedUsers.length > 0 &&
 								mentionedUsers.map((mentionedUser) => (
@@ -373,18 +400,33 @@ export default function PostForm({
 								))}
 						</div>
 						<div className="mb-8 w-full flex-start flex-col gap-2">
-							<Textarea
-								autoFocus
-								ref={textareaRef}
-								value={postContent}
-								onChange={handleInputChange}
-								placeholder={cn("Dear ", fullName, ", what is in your mind ?")}
-								className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
-							/>
-							<div className="flex space-x-4">
-								<ImageIcon />
-								<HashIcon />
-								<MenuIcon />
+							<div className="flex-col gap-4">
+								<h1>Title</h1>
+								<Input
+									value={postTitle}
+									onChange={(e) => setPostTitle(e.target.value)}
+									placeholder={cn(
+										"Dear ",
+										posterInfo?.userName,
+										", what is the title of your topic?",
+									)}
+									className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
+								/>
+							</div>
+							<div className="my-4 flex-center gap-3">
+								<Separator className="w-1/3" />
+								<Sparkles color="#272727" size={15} />
+								<Separator className="w-1/3" />
+							</div>
+							<div className="flex-col gap-4">
+								<h1>Description</h1>
+								<Textarea
+									ref={textareaRef}
+									value={postContent}
+									onChange={handleInputChange}
+									placeholder={cn("Describe your topic here")}
+									className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
+								/>
 							</div>
 						</div>
 					</div>
@@ -403,9 +445,10 @@ export default function PostForm({
 					)}
 
 					<DrawerFooter>
-						<div className="flex-between ">
+						<div className="flex-between">
 							{/* Select post visibility */}
-							<Select
+							<div className="h-[10px] w-[100px]" onClick={handleFakePost} />
+							{/* <Select
 								onValueChange={(value: PostVisibilityEnumType) =>
 									setPostVisibility(value)
 								}
@@ -430,7 +473,7 @@ export default function PostForm({
 										Only you can view, because you are an introvert 😃
 									</SelectItem>
 								</SelectContent>
-							</Select>
+							</Select> */}
 
 							{/* Controls post length */}
 							{postContent.length >= mid_threshold && (
@@ -446,7 +489,6 @@ export default function PostForm({
 
 							{/* Post button */}
 							<div className="flex gap-4">
-								<Button onClick={handleFakePost}>Fake</Button>
 								<Button
 									className="w-[100px]"
 									disabled={

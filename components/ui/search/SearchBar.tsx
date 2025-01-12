@@ -1,85 +1,97 @@
 "use client"
+import { searchUsers } from "@/app/actions/search"
+import { Button } from "@components/ui/Button"
 import { Input } from "@components/ui/Input"
-import { Separator } from "@components/ui/Separator"
-import SearchList, {
-	type SearchResultProps,
-} from "@components/ui/search/SearchList"
-import SearchSkeleton from "@components/ui/skeleton/SearchResultSkeleton"
-import { useQueryAppUser } from "@queries/client/appUser"
-import { SearchIcon, Sparkles } from "lucide-react"
+import SearchList from "@components/ui/search/SearchList"
+import { useUser } from "@stackframe/stack"
+import { cn } from "@utils/cn"
+import { Search } from "lucide-react"
 import React from "react"
 
-export default function SearchBar() {
-	const [searchValue, setSearchValue] = React.useState<string>("")
-	const [isSearching, setIsSearching] = React.useState<boolean>(false)
-	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
-		[],
-	)
+interface SearchBarProps {
+	className?: string
+	placeholder?: string
+}
 
-	const { data: user } = useQueryAppUser()
-	// const appUserId = user?.id
+export default function SearchBar({
+	className,
+	placeholder = "Type here to search"
+}: SearchBarProps) {
+	const [searchValue, setSearchValue] = React.useState("")
+	const [isSearching, setIsSearching] = React.useState(false)
+	const [searchResults, setSearchResults] = React.useState<any[]>([])
+	const user = useUser()
 
-	const handleSearchvalue = async (value: string) => {
-		try {
-			if (value.length > 0) {
-				setIsSearching(true)
-				// const data = await usePartialSearch({
-				// 	prefix: value,
-				// })
+	const handleSearch = async () => {
+		if (searchValue.length > 0) {
+			console.log("[SearchBar] Manual search triggered for:", searchValue)
+			setIsSearching(true)
+			try {
+				const results = await searchUsers(searchValue)
+				console.log("[SearchBar] Search results:", results)
+				setSearchResults(results)
+			} catch (error) {
+				console.error("[SearchBar] Search error:", error)
+				setSearchResults([])
+			} finally {
+				console.log("[SearchBar] Search completed")
 				setIsSearching(false)
-				// setSearchResults(data)
 			}
-		} catch (error) {
-			console.error("Error searching: ", error)
 		}
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: handleSearchvalue renders on every change
-	React.useEffect(() => {
-		if (searchValue.length > 0) {
-			handleSearchvalue(searchValue.toLowerCase())
-		} else {
-			setSearchResults([])
+	const handleKeyPress = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			handleSearch()
 		}
-	}, [searchValue])
+	}
+
+	React.useEffect(() => {
+		const timeoutId = setTimeout(handleSearch, 300)
+
+		return () => {
+			console.log("[SearchBar] Clearing timeout")
+			clearTimeout(timeoutId)
+		}
+	}, [searchValue]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	return (
-		<>
-			<div className="mobile_l:w-[400px] mobile_m:w-[350px] mobile_s:w-[300px] tablet:w-[600px] flex-center flex-col">
-				<div className="relative w-full">
-					<SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-gray-500" />
+		<div className="flex-col gap-4">
+			<div className={cn("relative flex gap-2", className)}>
+				<div className="relative flex-1">
+					<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 					<Input
+						placeholder={placeholder}
 						value={searchValue}
-						onChange={(e) => setSearchValue(e.target.value)}
-						type="search"
-						placeholder="Search..."
+						onChange={(e) => {
+							console.log("[SearchBar] Input changed:", e.target.value)
+							setSearchValue(e.target.value)
+						}}
+						onKeyUp={handleKeyPress}
 						className="pl-8"
 					/>
 				</div>
-
-				{/* Display search results */}
-				{isSearching && (
-					<>
-						<SearchSkeleton />
-						<SearchSkeleton />
-						<SearchSkeleton />
-					</>
-				)}
-
-				{searchValue.length > 0 && (
-					<div className="w-full">
-						<SearchList
-							searchResults={searchResults}
-							// appUserId={appUserId ?? null}
-						/>
-						<div className="my-1 flex-center gap-3">
-							<Separator className="w-1/3" />
-							<Sparkles color="#272727" size={15} />
-							<Separator className="w-1/3" />
-						</div>
-					</div>
-				)}
+				{/* <Button
+					onClick={handleSearch}
+					disabled={isSearching || searchValue.length === 0}
+					className="w-[100px]"
+				>
+					{isSearching ? (
+						"Searching..."
+					) : (
+						<>
+							Search
+							<Search className="ml-2 h-4 w-4" />
+						</>
+					)}
+				</Button> */}
 			</div>
-		</>
+			{searchResults.length > 0 && (
+				<SearchList
+					searchResults={searchResults}
+					appUserId={user?.id}
+				/>
+			)}
+		</div>
 	)
 }

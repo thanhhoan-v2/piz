@@ -7,8 +7,8 @@ export type CreateCommentProps = {
 	id: string
 	postId: string
 	userId: string
-	userName: string | null
-	userAvatarUrl: string | null
+	userName?: string | null
+	userAvatarUrl?: string | null
 	content: string
 	degree?: number
 	parentId?: string
@@ -27,29 +27,40 @@ export const createComment = async ({
 	try {
 		if (parentId) {
 			if (degree) {
-				const newChildComment = await prisma.comment.create({
+				try {
+					const newChildComment = await prisma.comment.create({
+						data: {
+							id: id,
+							userId: userId,
+							postId: postId,
+							content: content,
+							parentId: parentId,
+							degree: degree,
+						},
+					})
+					console.log("<< Comment >> Created child comment: ", newChildComment)
+				} catch (error) {
+					console.error(
+						"<< Child comment >> An unexpected error occurred:",
+						error,
+					)
+				}
+			}
+
+			try {
+				const newComment = await prisma.comment.create({
 					data: {
 						id: id,
 						userId: userId,
 						postId: postId,
-						content: content,
 						parentId: parentId,
-						degree: degree,
+						content: content,
 					},
 				})
-				console.log("<< Comment >> Created child comment: ", newChildComment)
+				console.log("<< Comment >> Created comment: ", newComment)
+			} catch (error) {
+				console.error("<< Comment >> An unexpected error occurred:", error)
 			}
-
-			const newComment = await prisma.comment.create({
-				data: {
-					id: id,
-					userId: userId,
-					postId: postId,
-					parentId: parentId,
-					content: content,
-				},
-			})
-			console.log("<< Comment >> Created comment: ", newComment)
 		}
 		console.error("<< Comment >> Missing parentId when creating")
 	} catch (error) {
@@ -89,7 +100,7 @@ export const getAllChildComments = async (parentId: string) => {
 export const getCommentCounts = async ({
 	commentId,
 	parentId,
-}: { commentId: string; parentId: string }) => {
+}: { commentId: string; parentId: string | null }) => {
 	try {
 		const noReactions = await prisma.commentReaction.count({
 			where: { commentId: commentId },

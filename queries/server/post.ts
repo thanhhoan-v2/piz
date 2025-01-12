@@ -8,6 +8,7 @@ export type CreatePostProps = {
 	userId?: string | null
 	userName?: string | null
 	userAvatarUrl?: string | null
+	title: string
 	content: string
 	visibility: $Enums.PostVisibility
 	createdAt: Date
@@ -46,6 +47,7 @@ export const createPost = async ({
 	userId,
 	userName,
 	userAvatarUrl,
+	title,
 	content,
 	visibility,
 }: CreatePostProps) => {
@@ -60,6 +62,7 @@ export const createPost = async ({
 			!userId ||
 			!userName ||
 			!userAvatarUrl ||
+			!title ||
 			!content ||
 			!visibility
 		) {
@@ -71,7 +74,8 @@ export const createPost = async ({
 		console.log("id:", id)
 		console.log("userId:", userId)
 		console.log("userName:", userName)
-		console.log("userAvatarUrl:", userAvatarUrl)
+		// console.log("userAvatarUrl:", userAvatarUrl)
+		console.log("title:", title)
 		console.log("content:", content)
 		console.log("visibility:", visibility)
 
@@ -81,11 +85,12 @@ export const createPost = async ({
 				userId: userId,
 				userName: userName,
 				userAvatarUrl: userAvatarUrl,
+				title: title,
 				content: content,
 				visibility: visibility,
 			},
 		})
-		console.log("Created post: ", newPost)
+		console.log("Created post successfully")
 		return newPost
 	} catch (error) {
 		console.error(
@@ -130,6 +135,7 @@ export const getAllPosts = async () => {
 			createdAt: "desc",
 		},
 	})
+	console.log("Successfully GET all POSTS: ", posts)
 	return posts
 }
 

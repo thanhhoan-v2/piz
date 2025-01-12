@@ -4,7 +4,6 @@ import DownRightArrowSVG from "@assets/images/down-right-arrow.svg"
 import { Skeleton } from "@components/ui/Skeleton"
 import CommentCommentButton from "@components/ui/comment/CommentCommentButton"
 import CommentReactButton from "@components/ui/comment/CommentReactButton"
-import CommentShareButton from "@components/ui/comment/CommentShareButton"
 import {
 	postButtonClassName,
 	postButtonSkeletonClassName,
@@ -51,7 +50,7 @@ export default function PostComment({
 	} = useQueryCommentCounts({ commentId: id, parentId })
 	const noReactions = commentCounts?.noReactions
 	const noComments = commentCounts?.noComments
-	const noShares = commentCounts?.noShares
+	// const noShares = commentCounts?.noShares
 
 	// Get the reaction of the comment by the app user by query data
 	const {
@@ -143,13 +142,13 @@ export default function PostComment({
 									degree={degree}
 								/>
 
-								<CommentShareButton
-									className={postButtonClassName}
-									wrapperClassName={postButtonWrapperClassName}
-									userId={userId}
-									commentId={id}
-									initialShareCount={noShares ?? 0}
-								/>
+								{/* <CommentShareButton */}
+								{/* 	className={postButtonClassName} */}
+								{/* 	wrapperClassName={postButtonWrapperClassName} */}
+								{/* 	userId={userId} */}
+								{/* 	commentId={id} */}
+								{/* 	// initialShareCount={noShares ?? 0} */}
+								{/* /> */}
 							</>
 						</div>
 					)}
@@ -173,7 +172,7 @@ export default function PostComment({
 							{childrenComment?.children?.map((child, index) => (
 								<>
 									<PostComment
-										key={child.id + child.userId + index}
+										key={`comment-${child.id}-${child.userId}-${child.parentId}-${index}`}
 										{...child}
 										childrenComment={{
 											...child,

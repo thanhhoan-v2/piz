@@ -24,20 +24,39 @@ const sideBarItemClass = cn(
 	sizes,
 )
 
+/**
+ * Renders a sidebar item with different behaviors based on user authentication
+ * status and the provided href.
+ *
+ * - If the user is signed in and the href is "post", renders a button inside a
+ *   PostForm.
+ * - If the user is signed in and the href is "profile", renders a link to the
+ *   user's profile or a placeholder icon if the userName is not available.
+ * - If the href is ROUTE.HOME, always renders a link to the home route.
+ * - If the user is not signed in, renders a button inside a WelcomeModal.
+ * - If none of the above conditions are met, renders a simple link.
+ *
+ * The icon's fill color is determined by whether the current pathname matches
+ * the href and the current theme.
+ *
+ * @param {string} href - The target URL or route for the sidebar item.
+ * @param {LucideIcon} icon - The icon component to display in the sidebar item.
+ * @returns {JSX.Element} The rendered sidebar item component.
+ */
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const pathname = usePathname()
 	const { theme } = useTheme()
 
 	// Get user data from query cache
 	const user = useUser()
-	const userName = user?.displayName
+	const userId = user?.id
 
 	// Icon fill for different pages
 	const iconFill =
 		pathname === href ? (theme === "dark" ? "white" : "black") : "none"
 
 	// If user is signed in and the href is post
-	if (href === "post" && userName) {
+	if (href === "post" && userId) {
 		return (
 			<PostForm>
 				<Button variant="ghost" className={sideBarItemClass}>
@@ -48,18 +67,18 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	}
 
 	// If user is signed in and the href is profile
-	if (href === "profile" && userName) {
+	if (href === "profile" && userId) {
 		return (
 			<Link
 				prefetch={true}
-				href={`/${userName}` as Route}
-				aria-disabled={!userName && true}
+				href={`/${userId}` as Route}
+				aria-disabled={!userId && true}
 			>
 				<Button
 					variant="ghost"
-					className={cn(sideBarItemClass, !userName && "pointer-events-none")}
+					className={cn(sideBarItemClass, !userId && "pointer-events-none")}
 				>
-					{!userName ? <UserRoundX className="w-full" /> : <Icon />}
+					{!userId ? <UserRoundX className="w-full" /> : <Icon />}
 				</Button>
 			</Link>
 		)
@@ -76,7 +95,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 		)
 
 	// If user is not signed in
-	if (!userName) {
+	if (!userId) {
 		return (
 			<>
 				<WelcomeModal>

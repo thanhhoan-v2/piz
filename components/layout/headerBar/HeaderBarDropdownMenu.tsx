@@ -30,6 +30,15 @@ const items = [
 	},
 ]
 
+/**
+ * HeaderDropdownMenu is a component that renders a dropdown menu for the header bar.
+ * It manages user authentication states and theme toggling.
+ * 
+ * - If the user is not authenticated, it provides options to sign up or log in.
+ * - If the user is authenticated, it displays user-related menu items.
+ * - Includes a theme toggle feature to switch between light and dark modes.
+ * - Provides a sign-out option that clears cache and redirects the user to the sign-in page.
+ */
 export default function HeaderDropdownMenu() {
 	const user = useUser()
 	const { theme, setTheme } = useTheme()

@@ -4,6 +4,7 @@ import { Avatar, AvatarImage } from "@components/ui/Avatar"
 import type { NotificationType } from "@prisma/client"
 import { useQueryAppUser } from "@queries/client/appUser"
 import { useQueryAllNotifications } from "@queries/client/noti"
+import { useUser } from "@stackframe/stack"
 import { avatarPlaceholder } from "@utils/image.helpers"
 
 const notiMap: Record<string, string> = {
@@ -14,12 +15,21 @@ const notiMap: Record<string, string> = {
 	REACT: "reacted",
 }
 
+/**
+ * Page showing all the activities of the user.
+ *
+ * It fetches the list of notifications for the user and displays each one
+ * as a card with the sender's avatar, the sender's username, the type of
+ * notification, and the text "you".
+ *
+ * If there is an error fetching the user's information, it displays an error
+ * message. If there is an error loading the activities, it displays an error
+ * message. If the activities are loading, it displays a loading message.
+ *
+ * Otherwise, it displays a list of all the user's activities.
+ */
 export default function ActivityPage() {
-	const {
-		data: user,
-		isLoading: isUserLoading,
-		isError: isUserError,
-	} = useQueryAppUser()
+	const user = useUser()
 
 	const {
 		data: notiList,
@@ -28,9 +38,6 @@ export default function ActivityPage() {
 		isError,
 		isFetching,
 	} = useQueryAllNotifications({ userId: user?.id })
-
-	if (isUserError) return <div>Error fetching your information 😢</div>
-	if (isUserLoading) return <div>Fetching your information...</div>
 
 	if (isError) return <div>Error loading activities 😢</div>
 	if (isLoading || isFetching) return <div>Loading activities...</div>

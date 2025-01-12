@@ -1,3 +1,9 @@
+/**
+ * The component for the footer of every page.
+ *
+ * The footer is placed at the bottom of the page and is only visible on desktop
+ * devices. The footer contains a copyright notice.
+ */
 export default function Footer() {
 	return (
 		<>

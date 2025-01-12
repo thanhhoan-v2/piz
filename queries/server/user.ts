@@ -11,7 +11,7 @@ export const createUser = async (
 	id: string,
 	userName: string,
 	email: string,
-	fullName: string,
+	avatarUrl: string,
 ) => {
 	try {
 		const existingUser = await prisma.user.findUnique({
@@ -21,9 +21,7 @@ export const createUser = async (
 		})
 
 		if (existingUser) {
-			console.error(
-				`[USER] A user with ID ${id} already exists. Abort creating...`,
-			)
+			console.error(`[USER] A user with ID ${id} already exists. Aborting...`)
 			return existingUser
 		}
 
@@ -32,7 +30,7 @@ export const createUser = async (
 				id: id,
 				email: email,
 				userName: userName,
-				fullName: fullName,
+				avatarUrl: avatarUrl,
 			},
 		})
 
@@ -46,16 +44,16 @@ export const createUser = async (
 	}
 }
 
-// export const getViewingUserInfo = async (userName: string) => {
-// 	try {
-// 		const user = await prisma.appUser.findUnique({
-// 			where: { userName: userName },
-// 		})
-// 		return user
-// 	} catch (error) {
-// 		console.error("[USER] Error when fetching: ", error)
-// 	}
-// }
+export const getViewingUserInfo = async (userName: string) => {
+	try {
+		const user = await prisma.user.findUnique({
+			where: { userName: userName },
+		})
+		return user
+	} catch (error) {
+		console.error("[USER] Error when fetching: ", error)
+	}
+}
 
 // export const getRandomUserList = async (
 // 	appUserId: string | null | undefined,

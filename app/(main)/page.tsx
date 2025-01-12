@@ -10,6 +10,20 @@ import { queryKey } from "@utils/queryKeyFactory"
 // to avoid recreating the instance on each render
 
 const queryClient = getQueryClient()
+/**
+ * Prefetches all posts data and optionally prefetches related data for each post.
+ *
+ * This function initiates a prefetch query to retrieve all posts using the query client.
+ * It stores the fetched posts data in the query cache using a specific query key.
+ * 
+ * The commented-out section within the function suggests additional prefetch operations
+ * that can be performed for each post, such as fetching user reactions, post counts,
+ * and comments associated with each post.
+ * 
+ * Currently, these additional prefetch operations are disabled, but they can be enabled
+ * to optimize data retrieval for posts and their related entities.
+ */
+
 async function prefetchPosts() {
 	await queryClient.prefetchQuery({
 		queryKey: queryKey.post.all,
@@ -58,6 +72,21 @@ async function prefetchUser() {
 	}
 }
 
+/**
+ * The home page of the app.
+ *
+ * The home page displays all the posts of the app.
+ *
+ * Prefetches the posts and the user data.
+ *
+ * The posts are fetched in the background and then displayed by the
+ * `PostList` component.
+ *
+ * The user data is fetched in the background and then stored in the
+ * `queryClient` cache.
+ *
+ * @returns The home page component.
+ */
 export default async function HomePage() {
 	await Promise.all([prefetchPosts(), prefetchUser()])
 

@@ -27,7 +27,7 @@ export const useQueryChildComments = ({ parentId }: { parentId: string }) =>
 export const useQueryCommentCounts = ({
 	commentId,
 	parentId,
-}: { commentId: string; parentId: string }) =>
+}: { commentId: string; parentId: string | null }) =>
 	useQuery({
 		queryKey: queryKey.comment.selectCountByComment({
 			commentId: commentId,
@@ -50,8 +50,16 @@ export const useQueryCommentReaction = ({
 		enabled: !!userId && !!commentId,
 	})
 
-export const useQueryAllComments = ({ postId }: { postId: string }) =>
+interface UseQueryAllCommentsParams {
+	postId: string;
+	enabled?: boolean;
+}
+
+export const useQueryAllComments = ({ postId, enabled = true }: UseQueryAllCommentsParams) =>
 	useQuery({
-		queryKey: queryKey.comment.all,
+		queryKey: queryKey.comment.selectPost(postId),
 		queryFn: async () => getAllCommentsByPost({ postId }),
+		enabled: !!postId && enabled,
+		staleTime: 0,
+		refetchOnMount: true
 	})

@@ -10,10 +10,19 @@ import {
 	extractFromCommentTreeById,
 } from "@utils/comment-tree.helpers"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
-export default function CommentPage({
-	params,
-}: { params: { userName: string; postId: string; commentId: string } }) {
+/**
+ * Page displaying a single comment and all its children.
+ *
+ * @returns JSX element for the comment page.
+ */
+export default function CommentPage() {
+	const params = useParams<{
+		userName: string
+		postId: string
+		commentId: string
+	}>()
 	const userName = params.userName
 	const postId = params.postId
 	const commentId = params.commentId

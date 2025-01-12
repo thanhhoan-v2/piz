@@ -1,4 +1,4 @@
-import { createUser } from "@queries/server/user"
+import { createUser, getViewingUserInfo } from "@queries/server/user"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
 
@@ -17,10 +17,16 @@ export const useQueryCreateUser = (
 	id: string,
 	email: string,
 	userName: string,
-	fullName: string,
+  avatarUrl: string,
 ) =>
 	useQuery({
 		queryKey: [queryKey.user.selectMain()],
-		queryFn: async () => createUser(id, email, userName, fullName),
-		enabled: !!id && !!email && !!userName && !!fullName,
+		queryFn: async () => createUser(id, email, userName, avatarUrl),
+		enabled: !!id && !!email && !!userName,
+	})
+
+export const useQueryDataViewingUser = (userName: string) =>
+	useQuery({
+		queryKey: [queryKey.user.selectUserName(userName)],
+		queryFn: async () => getViewingUserInfo(userName),
 	})

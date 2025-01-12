@@ -4,11 +4,12 @@ import { userAtom } from "@atoms/user"
 import { Avatar, AvatarImage } from "@components/ui/Avatar"
 import { Input } from "@components/ui/Input"
 import PostForm from "@components/ui/form/PostForm"
+import { useUser } from "@stackframe/stack"
 import { useAtomValue } from "jotai"
 
 export default function PostFormDesktop() {
-	const user = useAtomValue(userAtom)
-	const userAvatarUrl = user?.user_metadata?.avatar_url
+	const user = useUser()
+	const userAvatarUrl = user?.profileImageUrl
 	return (
 		<>
 			<PostForm>

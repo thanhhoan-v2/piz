@@ -1,5 +1,10 @@
 import type { Post } from "@prisma/client"
-import { getAllPosts, getPost, getPostCounts } from "@queries/server/post"
+import {
+	getAllPosts,
+	getAllUserPosts,
+	getPost,
+	getPostCounts,
+} from "@queries/server/post"
 import { getPostReaction } from "@queries/server/postReaction"
 import { useQuery } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -22,11 +27,28 @@ export const useQueryPostReaction = ({
 		enabled: !!userId && !!postId,
 	})
 
-export const useQueryPost = ({ postId }: { postId: string }) =>
+interface UseQueryPostParams {
+	postId: string;
+	enabled?: boolean;
+}
+
+export const useQueryPost = ({ postId, enabled = true }: UseQueryPostParams) =>
 	useQuery({
 		queryKey: queryKey.post.selectId(postId),
 		queryFn: async () => getPost(postId),
-		enabled: !!postId,
+		enabled: !!postId && enabled
+	})
+
+interface UseQueryAllUserPostsParams {
+	userId: string;
+	enabled?: boolean;
+}
+
+export const useQueryAllUserPosts = ({ userId, enabled }: UseQueryAllUserPostsParams) =>
+	useQuery({
+		queryKey: queryKey.post.selectUser(userId),
+		queryFn: async () => getAllUserPosts(userId),
+		// staleTime: Number.POSITIVE_INFINITY,
 	})
 
 export const useQueryAllPosts = () =>

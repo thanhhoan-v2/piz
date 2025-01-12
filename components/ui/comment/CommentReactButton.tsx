@@ -14,7 +14,7 @@ type PostReactButtonProps = {
 	initialReactionCount: number
 	isReacted: boolean
 	userId?: string
-	parentId: string
+	parentId: string | null
 	commentId: string
 	className?: string
 	wrapperClassName?: string

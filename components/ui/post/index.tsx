@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import PostCommentButton from "@components/ui/post/PostCommentButton"
@@ -12,6 +13,7 @@ import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import { Sparkles } from "lucide-react"
 import { useRouter } from "nextjs-toploader/app"
+import { getUserById } from "../../../app/actions/user"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
 export const postButtonSkeletonClassName =
@@ -30,9 +32,8 @@ export default function Post({
 	postIndex,
 	postsLength,
 	id,
-	userId, // id of the poster
-	userName, // username of the poster
-	userAvatarUrl,
+	userId,
+	title,
 	content,
 	visibility,
 	createdAt,
@@ -40,6 +41,15 @@ export default function Post({
 	isDeleted,
 }: IPost & PostProps) {
 	const router = useRouter()
+	const [posterInfo, setPosterInfo] = React.useState<{ userName: string; avatarUrl: string, userId: string }>()
+
+	React.useEffect(() => {
+		const fetchUserInfo = async () => {
+			const userInfo = await getUserById(userId)
+			setPosterInfo(userInfo)
+		}
+		fetchUserInfo()
+	}, [userId])
 
 	// Get the app user byt query data
 	const user = useUser()
@@ -61,7 +71,7 @@ export default function Post({
 		data: queriedPostReactionByAppUser,
 		isSuccess: isPostReactionQuerySuccess,
 	} = useQueryPostReaction({
-		userId: appUserId,
+		userId: appUserId ?? null,
 		postId: id,
 	})
 
@@ -72,11 +82,11 @@ export default function Post({
 		const targetTag = (event.target as HTMLElement).tagName.toLowerCase()
 		console.log(targetTag)
 		if (targetTag === "div") {
-			router.push(`/${userName}/post/${id}`)
+			router.push(`/${posterInfo?.userId}/post/${id}`)
 		}
 	}
 
-	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {}
+	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => { }
 
 	if (isDeleted) return null
 
@@ -93,8 +103,10 @@ export default function Post({
 			>
 				<div className="flex justify-between">
 					<PostUserInfo
-						userName={userName}
-						userAvatarUrl={userAvatarUrl}
+						userId={userId}
+						userName={posterInfo?.userName}
+						userAvatarUrl={posterInfo?.avatarUrl}
+						title={title}
 						content={content}
 						visibility={visibility}
 						createdAt={createdAt}
@@ -105,7 +117,7 @@ export default function Post({
 					<PostDropdownMenu
 						userId={userId}
 						postId={id}
-						userName={userName}
+						userName={posterInfo?.userName ?? null}
 						content={content}
 					/>
 				</div>
@@ -129,7 +141,7 @@ export default function Post({
 							<PostReactButton
 								className={postButtonClassName}
 								wrapperClassName={postButtonWrapperClassName}
-								userId={appUserId}
+								userId={appUserId ?? null}
 								postId={id}
 								initialReactionCount={noReactions ?? 0}
 								isReacted={!!queriedPostReactionByAppUser}
@@ -146,8 +158,8 @@ export default function Post({
 							initialCommentCount={noComments ?? 0}
 							// User related props
 							userId={userId}
-							userName={userName}
-							userAvatarUrl={userAvatarUrl}
+							userName={posterInfo?.userName ?? null}
+							userAvatarUrl={posterInfo?.avatarUrl ?? null}
 							// Post related props
 							postId={id}
 							postContent={content}
@@ -161,12 +173,12 @@ export default function Post({
 							wrapperClassName={postButtonWrapperClassName}
 							userId={userId}
 							postId={id}
-							// initialShareCount={noShares ?? 0}
+						// initialShareCount={noShares ?? 0}
 						/>
 					</>
 				</div>
 			) : (
-				<>Something is wrong here 😢</>
+				<></>
 			)}
 
 			{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}

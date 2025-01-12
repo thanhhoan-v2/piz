@@ -1,20 +1,19 @@
-import { Avatar, AvatarImage } from "@components/ui/Avatar"
-import FollowButton from "@components/ui/button/FollowButton"
+"use client"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
-import type { Route } from "next"
+import { firstLetterToUpper } from "@utils/string.helpers"
 import Link from "next/link"
 
-export type SearchResultProps = {
+export type SearchResultProps = Array<{
 	id: string
-	fullName: string
 	userName: string
-	avatarUrl: string | null
-}[]
+	avatarUrl?: string | null
+}>
 
-type SearchListProps = {
-	appUserId?: string | null
-	searchResults: SearchResultProps | null
+interface SearchListProps {
+	searchResults: SearchResultProps
+	appUserId?: string
 	isMention?: boolean
 	containerClassname?: string
 	onSearchResultClick?: (id: string, userName: string) => void
@@ -27,86 +26,46 @@ export default function SearchList({
 	containerClassname,
 	onSearchResultClick,
 }: SearchListProps) {
-	const handleSearchResultClick = (id: string, userName: string) => {
-		onSearchResultClick?.(id, userName)
-	}
-	const handleKeyUp = (
-		event: React.KeyboardEvent<HTMLDivElement>,
-		id: string,
-		userName: string,
-	) => {
-		if (event.key === "Enter") handleSearchResultClick(id, userName)
-	}
+	return (
+		<div className={cn("my-4 flex-col gap-2", containerClassname)}>
+			{searchResults.map((result) => (
+				isMention ? (
+					<div
+						key={result.id}
+						className={cn(
+							"flex-between rounded-lg bg-background-item p-4 hover:bg-background-item/80 cursor-pointer"
+						)}
+						onClick={() => onSearchResultClick?.(result.id, result.userName)}
+					>
+						<ResultContent result={result} appUserId={appUserId} />
+					</div>
+				) : (
+					<Link key={result.id} href={`/${result.id}`}>
+						<div className="flex-between rounded-lg bg-background-item p-4 hover:bg-background-item/80">
+							<ResultContent result={result} appUserId={appUserId} />
+						</div>
+					</Link>
+				)
+			))}
+		</div>
+	)
+}
+
+function ResultContent({ result, appUserId }: { result: SearchResultProps[0], appUserId?: string }) {
 	return (
 		<>
-			<div className={cn("my-4 w-full flex-col gap-3", containerClassname)}>
-				{searchResults?.map(({ id, userName, fullName, avatarUrl }) => (
-					<>
-						{isMention ? (
-							<div
-								key={id}
-								onClick={() => handleSearchResultClick(id, userName)}
-								onKeyUp={(e) => handleKeyUp(e, id, userName)}
-								className="flex h-full w-full flex-between flex-y-center cursor-pointer gap-3"
-							>
-								<div className="flex-auto gap-3 rounded-lg bg-background-item px-4 py-2">
-									<div className="flex-y-center gap-5">
-										<Avatar>
-											<AvatarImage
-												src={avatarUrl ?? avatarPlaceholder}
-												alt={userName}
-											/>
-										</Avatar>
-										<div className="flex-col gap-1">
-											<p className="font-bold">{userName}</p>
-											<p className="text-gray-400">{fullName}</p>
-										</div>
-									</div>
-								</div>
-
-								{appUserId && !isMention && (
-									<FollowButton
-										className="h-[70px] w-[100px]"
-										followerId={appUserId}
-										followeeId={id}
-									/>
-								)}
-							</div>
-						) : (
-							<div
-								key={id}
-								className="flex h-full w-full flex-between flex-y-center gap-3"
-							>
-								<Link
-									href={`/${userName}` as Route}
-									className="flex-auto gap-3 rounded-lg bg-background-item px-4 py-2"
-								>
-									<div className="flex-y-center gap-5">
-										<Avatar>
-											<AvatarImage
-												src={avatarUrl ?? avatarPlaceholder}
-												alt={userName}
-											/>
-										</Avatar>
-										<div className="flex-col gap-1">
-											<p className="font-bold">{userName}</p>
-											<p className="text-gray-400">{fullName}</p>
-										</div>
-									</div>
-								</Link>
-
-								{appUserId && !isMention && (
-									<FollowButton
-										className="h-[70px] w-[100px]"
-										followerId={appUserId}
-										followeeId={id}
-									/>
-								)}
-							</div>
-						)}
-					</>
-				))}
+			<div className="flex-y-center gap-4">
+				<Avatar>
+					<AvatarImage src={result.avatarUrl ?? avatarPlaceholder} />
+					<AvatarFallback>
+						{firstLetterToUpper(result.userName)}
+					</AvatarFallback>
+				</Avatar>
+				<span>{result.userName}</span>
 			</div>
+			{result.id === appUserId && (
+				<span className="text-sm text-muted-foreground">You</span>
+			)}
 		</>
 	)
 }

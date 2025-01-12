@@ -11,12 +11,14 @@ import {
 	AlertDialogTitle,
 } from "@components/ui/AlertDialog"
 import { Button } from "@components/ui/Button"
-import { Dialog, DialogContent } from "@components/ui/Dialog"
+import { Dialog, DialogContent, DialogTitle } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
 import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
 import type { PostCounts } from "@components/ui/post/PostReactButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
+import type { Comment } from "@prisma/client"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -29,8 +31,8 @@ type CommentCommentButtonProps = {
 	className?: string
 	wrapperClassName?: string
 	userId: string
-	userAvatarUrl: string | null
-	userName: string | null
+	userAvatarUrl?: string | null
+	userName?: string | null
 	postId: string
 	postContent: string
 	postVisibility?: PostVisibilityEnumType
@@ -79,10 +81,7 @@ export default function CommentCommentButton({
 			await createComment(newComment),
 		onMutate: async (newComment) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
-			await queryClient.cancelQueries({
-				queryKey: queryKey.comment.all,
-			})
-
+			await queryClient.cancelQueries({ queryKey: queryKey.comment.all })
 			// Snapshot the previous value
 			const previousComments = queryClient.getQueryData(queryKey.comment.all)
 
@@ -169,6 +168,9 @@ export default function CommentCommentButton({
 			</div>
 
 			<Dialog open={modalIsOpen} onOpenChange={setOpenModal}>
+				<VisuallyHidden.Root>
+					<DialogTitle />
+				</VisuallyHidden.Root>
 				<DialogContent
 					className="flex-col rounded-lg border-0"
 					onPointerDownOutside={handleOpenDiscardAlert}

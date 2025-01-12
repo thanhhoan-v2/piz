@@ -11,10 +11,8 @@ datasource db {
 model User {
   id               String            @id @default(cuid())
   email            String            @unique
-  fullName         String            @unique
   userName         String            @unique
-  password         String?
-  avatarUrl        String?           @unique
+  avatarUrl        String?           @db.LongText
   bio              String?
   isActive         Boolean           @default(false)
   privacyMode      Privacy           @default(PUBLIC)
@@ -22,14 +20,11 @@ model User {
   updatedAt        DateTime?
   isDeleted        Boolean           @default(false)
   attachments      Attachment[]
-  comments         Comment[]
   commentReactions CommentReaction[]
   followee         Follow[]          @relation("UserFollowees")
   follower         Follow[]          @relation("UserFollowers")
   notifications    Notification[]
-  posts            Post[]
   postActions      PostAction[]
-  postReactions    PostReaction[]
   tags             Tag[]
 }
 
@@ -51,18 +46,16 @@ model Post {
   id            String         @id @default(cuid())
   userId        String
   userName      String?
-  userAvatarUrl String?
+  userAvatarUrl String?        @db.LongText
   visibility    PostVisibility @default(PUBLIC)
+  title         String
   content       String         @db.LongText
   createdAt     DateTime       @default(now())
   updatedAt     DateTime?
   isDeleted     Boolean        @default(false)
   attachments   Attachment[]
-  comments      Comment[]
   Notification  Notification[]
-  user          User           @relation(fields: [userId], references: [id])
   PostAction    PostAction[]
-  reactions     PostReaction[]
   tags          Tag[]
 
   @@index([userId], map: "Post_userId_fkey")
@@ -81,16 +74,12 @@ model Comment {
   Attachment      Attachment[]
   parent          Comment?          @relation("ParentComment", fields: [parentId], references: [id])
   replies         Comment[]         @relation("ParentComment")
-  Post            Post              @relation(fields: [postId], references: [id])
-  user            User              @relation(fields: [userId], references: [id])
   CommentReaction CommentReaction[]
   Notification    Notification[]
   PostAction      PostAction[]
   Tag             Tag[]
 
-  // @@index([parentId], map: "Comment_parentId_fkey")
-  // @@index([postId], map: "Comment_postId_fkey")
-  // @@index([userId], map: "Comment_userId_fkey")
+  @@index([parentId], map: "Comment_parentId_fkey")
 }
 
 model PostReaction {
@@ -102,8 +91,6 @@ model PostReaction {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime?
   notification Notification[]
-  post         Post           @relation(fields: [postId], references: [id])
-  user         User           @relation(fields: [userId], references: [id])
 
   @@unique([userId, postId])
   @@index([postId], map: "PostReaction_postId_fkey")

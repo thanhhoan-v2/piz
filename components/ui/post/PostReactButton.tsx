@@ -8,13 +8,13 @@ import { queryKey } from "@utils/queryKeyFactory"
 import { Heart } from "lucide-react"
 import React from "react"
 
-type PostReactButtonProps = {
-	initialReactionCount: number
-	isReacted: boolean
-	userId?: string
-	postId: string
-	className?: string
-	wrapperClassName?: string
+interface PostReactButtonProps {
+	userId?: string | null;
+	postId: string;
+	className?: string;
+	wrapperClassName?: string;
+	initialReactionCount: number;
+	isReacted: boolean;
 }
 
 export type PostCounts = {

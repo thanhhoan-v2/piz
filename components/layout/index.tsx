@@ -15,6 +15,22 @@ import { useTheme } from "next-themes"
 import React from "react"
 import { useEffect } from "react"
 
+/**
+ * The root component for all pages. It provides a header bar and a side bar.
+ * The header bar is fixed to the top of the screen and contains a logo, a
+ * search bar, and a button to show/hide the side bar.
+ * The side bar is fixed to the left side of the screen and contains a list of
+ * links to different pages.
+ * The main content of the page is rendered in the middle of the screen.
+ * The theme of the app is applied to the component.
+ * The component listens for changes to the theme and updates the styles
+ * accordingly.
+ * The component also listens for changes to the user and updates the user
+ * information in the header bar accordingly.
+ * The component renders a toast notification when a new follower is detected.
+ * The toast notification contains the name and avatar of the new follower.
+ * The component renders a spinner when the user is loading.
+ */
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const [isVisible, setIsVisible] = React.useState(true)
 	const [lastScrollY, setLastScrollY] = React.useState(0)
@@ -68,7 +84,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 				),
 			})
 		}
-		;() => setNewNotiId(null)
+		; () => setNewNotiId(null)
 	}, [isSuccess, newNoti, toast])
 
 	const { theme } = useTheme()
@@ -79,13 +95,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 		const {
 			id,
 			displayName: userName,
-			displayName: fullName,
+			// displayName: fullName,
 			primaryEmail: email,
+			profileImageUrl: avatarUrl,
 		} = user
 
-		if (userName && email && fullName) {
-			const newUser = useQueryCreateUser(id, userName, email, fullName)
-			console.log(newUser)
+		if (userName && email && avatarUrl) {
+			const newUser = useQueryCreateUser(id, userName, email, avatarUrl)
 		}
 	}
 

@@ -13,6 +13,13 @@ import { useAtom } from "jotai"
 import { Moon, PaintbrushVertical, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
+/**
+ * A dropdown menu component that allows users to select their preferred theme.
+ * The currently selected theme is stored in the "customTheme" atom, and can be
+ * retrieved using the `useAtom` hook.
+ *
+ * @returns A JSX element representing the dropdown menu.
+ */
 export const HeaderBarCustomTheme = () => {
 	const [customTheme, setCustomTheme] = useAtom(customThemeAtom)
 	const { setTheme } = useTheme()

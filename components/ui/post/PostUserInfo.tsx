@@ -4,11 +4,12 @@ import { getTimeDiffStatus } from "@utils/time.helpers"
 import type { Route } from "next"
 import Link from "next/link"
 import type { PostVisibilityEnumType } from "../form/PostForm"
-import PostVisibilityBadge from "./PostVisibilityBadge"
 
 export type PostUserInfoProps = {
 	userName?: string | null
 	userAvatarUrl?: string | null
+	userId?: string | null
+	title?: string
 	content?: string
 	visibility?: PostVisibilityEnumType
 	createdAt: Date
@@ -18,8 +19,10 @@ export type PostUserInfoProps = {
 }
 
 export default function PostUserInfo({
+	userId,
 	userAvatarUrl,
 	userName,
+	title,
 	content,
 	visibility,
 	createdAt,
@@ -27,6 +30,8 @@ export default function PostUserInfo({
 	appUserName,
 	isWriteOnly, // If the post is write-only, then hide the time diff
 }: PostUserInfoProps) {
+	console.log(title)
+	console.log(content)
 	return (
 		<>
 			<div className="flex items-start gap-3">
@@ -42,7 +47,7 @@ export default function PostUserInfo({
 					<div>
 						<div className="flex-y-center gap-4">
 							<Link
-								href={`/${userName}` as Route}
+								href={`/${userId}` as Route}
 								className="flex items-center gap-2 font-bold hover:underline hover:decoration-wavy hover:underline-offset-2"
 							>
 								<p>{userName}</p>
@@ -54,9 +59,12 @@ export default function PostUserInfo({
 								{!isWriteOnly && getTimeDiffStatus(createdAt, updatedAt)}
 							</p>
 						</div>
-						{visibility && <PostVisibilityBadge visibility={visibility} />}
+						{/* {visibility && <PostVisibilityBadge visibility={visibility} />} */}
 					</div>
 					<div className="flex flex-col gap-4">
+						<div className="font-bold text-[1.2rem] text-wrap-pretty">
+							{title}
+						</div>
 						<div className="whitespace-pre-wrap text-wrap-pretty">
 							{content}
 						</div>
