@@ -14,22 +14,22 @@ export const customThemes: ICustomTheme[] = [
 	},
 	{
 		group: "light",
-		label: "Small Squares",
+		label: "Light Small Squares",
 		value: "light_small_squares",
 	},
 	{
 		group: "light",
-		label: "Gradient Violet",
+		label: "Light Gradient Violet",
 		value: "light_gradient_violet",
 	},
 	{
 		group: "dark",
-		label: "Small Squares",
+		label: "Dark Small Squares",
 		value: "dark_small_squares",
 	},
 	{
 		group: "dark",
-		label: "Gradient Violet",
+		label: "Dark Gradient Violet",
 		value: "dark_gradient_violet",
 	},
 	{

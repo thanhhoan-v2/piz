@@ -60,6 +60,9 @@ export default function CommentCommentButton({
 	parentId,
 	degree,
 }: CommentCommentButtonProps) {
+	// If degree is 2 or greater, don't render the button
+	if (degree >= 2) return null;
+
 	const [modalIsOpen, setOpenModal] = React.useState<boolean>(false)
 	const [discardAlertIsOpen, setOpenDiscardAlert] =
 		React.useState<boolean>(false)
@@ -79,6 +82,14 @@ export default function CommentCommentButton({
 		mutationKey: queryKey.comment.insert(),
 		mutationFn: async (newComment: CreateCommentProps) =>
 			await createComment(newComment),
+		onSuccess: () => {
+			// Invalidate and refetch comments for this post
+			queryClient.invalidateQueries({
+				queryKey: queryKey.comment.selectPost(postId),
+				exact: true,
+				refetchType: 'all'
+			})
+		},
 		onMutate: async (newComment) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({ queryKey: queryKey.comment.all })
@@ -87,7 +98,7 @@ export default function CommentCommentButton({
 
 			queryClient.setQueryData(queryKey.comment.all, (old: Comment[]) => [
 				newComment,
-				...old,
+				...(old??[]),
 			])
 
 			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {

@@ -1,119 +1,47 @@
 "use server"
 
-import type { $Enums } from "@prisma/client"
+import { NotificationType } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
 
-export type NotiType = "FOLLOW" | "COMMENT" | "REPLY" | "MENTION"
-
-type NotiProps = {
-	senderId?: string | null
-	receiverId?: string | null
-	notiType?: $Enums.NotificationType
+export async function getAllNotifications({ receiverId }: { receiverId: string }) {
+	try {
+		const notifications = await prisma.notification.findMany({
+			where: { receiverId },
+			orderBy: { createdAt: 'desc' },
+		})
+		return notifications
+	} catch (error) {
+		console.error('Error fetching notifications:', JSON.stringify(error, null, 2))
+		return []
+	}
 }
 
-export const createNotification = async ({
+export async function createNotification({
+	receiverId,
 	senderId,
-	receiverId,
-	notiType,
-}: NotiProps) => {
+	type,
+	postId,
+	commentId,
+}: {
+	receiverId: string
+	senderId: string
+	type: NotificationType
+	postId?: string
+	commentId?: string
+}) {
 	try {
-		if (senderId) {
-			const sender = await prisma.appUser.findUnique({
-				where: { id: senderId },
-				select: {
-					userName: true,
-					avatarUrl: true,
-				},
-			})
-
-			if (!sender) {
-				throw new Error(
-					`<< Noti >> Error getting userName and avatarUrl for senderId: ${senderId}.`,
-				)
-			}
-
-			if (receiverId) {
-				const noti = await prisma.notification.create({
-					data: {
-						senderId: senderId,
-						receiverId: receiverId,
-						notificationType: notiType,
-						senderUserName: sender.userName,
-						senderAvatarUrl: sender.avatarUrl,
-					},
-				})
-				console.log("<< Noti >> Created: \n", noti)
-			} else {
-				console.error("<< Noti >> Missing receiverId when creating")
-			}
-		} else {
-			console.error("<< Noti >> Missing senderId when creating")
-		}
+		const notification = await prisma.notification.create({
+			data: {
+				receiverId,
+				senderId,
+				notificationType: type,
+				postId,
+				commentId,
+			},
+		})
+		return notification
 	} catch (error) {
-		console.error("[NOTI] Error when creating notification: ", error)
-	}
-}
-
-export const getNotification = async ({
-	notificationId,
-}: { notificationId: number }) => {
-	try {
-		if (notificationId) {
-			console.log(`Getting notification with ID ${notificationId} ...`)
-			const noti = await prisma.notification.findUnique({
-				where: {
-					id: notificationId,
-				},
-				include: {
-					sender: {
-						select: {
-							userName: true,
-							avatarUrl: true,
-						},
-					},
-				},
-			})
-			if (noti) {
-				console.log(
-					`Got notification with ID ${notificationId}:\n${JSON.stringify(noti, null, 2)}`,
-				)
-				return noti
-			}
-			console.error(
-				`<< Noti >> Notification with ID ${notificationId} not found`,
-			)
-		} else {
-			console.error("<< Noti >> Missing notificationId when getting")
-		}
-	} catch (error) {
-		console.error("[NOTI] Error getting notification: ", error)
-	}
-}
-
-export const getAllNotifications = async ({
-	receiverId,
-}: { receiverId: string }) => {
-	try {
-		if (receiverId) {
-			console.log(`Getting all notifications for user ${receiverId} ...`)
-			const notis = await prisma.notification.findMany({
-				where: {
-					receiverId: receiverId,
-				},
-				include: {
-					sender: {
-						select: {
-							userName: true,
-							avatarUrl: true,
-						},
-					},
-				},
-			})
-			console.log(`Got all notifications for user ${receiverId}:\n${notis}`)
-			return notis
-		}
-		console.error("<< Noti >> Missing receiverId when getting")
-	} catch (error) {
-		console.error("[NOTI] Error getting all notification: ", error)
+		console.error('Error creating notification:', JSON.stringify(error, null, 2))
+		return null
 	}
 }

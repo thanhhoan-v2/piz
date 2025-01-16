@@ -69,4 +69,11 @@ export const queryKey = {
 		// notis - select - { id }
 		selectId: (id: number) => [...queryKey.noti.selects(), id] as const,
 	},
-}
+	follow: {
+		all: ["follows"] as const,
+		selectFollower: (followerId: string) =>
+			["follows", "follower", followerId] as const,
+		selectFollowee: (followeeId: string) =>
+			["follows", "followee", followeeId] as const,
+	},
+} as const

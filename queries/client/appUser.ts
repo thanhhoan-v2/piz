@@ -17,7 +17,7 @@ export const useQueryCreateUser = (
 	id: string,
 	email: string,
 	userName: string,
-  avatarUrl: string,
+	avatarUrl?: string,
 ) =>
 	useQuery({
 		queryKey: [queryKey.user.selectMain()],

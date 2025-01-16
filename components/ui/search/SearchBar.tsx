@@ -24,17 +24,13 @@ export default function SearchBar({
 
 	const handleSearch = async () => {
 		if (searchValue.length > 0) {
-			console.log("[SearchBar] Manual search triggered for:", searchValue)
 			setIsSearching(true)
 			try {
 				const results = await searchUsers(searchValue)
-				console.log("[SearchBar] Search results:", results)
 				setSearchResults(results)
 			} catch (error) {
-				console.error("[SearchBar] Search error:", error)
 				setSearchResults([])
 			} finally {
-				console.log("[SearchBar] Search completed")
 				setIsSearching(false)
 			}
 		}
@@ -71,20 +67,6 @@ export default function SearchBar({
 						className="pl-8"
 					/>
 				</div>
-				{/* <Button
-					onClick={handleSearch}
-					disabled={isSearching || searchValue.length === 0}
-					className="w-[100px]"
-				>
-					{isSearching ? (
-						"Searching..."
-					) : (
-						<>
-							Search
-							<Search className="ml-2 h-4 w-4" />
-						</>
-					)}
-				</Button> */}
 			</div>
 			{searchResults.length > 0 && (
 				<SearchList

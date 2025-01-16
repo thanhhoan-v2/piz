@@ -19,6 +19,7 @@ import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+import { useUser } from "@stackframe/stack"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
@@ -66,6 +67,8 @@ export default function PostCommentButton({
 	const [userInput, setUserInput] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
+	const user = useUser()
+
 	const handleInputChange = React.useCallback(
 		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
 			setUserInput(e.target.value)
@@ -79,6 +82,14 @@ export default function PostCommentButton({
 		mutationKey: queryKey.comment.insert(),
 		mutationFn: async (newComment: CreateCommentProps) =>
 			await createComment(newComment),
+		onSuccess: () => {
+			// Invalidate and refetch comments for this post
+			queryClient.invalidateQueries({
+				queryKey: queryKey.comment.selectPost(postId),
+				exact: true,
+				refetchType: 'all'
+			})
+		},
 		onMutate: async (newComment) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({
@@ -124,7 +135,7 @@ export default function PostCommentButton({
 			id: newPostCommentId,
 			parentId: newPostCommentId,
 			postId: postId,
-			userId: userId,
+			userId: user?.id,
 			userName: userName,
 			userAvatarUrl: userAvatarUrl,
 			content: userInput,

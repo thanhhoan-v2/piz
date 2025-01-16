@@ -83,10 +83,10 @@ export default function PostComment({
 						)}
 					>
 						<PostUserInfo
-							isWriteOnly
-							userName={userName}
-							userAvatarUrl={userAvatarUrl}
-							appUserName={userName}
+							userId={userId}
+							// userName={userName}
+							// userAvatarUrl={userAvatarUrl}
+							// appUserName={userName}
 							createdAt={new Date()}
 							updatedAt={null}
 							content={content}
@@ -170,16 +170,14 @@ export default function PostComment({
 						)}
 						<div className="w-full flex-col">
 							{childrenComment?.children?.map((child, index) => (
-								<>
-									<PostComment
-										key={`comment-${child.id}-${child.userId}-${child.parentId}-${index}`}
-										{...child}
-										childrenComment={{
-											...child,
-											children: child.children ?? [],
-										}}
-									/>
-								</>
+								<PostComment
+									key={`comment-${child.id}-${child.userId}-${child.parentId}-${index}`}
+									{...child}
+									childrenComment={{
+										...child,
+										children: child.children ?? [],
+									}}
+								/>
 							))}
 						</div>
 					</div>

@@ -1,6 +1,7 @@
 import type { CommentWithChildren } from "@components/ui/comment"
 import type { Comment as IComment } from "@prisma/client"
 
+
 export const buildCommentTree = (comments: IComment[], rootId?: string) => {
 	const commentMap: { [key: string]: CommentWithChildren } = {}
 	const roots: CommentWithChildren[] = []

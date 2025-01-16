@@ -28,7 +28,7 @@ import {
 import { Textarea } from "@components/ui/Textarea"
 import { createSavedPost } from "@queries/server/saved"
 import { useCopyToClipboard } from "@uidotdev/usehooks"
-import { BookMarked, Copy, Ellipsis, FlagTriangleRight } from "lucide-react"
+import { BookMarked, Ellipsis, FlagTriangleRight } from "lucide-react"
 import React from "react"
 
 export type PostSaveProps = {
@@ -140,16 +140,16 @@ export default function PostDropdownMenu({
 					<DropdownMenuSeparator />
 
 					{/* copy link */}
-					<DropdownMenuItem asChild className={dropdownMenuItemClassName}>
-						<Button
-							variant="ghost"
-							className="w-full flex-between"
-							onClick={() => copyToClipboard(postLink)}
-						>
-							<p>Copy link</p>
-							<Copy />
-						</Button>
-					</DropdownMenuItem>
+					{/* <DropdownMenuItem asChild className={dropdownMenuItemClassName}> */}
+					{/* 	<Button */}
+					{/* 		variant="ghost" */}
+					{/* 		className="w-full flex-between" */}
+					{/* 		onClick={() => copyToClipboard(postLink)} */}
+					{/* 	> */}
+					{/* 		<p>Copy link</p> */}
+					{/* 		<Copy /> */}
+					{/* 	</Button> */}
+					{/* </DropdownMenuItem> */}
 				</DropdownMenuContent>
 			</DropdownMenu>
 

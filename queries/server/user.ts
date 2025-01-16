@@ -11,7 +11,7 @@ export const createUser = async (
 	id: string,
 	userName: string,
 	email: string,
-	avatarUrl: string,
+	avatarUrl?: string,
 ) => {
 	try {
 		const existingUser = await prisma.user.findUnique({

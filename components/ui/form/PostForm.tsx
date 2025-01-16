@@ -182,15 +182,6 @@ export default function PostForm({
 		})
 	}
 
-	// console.log("\n------")
-	// console.log("Start mention index: ", startMentionIndex)
-	// console.log("Last mention index: ", lastMentionIndexes)
-	// console.log("Post length:", postContent.length)
-	// console.log("Mention search value: ", mentionSearchValue)
-	// console.log("Search results: ", searchResults[0]?.userName)
-	// console.log("Show mention suggestions: ", showMentionSuggestions)
-	// console.log("Mentioned users: ", mentionedUsers)
-
 	const handleSelectUser = (id: string, userName: string) => {
 		setMentionedUsers((prevMentionedUsers) => {
 			const userExists = prevMentionedUsers.some((user) => user.id === id)
@@ -304,7 +295,7 @@ export default function PostForm({
 			toast({
 				title: "Success!",
 				description: "Your post has been created.",
-				className: "bg-green-500",
+				// className: "bg-green-500",
 			})
 		},
 		onError: (error) => {
@@ -314,37 +305,32 @@ export default function PostForm({
 				variant: "destructive",
 			})
 		},
-		// onSettled: (newPost) => {
-		// 	if (newPost) {
-		// 		queryClient.invalidateQueries({
-		// 			queryKey: [
-		// 				queryKey.post.selectId(newPost.id),
-		// 				queryKey.post.selectCount(newPost.id),
-		// 				queryKey.post.selectReactionByUser({
-		// 					userId: newPost.userId,
-		// 					postId: newPost.id,
-		// 				}),
-		// 			],
-		// 		})
-		// 	}
-		// },
 	})
 
 	const handleSubmitPost = () => {
-		const date = new Date()
+		if (!user?.id) {
+			toast({
+				title: "Error",
+				description: "You must be logged in to create a post",
+				variant: "destructive",
+			})
+			return
+		}
 
+		const date = new Date()
 		const newPost: CreatePostProps = {
 			id: generateBase64uuid(),
-			userId: userId,
-			userName: posterInfo?.userName ?? "",
-			userAvatarUrl: posterInfo?.avatarUrl ?? "",
+			userId: user.id,
+			userName: user.displayName,
+			userAvatarUrl: user.profileImageUrl || null,
 			title: postTitle,
 			content: postContent,
-			visibility: postVisibility,
 			createdAt: date,
 		}
+
 		addPostMutation.mutate(newPost)
 		setOpenDrawer(false)
+		setPostTitle("")
 		setPostContent("")
 		setPostVisibility("PUBLIC")
 	}
@@ -371,7 +357,7 @@ export default function PostForm({
 				<DrawerTrigger asChild>{children}</DrawerTrigger>
 
 				<DrawerContent
-					className="h-[90vh] bg-background-item dark:bg-background-item"
+					className="h-[90vh]  dark:bg-background-item"
 					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					{/* header */}

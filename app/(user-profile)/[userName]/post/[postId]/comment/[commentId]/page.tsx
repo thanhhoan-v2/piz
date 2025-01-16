@@ -45,7 +45,7 @@ export default function CommentPage() {
 
 	return (
 		<>
-			<div className="flex-col">
+			<div className="flex-col mt-[100px]">
 				{post ? <Post {...post} /> : <>Could not load post</>}
 
 				{/* <div className="flex-center"> */}

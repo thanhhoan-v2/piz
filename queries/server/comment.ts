@@ -2,11 +2,12 @@
 
 import type { CommentReaction } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
+import { createNotification } from "@queries/server/noti"
 
 export type CreateCommentProps = {
 	id: string
 	postId: string
-	userId: string
+	userId?: string
 	userName?: string | null
 	userAvatarUrl?: string | null
 	content: string
@@ -14,60 +15,46 @@ export type CreateCommentProps = {
 	parentId?: string
 }
 
-export const createComment = async ({
-	id,
-	postId,
-	parentId,
-	userId,
-	userName,
-	userAvatarUrl,
-	content,
-	degree,
-}: CreateCommentProps) => {
+export const createComment = async (newComment: CreateCommentProps) => {
 	try {
-		if (parentId) {
-			if (degree) {
-				try {
-					const newChildComment = await prisma.comment.create({
-						data: {
-							id: id,
-							userId: userId,
-							postId: postId,
-							content: content,
-							parentId: parentId,
-							degree: degree,
-						},
-					})
-					console.log("<< Comment >> Created child comment: ", newChildComment)
-				} catch (error) {
-					console.error(
-						"<< Child comment >> An unexpected error occurred:",
-						error,
-					)
-				}
-			}
+		if (!newComment.userId) {
+			console.log("[COMMENT] Missing userId when creating comment")
+			return
+		}
 
+		const comment = await prisma.comment.create({
+			data: {
+				id: newComment.id,
+				userId: newComment.userId,
+				postId: newComment.postId,
+				content: newComment.content,
+				parentId: newComment.parentId,
+				degree: newComment.degree,
+			},
+		})
+
+		// Get post owner
+		const post = await prisma.post.findUnique({
+			where: { id: newComment.postId }
+		})
+
+		if (post && post.userId !== newComment.userId) {
 			try {
-				const newComment = await prisma.comment.create({
-					data: {
-						id: id,
-						userId: userId,
-						postId: postId,
-						parentId: parentId,
-						content: content,
-					},
+				await createNotification({
+					receiverId: post.userId,
+					senderId: newComment.userId,
+					type: "COMMENT",
+					postId: newComment.postId,
+					commentId: comment.id
 				})
-				console.log("<< Comment >> Created comment: ", newComment)
 			} catch (error) {
-				console.error("<< Comment >> An unexpected error occurred:", error)
+				console.error('[COMMENT] Error creating notification:', error)
 			}
 		}
-		console.error("<< Comment >> Missing parentId when creating")
+
+		return comment
 	} catch (error) {
-		console.error(
-			"<< Comment >> Error creating:\n",
-			JSON.stringify(error, null, 2),
-		)
+		console.error(error)
 	}
 }
 
@@ -164,6 +151,20 @@ export const createCommentReaction = async ({
 				const newCommentReaction = await prisma.commentReaction.create({
 					data: { userId: userId, commentId },
 				})
+				// Get comment owner
+				const comment = await prisma.comment.findUnique({
+					where: { id: commentId }
+				})
+
+				if (comment && comment.userId !== userId) {
+					await createNotification({
+						receiverId: comment.userId,
+						senderId: userId,
+						type: "COMMENT_REACTION",
+						postId: comment.postId,
+						commentId,
+					})
+				}
 				return newCommentReaction
 			}
 		}

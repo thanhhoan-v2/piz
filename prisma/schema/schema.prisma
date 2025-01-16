@@ -19,44 +19,34 @@ model User {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime?
   isDeleted        Boolean           @default(false)
-  attachments      Attachment[]
   commentReactions CommentReaction[]
   followee         Follow[]          @relation("UserFollowees")
   follower         Follow[]          @relation("UserFollowers")
-  notifications    Notification[]
-  postActions      PostAction[]
-  tags             Tag[]
 }
 
 model Follow {
-  id            Int                 @id @default(autoincrement())
-  followerId    String
-  followeeId    String
-  requestStatus FollowRequestStatus @default(PENDING)
-  followedAt    DateTime            @default(now())
-  acceptedAt    DateTime?
-  followee      User                @relation("UserFollowees", fields: [followeeId], references: [id])
-  follower      User                @relation("UserFollowers", fields: [followerId], references: [id])
+  id         Int       @id @default(autoincrement())
+  followerId String
+  followeeId String
+  followedAt DateTime  @default(now())
+  acceptedAt DateTime?
+  followee   User      @relation("UserFollowees", fields: [followeeId], references: [id])
+  follower   User      @relation("UserFollowers", fields: [followerId], references: [id])
 
   @@unique([followerId, followeeId])
   @@index([followeeId], map: "Follow_followeeId_fkey")
 }
 
 model Post {
-  id            String         @id @default(cuid())
+  id            String    @id @default(cuid())
   userId        String
   userName      String?
-  userAvatarUrl String?        @db.LongText
-  visibility    PostVisibility @default(PUBLIC)
+  userAvatarUrl String?   @db.LongText
   title         String
-  content       String         @db.LongText
-  createdAt     DateTime       @default(now())
+  content       String    @db.LongText
+  createdAt     DateTime  @default(now())
   updatedAt     DateTime?
-  isDeleted     Boolean        @default(false)
-  attachments   Attachment[]
-  Notification  Notification[]
-  PostAction    PostAction[]
-  tags          Tag[]
+  isDeleted     Boolean   @default(false)
 
   @@index([userId], map: "Post_userId_fkey")
 }
@@ -71,153 +61,56 @@ model Comment {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime?
   isDeleted       Boolean           @default(false)
-  Attachment      Attachment[]
   parent          Comment?          @relation("ParentComment", fields: [parentId], references: [id])
   replies         Comment[]         @relation("ParentComment")
   CommentReaction CommentReaction[]
-  Notification    Notification[]
-  PostAction      PostAction[]
-  Tag             Tag[]
 
   @@index([parentId], map: "Comment_parentId_fkey")
 }
 
 model PostReaction {
-  id           Int            @id @default(autoincrement())
-  userId       String
-  postId       String
-  reaction     ReactionType?
-  isDeleted    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime?
-  notification Notification[]
+  id        Int       @id @default(autoincrement())
+  userId    String
+  postId    String
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
 
   @@unique([userId, postId])
   @@index([postId], map: "PostReaction_postId_fkey")
 }
 
 model CommentReaction {
-  id           Int            @id @default(autoincrement())
-  userId       String
-  commentId    String
-  reaction     ReactionType?
-  contentType  ContentType?
-  isDeleted    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime?
-  comment      Comment        @relation(fields: [commentId], references: [id])
-  user         User           @relation(fields: [userId], references: [id])
-  Notification Notification[]
+  id          Int          @id @default(autoincrement())
+  userId      String
+  commentId   String
+  contentType ContentType?
+  isDeleted   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime?
+  comment     Comment      @relation(fields: [commentId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, commentId])
   @@index([commentId], map: "CommentReaction_commentId_fkey")
 }
 
-model Tag {
-  id           Int            @id @default(autoincrement())
-  taggerId     String
-  taggedId     String
-  postId       String?
-  commentId    String?
-  contentType  ContentType
-  isDeleted    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  Notification Notification[]
-  comment      Comment?       @relation(fields: [commentId], references: [id])
-  post         Post?          @relation(fields: [postId], references: [id])
-  tagged       User           @relation(fields: [taggedId], references: [id])
-
-  @@index([commentId], map: "Tag_commentId_fkey")
-  @@index([postId], map: "Tag_postId_fkey")
-  @@index([taggedId], map: "Tag_taggedId_fkey")
-}
-
-model Attachment {
-  id             Int         @id @default(autoincrement())
-  postId         String?
-  commentId      String?
-  storageUrl     String
-  soundDuration  String?
-  attachmentType ContentType
-  format         MediaFormat
-  isDeleted      Boolean     @default(false)
-  createdAt      DateTime    @default(now())
-  userId         String?
-  comment        Comment?    @relation(fields: [commentId], references: [id])
-  post           Post?       @relation(fields: [postId], references: [id])
-  User           User?       @relation(fields: [userId], references: [id])
-
-  @@index([commentId], map: "Attachment_commentId_fkey")
-  @@index([postId], map: "Attachment_postId_fkey")
-  @@index([userId], map: "Attachment_userId_fkey")
-}
-
 model Notification {
-  id                Int              @id @default(autoincrement())
-  senderId          String
-  receiverId        String
-  postId            String?
-  commentId         String?
-  postReactionId    Int?
-  commentReactionId Int?
-  tagId             Int?
-  notificationType  NotificationType
-  createdAt         DateTime         @default(now())
-  isRead            Boolean          @default(false)
-  comment           Comment?         @relation(fields: [commentId], references: [id])
-  commentReaction   CommentReaction? @relation(fields: [commentReactionId], references: [id])
-  post              Post?            @relation(fields: [postId], references: [id])
-  postReaction      PostReaction?    @relation(fields: [postReactionId], references: [id])
-  receiver          User             @relation(fields: [receiverId], references: [id])
-  tag               Tag?             @relation(fields: [tagId], references: [id])
-
-  @@index([commentId], map: "Notification_commentId_fkey")
-  @@index([commentReactionId], map: "Notification_commentReactionId_fkey")
-  @@index([postId], map: "Notification_postId_fkey")
-  @@index([postReactionId], map: "Notification_postReactionId_fkey")
-  @@index([receiverId], map: "Notification_receiverId_fkey")
-  @@index([tagId], map: "Notification_tagId_fkey")
-}
-
-model PostAction {
-  id         Int            @id @default(autoincrement())
-  userId     String
-  receiverId String
-  actionType PostActionType
-  postId     String?
-  commentId  String?
-  createdAt  DateTime       @default(now())
-  comment    Comment?       @relation(fields: [commentId], references: [id])
-  post       Post?          @relation(fields: [postId], references: [id])
-  receiver   User           @relation(fields: [receiverId], references: [id])
-
-  @@index([commentId], map: "PostAction_commentId_fkey")
-  @@index([postId], map: "PostAction_postId_fkey")
-  @@index([receiverId], map: "PostAction_receiverId_fkey")
-}
-
-enum ReactionType {
-  LOVE
-  HATE
+  id               String            @id @default(cuid())
+  senderId         String
+  receiverId       String
+  postId           String?
+  commentId        String?
+  notificationType NotificationType?
+  isRead           Boolean           @default(false)
+  isDeleted        Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime?
 }
 
 enum Privacy {
   PUBLIC
   PRIVATE
-}
-
-enum FollowRequestStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-
-enum PostVisibility {
-  PUBLIC
-  FOLLOWERS_ONLY
-  MENTIONED_ONLY
-  FANS_ONLY
-  ME_ONLY
 }
 
 enum ContentType {
@@ -233,10 +126,10 @@ enum MediaFormat {
 
 enum NotificationType {
   FOLLOW
-  FOLLOW_SUGGEST
-  TAG
   COMMENT
-  REACT
+  COMMENT_REACTION
+  POST
+  POST_REACTION
 }
 
 enum PostActionType {

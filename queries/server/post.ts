@@ -2,6 +2,7 @@
 
 import type { $Enums } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
+import { createNotification } from "@queries/server/noti"
 
 export type CreatePostProps = {
 	id: string
@@ -10,7 +11,6 @@ export type CreatePostProps = {
 	userAvatarUrl?: string | null
 	title: string
 	content: string
-	visibility: $Enums.PostVisibility
 	createdAt: Date
 }
 
@@ -49,7 +49,6 @@ export const createPost = async ({
 	userAvatarUrl,
 	title,
 	content,
-	visibility,
 }: CreatePostProps) => {
 	try {
 		if (!userId) {
@@ -61,10 +60,8 @@ export const createPost = async ({
 			!id ||
 			!userId ||
 			!userName ||
-			!userAvatarUrl ||
 			!title ||
-			!content ||
-			!visibility
+			!content 
 		) {
 			console.log("[POST] Missing required fields when creating post")
 			return
@@ -74,23 +71,42 @@ export const createPost = async ({
 		console.log("id:", id)
 		console.log("userId:", userId)
 		console.log("userName:", userName)
-		// console.log("userAvatarUrl:", userAvatarUrl)
+		console.log("userAvatarUrl:", userAvatarUrl)
 		console.log("title:", title)
 		console.log("content:", content)
-		console.log("visibility:", visibility)
 
 		const newPost = await prisma.post.create({
 			data: {
 				id: id,
 				userId: userId,
 				userName: userName,
-				userAvatarUrl: userAvatarUrl,
+				userAvatarUrl: userAvatarUrl ?? null,
 				title: title,
 				content: content,
-				visibility: visibility,
 			},
 		})
 		console.log("Created post successfully")
+
+		// Create notifications for all followers
+		const followers = await prisma.follow.findMany({
+			where: { followeeId: userId }
+		})
+
+		try {
+			await Promise.all(
+				followers.map(follower =>
+					createNotification({
+						receiverId: follower.followerId,
+						senderId: userId,
+						type: "POST",
+						postId: newPost.id
+					})
+				)
+			)
+		} catch (error) {
+			console.error("[POST] Error creating notifications:", JSON.stringify(error, null, 2))
+		}
+
 		return newPost
 	} catch (error) {
 		console.error(
@@ -110,14 +126,9 @@ export const getPostCounts = async ({ postId }: { postId: string }) => {
 			where: { postId: postId },
 		})
 
-		// const noShares = await prisma.share.count({
-		// 	where: { postId: postId },
-		// })
-
 		return {
 			noReactions: noReactions || 0,
 			noComments: noComments || 0,
-			// noShares: noShares || 0,
 		}
 	} catch (error) {
 		console.error("Error fetching post counts:", error)
@@ -135,7 +146,6 @@ export const getAllPosts = async () => {
 			createdAt: "desc",
 		},
 	})
-	console.log("Successfully GET all POSTS: ", posts)
 	return posts
 }
 
