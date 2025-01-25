@@ -1,4 +1,5 @@
 "use client"
+import { getUserById } from "@app/actions/user"
 import { customThemeAtom } from "@atoms/theme"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
@@ -12,7 +13,6 @@ import { avatarPlaceholder } from "@utils/image.helpers"
 import { useAtomValue } from "jotai"
 import { useTheme } from "next-themes"
 import React, { useEffect, useRef } from "react"
-import { getUserById } from "@app/actions/user"
 
 /**
  * The root component for all pages. It provides a header bar and a side bar.
@@ -39,7 +39,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const [isVisible, setIsVisible] = React.useState(true)
 	const [lastScrollY, setLastScrollY] = React.useState(0)
 	const [newNotiId, setNewNotiId] = React.useState<number | null>(null)
-	const [senderInfo, setSenderInfo] = React.useState<Record<string, SenderInfo>>({})
+	const [senderInfo, setSenderInfo] = React.useState<
+		Record<string, SenderInfo>
+	>({})
 
 	const { theme } = useTheme()
 	const customTheme = useAtomValue(customThemeAtom)
@@ -90,19 +92,20 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		if (notifications) {
 			const newNotifications = notifications.filter(
-				notification => !previousNotifications.current.find(
-					prev => prev.id === notification.id
-				)
+				(notification) =>
+					!previousNotifications.current.find(
+						(prev) => prev.id === notification.id,
+					),
 			)
 
-			newNotifications.forEach(async notification => {
+			newNotifications.forEach(async (notification) => {
 				if (notification.notificationType === "FOLLOW") {
 					// Fetch sender info
 					const sender = await getUserById(notification.senderId)
 					if (sender) {
-						setSenderInfo(prev => ({
+						setSenderInfo((prev) => ({
 							...prev,
-							[notification.senderId]: sender
+							[notification.senderId]: sender,
 						}))
 
 						toast({

@@ -28,12 +28,13 @@ export default function SearchList({
 }: SearchListProps) {
 	return (
 		<div className={cn("my-4 flex-col gap-2", containerClassname)}>
-			{searchResults.map((result) => (
+			{searchResults.map((result) =>
 				isMention ? (
+					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 					<div
 						key={result.id}
 						className={cn(
-							"flex-between rounded-lg bg-background-item p-4 hover:bg-background-item/80 cursor-pointer"
+							"flex-between cursor-pointer rounded-lg bg-background-item p-4 hover:bg-background-item/80",
 						)}
 						onClick={() => onSearchResultClick?.(result.id, result.userName)}
 					>
@@ -45,26 +46,27 @@ export default function SearchList({
 							<ResultContent result={result} appUserId={appUserId} />
 						</div>
 					</Link>
-				)
-			))}
+				),
+			)}
 		</div>
 	)
 }
 
-function ResultContent({ result, appUserId }: { result: SearchResultProps[0], appUserId?: string }) {
+function ResultContent({
+	result,
+	appUserId,
+}: { result: SearchResultProps[0]; appUserId?: string }) {
 	return (
 		<>
 			<div className="flex-y-center gap-4">
 				<Avatar>
 					<AvatarImage src={result.avatarUrl ?? avatarPlaceholder} />
-					<AvatarFallback>
-						{firstLetterToUpper(result.userName)}
-					</AvatarFallback>
+					<AvatarFallback>{firstLetterToUpper(result.userName)}</AvatarFallback>
 				</Avatar>
 				<span>{result.userName}</span>
 			</div>
 			{result.id === appUserId && (
-				<span className="text-sm text-muted-foreground">You</span>
+				<span className="text-muted-foreground text-sm">You</span>
 			)}
 		</>
 	)
