@@ -1,0 +1,138 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  userName         String            @unique
+  avatarUrl        String?           @db.LongText
+  bio              String?
+  isActive         Boolean           @default(false)
+  privacyMode      Privacy           @default(PUBLIC)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime?
+  isDeleted        Boolean           @default(false)
+  commentReactions CommentReaction[]
+  followee         Follow[]          @relation("UserFollowees")
+  follower         Follow[]          @relation("UserFollowers")
+}
+
+model Follow {
+  id         Int       @id @default(autoincrement())
+  followerId String
+  followeeId String
+  followedAt DateTime  @default(now())
+  acceptedAt DateTime?
+  followee   User      @relation("UserFollowees", fields: [followeeId], references: [id])
+  follower   User      @relation("UserFollowers", fields: [followerId], references: [id])
+
+  @@unique([followerId, followeeId])
+  @@index([followeeId], map: "Follow_followeeId_fkey")
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  userId        String
+  userName      String?
+  userAvatarUrl String?   @db.LongText
+  title         String
+  content       String    @db.LongText
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime?
+  isDeleted     Boolean   @default(false)
+
+  @@index([userId], map: "Post_userId_fkey")
+}
+
+model Comment {
+  id              String            @id @default(cuid())
+  userId          String
+  postId          String
+  degree          Int               @default(0)
+  parentId        String?
+  content         String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime?
+  isDeleted       Boolean           @default(false)
+  parent          Comment?          @relation("ParentComment", fields: [parentId], references: [id])
+  replies         Comment[]         @relation("ParentComment")
+  CommentReaction CommentReaction[]
+
+  @@index([parentId], map: "Comment_parentId_fkey")
+}
+
+model PostReaction {
+  id        Int       @id @default(autoincrement())
+  userId    String
+  postId    String
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  @@unique([userId, postId])
+  @@index([postId], map: "PostReaction_postId_fkey")
+}
+
+model CommentReaction {
+  id          Int          @id @default(autoincrement())
+  userId      String
+  commentId   String
+  contentType ContentType?
+  isDeleted   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime?
+  comment     Comment      @relation(fields: [commentId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, commentId])
+  @@index([commentId], map: "CommentReaction_commentId_fkey")
+}
+
+model Notification {
+  id               String            @id @default(cuid())
+  senderId         String
+  receiverId       String
+  postId           String?
+  commentId        String?
+  notificationType NotificationType?
+  isRead           Boolean           @default(false)
+  isDeleted        Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime?
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
+}
+
+enum ContentType {
+  POST
+  COMMENT
+}
+
+enum MediaFormat {
+  AUDIO
+  IMAGE
+  VIDEO
+}
+
+enum NotificationType {
+  FOLLOW
+  COMMENT
+  COMMENT_REACTION
+  POST
+  POST_REACTION
+}
+
+enum PostActionType {
+  SAVE
+  IGNORE
+}

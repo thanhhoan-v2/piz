@@ -8,7 +8,7 @@
 		"formatWithErrors": true,
 		"indentStyle": "tab",
 		"indentWidth": 2,
-		"lineWidth": 70
+		"lineWidth": 80
 	},
 	"javascript": {
 		"formatter": {
@@ -17,7 +17,7 @@
 			"bracketSpacing": true,
 			"jsxQuoteStyle": "double",
 			"quoteProperties": "asNeeded",
-			"semicolons": "always",
+			"semicolons": "asNeeded",
 			"trailingCommas": "all"
 		}
 	},
@@ -27,6 +27,14 @@
 		},
 		"formatter": {
 			"trailingCommas": "none"
+		}
+	},
+	"css": {
+		"formatter": {
+			"enabled": true
+		},
+		"linter": {
+			"enabled": true
 		}
 	},
 	"linter": {
@@ -85,4 +93,3 @@
 		}
 	}
 }
-
