@@ -25,14 +25,15 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 	const user = useUser()
 	const { theme } = useTheme()
+	const { toast } = useToast()
 	const customTheme = useAtomValue(customThemeAtom)
 
-	const newUser = useQueryCreateUser(
-		user?.id,
-		user?.primaryEmail,
-		user?.displayName,
-		user?.profileImageUrl,
-	)
+	useQueryCreateUser({
+		id: user?.id,
+		email: user?.primaryEmail,
+		userName: user?.displayName,
+		userAvatarUrl: user?.profileImageUrl,
+	})
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -54,9 +55,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 	const headerBarIsVisible = isVisible ? "transform-y-0" : "-translate-y-full"
 	const sideBarIsVisible = isVisible ? "transform-y-0" : "translate-y-full"
-
-	// Subscribe to notification changes
-	const { toast } = useToast()
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	// const previousNotifications = useRef<any[]>([])

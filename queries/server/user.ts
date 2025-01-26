@@ -7,42 +7,48 @@ import { prisma } from "@prisma/createClient"
 // import { prisma } from "@prisma/createClient"
 // import prismaRandom from "prisma-extension-random"
 
-export const createUser = async (
-	id?: string,
-	userName?: string | null,
-	email?: string | null,
-	avatarUrl?: string | null,
-) => {
+export const createUser = async ({
+	id,
+	email,
+	userName,
+	userAvatarUrl,
+}: {
+	id?: string
+	email?: string | null
+	userName?: string | null
+	userAvatarUrl?: string | null
+}) => {
 	try {
-		const existingUser = await prisma.user.findUnique({
-			where: {
-				id: id,
-			},
-		})
-
-		if (existingUser) {
-			console.error(`[USER] A user with ID ${id} already exists. Aborting...`)
-			return existingUser
-		}
-
-		if (userName !== null && email !== null && email !== undefined) {
-			const newUser = await prisma.user.create({
-				data: {
+		if (
+			email !== null &&
+			email !== undefined
+			// userName !== null &&
+			// userName !== undefined &&
+			// userAvatarUrl !== null &&
+			// userAvatarUrl !== undefined
+		) {
+			const upsertedUser = await prisma.user.upsert({
+				where: { id: id },
+				update: {
+					email: email,
+					userName: userName,
+					userAvatarUrl: userAvatarUrl,
+				},
+				create: {
 					id: id,
 					email: email,
 					userName: userName,
-					avatarUrl: avatarUrl,
+					userAvatarUrl: userAvatarUrl,
 				},
 			})
-
-			return newUser
+			console.log("<< User >> Created user: \n", upsertedUser)
+			return upsertedUser
 		}
 	} catch (error) {
 		console.error(
 			"[USER] Error when creating: ",
 			JSON.stringify(error, null, 2),
 		)
-		throw error
 	}
 }
 

@@ -7,7 +7,7 @@ export async function getUserById(userId?: string) {
 		return {
 			userId: user?.id ?? "",
 			userName: user?.displayName ?? "",
-			avatarUrl: user?.profileImageUrl ?? "",
+			userAvatarUrl: user?.profileImageUrl ?? "",
 		}
 	}
 	console.log("[USER] Missing userId when fetching user")

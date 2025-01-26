@@ -9,51 +9,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id               String            @id @default(cuid())
-  email            String            @unique
-  userName         String?           @unique
-  avatarUrl        String?
-  bio              String?
-  isActive         Boolean           @default(false)
-  privacyMode      Privacy           @default(PUBLIC)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime?
-  isDeleted        Boolean           @default(false)
-  commentReactions CommentReaction[]
-  followee         Follow[]          @relation("UserFollowees")
-  follower         Follow[]          @relation("UserFollowers")
-}
-
-model Follow {
-  id         Int       @id @default(autoincrement())
-  followerId String
-  followeeId String
-  followedAt DateTime  @default(now())
-  acceptedAt DateTime?
-  followee   User      @relation("UserFollowees", fields: [followeeId], references: [id])
-  follower   User      @relation("UserFollowers", fields: [followerId], references: [id])
-
-  @@unique([followerId, followeeId])
-  @@index([followeeId], map: "Follow_followeeId_fkey_unique")
-}
-
-model Post {
-  id            String    @id @default(cuid())
-  userId        String
-  userName      String?
-  userAvatarUrl String?
-  title         String
-  content       String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime?
-  isDeleted     Boolean   @default(false)
-
-  @@index([userId], map: "Post_userId_fkey")
-}
-
 model Comment {
-  id              String            @id @default(cuid())
+  id              String            @id
   userId          String
   postId          String
   degree          Int               @default(0)
@@ -62,23 +19,14 @@ model Comment {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime?
   isDeleted       Boolean           @default(false)
-  parent          Comment?          @relation("ParentComment", fields: [parentId], references: [id])
-  replies         Comment[]         @relation("ParentComment")
+  Comment         Comment?          @relation("CommentToComment", fields: [parentId], references: [id])
+  other_Comment   Comment[]         @relation("CommentToComment")
+  Post            Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  User            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   CommentReaction CommentReaction[]
+  Notification    Notification[]
 
   @@index([parentId], map: "Comment_parentId_fkey_unique")
-}
-
-model PostReaction {
-  id        Int       @id @default(autoincrement())
-  userId    String
-  postId    String
-  isDeleted Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
-
-  @@unique([userId, postId])
-  @@index([postId], map: "PostReaction_postId_fkey")
 }
 
 model CommentReaction {
@@ -89,15 +37,26 @@ model CommentReaction {
   isDeleted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime?
-  comment     Comment      @relation(fields: [commentId], references: [id])
-  user        User         @relation(fields: [userId], references: [id])
+  Comment     Comment      @relation(fields: [commentId], references: [id])
+  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
   @@index([commentId], map: "CommentReaction_commentId_fkey_unique")
 }
 
+model Follow {
+  id         Int       @id @default(autoincrement())
+  followerId String
+  followeeId String
+  followedAt DateTime  @default(now())
+  acceptedAt DateTime?
+
+  @@unique([followerId, followeeId])
+  @@index([followeeId], map: "Follow_followeeId_fkey_unique")
+}
+
 model Notification {
-  id               String            @id @default(cuid())
+  id               String            @id
   senderId         String
   receiverId       String
   postId           String?
@@ -107,11 +66,56 @@ model Notification {
   isDeleted        Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime?
+  Comment          Comment?          @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  Post             Post?             @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
-enum Privacy {
-  PUBLIC
-  PRIVATE
+model Post {
+  id                       String         @id(map: "post_pkey")
+  userId                   String
+  userName                 String?
+  userAvatarUrl            String?
+  title                    String
+  content                  String
+  createdAt                DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt                DateTime?      @db.Timestamp(6)
+  isDeleted                Boolean        @default(false)
+  Comment                  Comment[]
+  Notification             Notification[]
+  User_Post_userIdToUser   User           @relation("Post_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
+  User_Post_userNameToUser User?          @relation("Post_userNameToUser", fields: [userName], references: [userName], onDelete: Cascade)
+  PostReaction             PostReaction[]
+}
+
+model PostReaction {
+  id        Int       @id @default(autoincrement())
+  userId    String
+  postId    String
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  Post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade, map: "PostReaction_postId_fkey_unique")
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId], map: "PostReaction_postId_fkey")
+}
+
+model User {
+  id                       String            @id(map: "user_pkey")
+  email                    String            @unique
+  userName                 String?           @unique
+  userAvatarUrl            String?
+  bio                      String?
+  isActive                 Boolean           @default(false)
+  createdAt                DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt                DateTime?         @db.Timestamp(6)
+  isDeleted                Boolean           @default(false)
+  Comment                  Comment[]
+  CommentReaction          CommentReaction[]
+  Post_Post_userIdToUser   Post[]            @relation("Post_userIdToUser")
+  Post_Post_userNameToUser Post[]            @relation("Post_userNameToUser")
+  PostReaction             PostReaction[]
 }
 
 enum ContentType {
@@ -136,4 +140,9 @@ enum NotificationType {
 enum PostActionType {
   SAVE
   IGNORE
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
 }

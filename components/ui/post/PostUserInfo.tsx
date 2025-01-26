@@ -39,7 +39,7 @@ export default function PostUserInfo({
 
 	const [posterInfo, setPosterInfo] = useState<{
 		userName: string
-		avatarUrl: string
+		userAvatarUrl: string
 		userId: string
 	}>()
 
@@ -105,17 +105,18 @@ export default function PostUserInfo({
 
 	return (
 		<>
-			<div className="flex-col gap-4">
-				<div className="flex-between">
+			<div className="w-full flex-col gap-4">
+				<div className="w-full flex-between">
+					{/* Left side */}
 					<div className="flex-y-center gap-3">
 						{/* Avatar */}
 						<Link href={`/${userId}` as Route}>
 							<Avatar>
 								<AvatarImage
 									src={
-										posterInfo?.avatarUrl === ""
+										posterInfo?.userAvatarUrl === ""
 											? avatarPlaceholder
-											: posterInfo?.avatarUrl
+											: posterInfo?.userAvatarUrl
 									}
 									alt={`${posterInfo?.userName}'s avatar`}
 								/>
@@ -144,9 +145,13 @@ export default function PostUserInfo({
 							<div>{getFollowStatus()}</div>
 						</div>
 					</div>
-					{userId === user?.id && (
-						<span className="text-muted-foreground text-sm">You</span>
-					)}
+
+					{/* Right side */}
+					<div>
+						{userId === user?.id && (
+							<span className="text-muted-foreground text-sm">You</span>
+						)}
+					</div>
 				</div>
 
 				<div className="flex flex-col gap-4">

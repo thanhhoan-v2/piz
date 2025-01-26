@@ -1,7 +1,7 @@
 "use client"
 import { getQueryClient } from "@queries/getQueryClient"
 import { QueryClientProvider } from "@tanstack/react-query"
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import type React from "react"
 
 /*
@@ -68,7 +68,7 @@ export default function QueryProvider({
 			{/* <HydrateAtoms>{children}</HydrateAtoms> */}
 			{children}
 			{/* <DevTools /> */}
-			{/* <ReactQueryDevtools initialIsOpen={true} /> */}
+			<ReactQueryDevtools initialIsOpen={true} />
 			{/* </ResetProvider> */}
 		</QueryClientProvider>
 	)

@@ -96,7 +96,7 @@ export default function PostForm({
 	)
 	const [posterInfo, setPosterInfo] = React.useState<{
 		userName: string
-		avatarUrl: string
+		userAvatarUrl: string
 		userId: string
 	}>()
 	const user = useUser()
@@ -357,7 +357,7 @@ export default function PostForm({
 				<DrawerTrigger asChild>{children}</DrawerTrigger>
 
 				<DrawerContent
-					className="h-[90vh]  dark:bg-background-item"
+					className="h-[90vh] dark:bg-background-item"
 					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					{/* header */}

@@ -13,15 +13,26 @@ export const useQueryDataAppUser = () => {
 	return queryClient.getQueryData([queryKey.user.selectMain()])
 }
 
-export const useQueryCreateUser = (
-	id?: string,
-	email?: string | null,
-	userName?: string | null,
-	avatarUrl?: string | null,
-) =>
+export const useQueryCreateUser = ({
+	id,
+	email,
+	userName,
+	userAvatarUrl,
+}: {
+	id?: string
+	email?: string | null
+	userName?: string | null
+	userAvatarUrl?: string | null
+}) =>
 	useQuery({
 		queryKey: [queryKey.user.selectMain()],
-		queryFn: async () => createUser(id, email, userName, avatarUrl),
+		queryFn: async () =>
+			createUser({
+				id: id,
+				email: email,
+				userName: userName,
+				userAvatarUrl: userAvatarUrl,
+			}),
 		enabled: !!id && !!email,
 	})
 
