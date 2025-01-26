@@ -1,23 +1,11 @@
+import { stackServerApp } from "@/stack"
 import { ROUTE } from "@constants/route"
-import { useSupabaseServer } from "@hooks/supabase/server"
 import { redirect } from "next/navigation"
 
-/**
- * A protected page that redirects to sign-in page if the user is not authenticated.
- * The page renders a simple text when the user is authenticated.
- *
- * @returns A `NextResponse` object if the user is not authenticated, otherwise a React component.
- */
 export default async function ProtectedPage() {
-	const supabase = useSupabaseServer()
+	const user = await stackServerApp.getUser()
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser()
-
-	if (!user) {
-		return redirect(ROUTE.SIGN_IN)
-	}
+	if (!user) return redirect(ROUTE.SIGN_IN)
 
 	return (
 		<div className="flex w-full flex-1 flex-col items-center gap-20">
