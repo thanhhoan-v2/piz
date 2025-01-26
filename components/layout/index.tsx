@@ -1,35 +1,15 @@
 "use client"
-import { getUserById } from "@app/actions/user"
 import { customThemeAtom } from "@atoms/theme"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
-import { Avatar, AvatarImage } from "@components/ui/Avatar"
 import { useToast } from "@components/ui/toast/useToast"
 import { useQueryCreateUser } from "@queries/client/appUser"
-import { useQueryNotifications } from "@queries/client/noti"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
-import { avatarPlaceholder } from "@utils/image.helpers"
 import { useAtomValue } from "jotai"
 import { useTheme } from "next-themes"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect } from "react"
 
-/**
- * The root component for all pages. It provides a header bar and a side bar.
- * The header bar is fixed to the top of the screen and contains a logo, a
- * search bar, and a button to show/hide the side bar.
- * The side bar is fixed to the left side of the screen and contains a list of
- * links to different pages.
- * The main content of the page is rendered in the middle of the screen.
- * The theme of the app is applied to the component.
- * The component listens for changes to the theme and updates the styles
- * accordingly.
- * The component also listens for changes to the user and updates the user
- * information in the header bar accordingly.
- * The component renders a toast notification when a new follower is detected.
- * The toast notification contains the name and avatar of the new follower.
- * The component renders a spinner when the user is loading.
- */
 export type SenderInfo = {
 	userName: string
 	avatarUrl: string
@@ -43,23 +23,16 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 		Record<string, SenderInfo>
 	>({})
 
+	const user = useUser()
 	const { theme } = useTheme()
 	const customTheme = useAtomValue(customThemeAtom)
 
-	const user = useUser()
-	if (user) {
-		const {
-			id,
-			displayName: userName,
-			primaryEmail: email,
-			profileImageUrl: avatarUrl,
-		} = user
-
-		if (userName && email) {
-			const newUser = useQueryCreateUser(id, userName, email, avatarUrl)
-			console.log("newUser", newUser)
-		}
-	}
+	const newUser = useQueryCreateUser(
+		user?.id,
+		user?.primaryEmail,
+		user?.displayName,
+		user?.profileImageUrl,
+	)
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -83,56 +56,57 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const sideBarIsVisible = isVisible ? "transform-y-0" : "translate-y-full"
 
 	// Subscribe to notification changes
-	// const queryClient = useQueryClient()
 	const { toast } = useToast()
 
-	const previousNotifications = useRef<any[]>([])
-	const { data: notifications } = useQueryNotifications(user?.id)
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// const previousNotifications = useRef<any[]>([])
+	// const { data: notifications } = useQueryNotifications(user?.id)
 
-	useEffect(() => {
-		if (notifications) {
-			const newNotifications = notifications.filter(
-				(notification) =>
-					!previousNotifications.current.find(
-						(prev) => prev.id === notification.id,
-					),
-			)
-
-			newNotifications.forEach(async (notification) => {
-				if (notification.notificationType === "FOLLOW") {
-					// Fetch sender info
-					const sender = await getUserById(notification.senderId)
-					if (sender) {
-						setSenderInfo((prev) => ({
-							...prev,
-							[notification.senderId]: sender,
-						}))
-
-						toast({
-							title: "New Follower",
-							description: (
-								<div className="flex items-center space-x-2">
-									<Avatar className="h-8 w-8">
-										<AvatarImage
-											src={sender.avatarUrl ?? avatarPlaceholder}
-											alt="Follower Avatar"
-										/>
-									</Avatar>
-									<div className="flex-y-center gap-1 font-medium">
-										<p className="font-bold">{sender.userName}</p>
-										<p>is following you</p>
-									</div>
-								</div>
-							),
-							duration: 3000,
-						})
-					}
-				}
-			})
-
-			previousNotifications.current = notifications
-		}
-	}, [notifications, toast])
+	// useEffect(() => {
+	// 	if (notifications) {
+	// 		const newNotifications = notifications.filter(
+	// 			(notification) =>
+	// 				!previousNotifications.current.find(
+	// 					(prev) => prev.id === notification.id,
+	// 				),
+	// 		)
+	//
+	// 		// biome-ignore lint/complexity/noForEach: <explanation>
+	// 		newNotifications.forEach(async (notification) => {
+	// 			if (notification.notificationType === "FOLLOW") {
+	// 				// Fetch sender info
+	// 				const sender = await getUserById(notification.senderId)
+	// 				if (sender) {
+	// 					setSenderInfo((prev) => ({
+	// 						...prev,
+	// 						[notification.senderId]: sender,
+	// 					}))
+	//
+	// 					toast({
+	// 						title: "New Follower",
+	// 						description: (
+	// 							<div className="flex items-center space-x-2">
+	// 								<Avatar className="h-8 w-8">
+	// 									<AvatarImage
+	// 										src={sender.avatarUrl ?? avatarPlaceholder}
+	// 										alt="Follower Avatar"
+	// 									/>
+	// 								</Avatar>
+	// 								<div className="flex-y-center gap-1 font-medium">
+	// 									<p className="font-bold">{sender.userName}</p>
+	// 									<p>is following you</p>
+	// 								</div>
+	// 							</div>
+	// 						),
+	// 						duration: 3000,
+	// 					})
+	// 				}
+	// 			}
+	// 		})
+	//
+	// 		previousNotifications.current = notifications
+	// 	}
+	// }, [notifications, toast])
 
 	return (
 		<>

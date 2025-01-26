@@ -8,10 +8,10 @@ import { prisma } from "@prisma/createClient"
 // import prismaRandom from "prisma-extension-random"
 
 export const createUser = async (
-	id: string,
-	userName: string,
-	email: string,
-	avatarUrl?: string,
+	id?: string,
+	userName?: string | null,
+	email?: string | null,
+	avatarUrl?: string | null,
 ) => {
 	try {
 		const existingUser = await prisma.user.findUnique({
@@ -25,16 +25,18 @@ export const createUser = async (
 			return existingUser
 		}
 
-		const newUser = await prisma.user.create({
-			data: {
-				id: id,
-				email: email,
-				userName: userName,
-				avatarUrl: avatarUrl,
-			},
-		})
+		if (userName !== null && email !== null && email !== undefined) {
+			const newUser = await prisma.user.create({
+				data: {
+					id: id,
+					email: email,
+					userName: userName,
+					avatarUrl: avatarUrl,
+				},
+			})
 
-		return newUser
+			return newUser
+		}
 	} catch (error) {
 		console.error(
 			"[USER] Error when creating: ",

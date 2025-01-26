@@ -8,7 +8,7 @@ import { avatarPlaceholder } from "@utils/image.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { formatDistanceToNow } from "date-fns"
-import { Route } from "next"
+import type { Route } from "next"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -37,7 +37,11 @@ export default function PostUserInfo({
 }: PostUserInfoProps) {
 	const user = useUser()
 
-	const [posterInfo, setPosterInfo] = useState<{ userName: string; avatarUrl: string, userId: string }>()
+	const [posterInfo, setPosterInfo] = useState<{
+		userName: string
+		avatarUrl: string
+		userId: string
+	}>()
 
 	useEffect(() => {
 		const fetchUserInfo = async () => {
@@ -76,23 +80,25 @@ export default function PostUserInfo({
 		// Don't show status for certain visibility settings
 		if (visibility === "PRIVATE" || visibility === "ME_ONLY") return null
 
-		// If both users follow each other, only show "Following"
-		if (followData?.requestStatus === "ACCEPTED" && followsMe?.requestStatus === "ACCEPTED") {
-			return <span className="text-muted-foreground text-sm">Following</span>
-		}
-
-		// If only they follow me, show "Follows you"
-		if (followsMe?.requestStatus === "ACCEPTED") {
-			return <span className="text-muted-foreground text-sm">Follows you</span>
-		}
-
-		// If only I follow them, show "Following" or "Requested"
-		if (followData?.requestStatus === "ACCEPTED") {
-			return <span className="text-muted-foreground text-sm">Following</span>
-		}
-		if (followData?.requestStatus === "PENDING") {
-			return <span className="text-muted-foreground text-sm">Requested</span>
-		}
+		// // If both users follow each other, only show "Following"
+		// if (
+		// 	followData?.requestStatus === "ACCEPTED" &&
+		// 	followsMe?.requestStatus === "ACCEPTED"
+		// ) {
+		// 	return <span className="text-muted-foreground text-sm">Following</span>
+		// }
+		//
+		// // If only they follow me, show "Follows you"
+		// if (followsMe?.requestStatus === "ACCEPTED") {
+		// 	return <span className="text-muted-foreground text-sm">Follows you</span>
+		// }
+		//
+		// // If only I follow them, show "Following" or "Requested"
+		// if (followData?.requestStatus === "ACCEPTED") {
+		// 	return <span className="text-muted-foreground text-sm">Following</span>
+		// }
+		// if (followData?.requestStatus === "PENDING") {
+		// 	return <span className="text-muted-foreground text-sm">Requested</span> }
 
 		return null
 	}
@@ -106,7 +112,11 @@ export default function PostUserInfo({
 						<Link href={`/${userId}` as Route}>
 							<Avatar>
 								<AvatarImage
-									src={posterInfo?.avatarUrl == "" ? avatarPlaceholder : posterInfo?.avatarUrl}
+									src={
+										posterInfo?.avatarUrl === ""
+											? avatarPlaceholder
+											: posterInfo?.avatarUrl
+									}
 									alt={`${posterInfo?.userName}'s avatar`}
 								/>
 								<AvatarFallback>
@@ -131,9 +141,7 @@ export default function PostUserInfo({
 								</p>
 							</div>
 							{/* Follow status */}
-							<div>
-								{getFollowStatus()}
-							</div>
+							<div>{getFollowStatus()}</div>
 						</div>
 					</div>
 					{userId === user?.id && (
@@ -143,9 +151,11 @@ export default function PostUserInfo({
 
 				<div className="flex flex-col gap-4">
 					<div className="font-bold text-[1.2rem] text-wrap-pretty">
-						{title}
+						<h2>{title}</h2>
 					</div>
-					<div className="text-wrap-pretty">{content}</div>
+					<div className="text-wrap-pretty">
+						<p>{content}</p>
+					</div>
 				</div>
 			</div>
 		</>

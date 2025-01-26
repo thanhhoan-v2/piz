@@ -14,15 +14,15 @@ export const useQueryDataAppUser = () => {
 }
 
 export const useQueryCreateUser = (
-	id: string,
-	email: string,
-	userName: string,
-	avatarUrl?: string,
+	id?: string,
+	email?: string | null,
+	userName?: string | null,
+	avatarUrl?: string | null,
 ) =>
 	useQuery({
 		queryKey: [queryKey.user.selectMain()],
 		queryFn: async () => createUser(id, email, userName, avatarUrl),
-		enabled: !!id && !!email && !!userName,
+		enabled: !!id && !!email,
 	})
 
 export const useQueryDataViewingUser = (userName: string) =>

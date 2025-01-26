@@ -4,15 +4,16 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
   id               String            @id @default(cuid())
   email            String            @unique
-  userName         String            @unique
-  avatarUrl        String?           @db.LongText
+  userName         String?           @unique
+  avatarUrl        String?
   bio              String?
   isActive         Boolean           @default(false)
   privacyMode      Privacy           @default(PUBLIC)
@@ -34,16 +35,16 @@ model Follow {
   follower   User      @relation("UserFollowers", fields: [followerId], references: [id])
 
   @@unique([followerId, followeeId])
-  @@index([followeeId], map: "Follow_followeeId_fkey")
+  @@index([followeeId], map: "Follow_followeeId_fkey_unique")
 }
 
 model Post {
   id            String    @id @default(cuid())
   userId        String
   userName      String?
-  userAvatarUrl String?   @db.LongText
+  userAvatarUrl String?
   title         String
-  content       String    @db.LongText
+  content       String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime?
   isDeleted     Boolean   @default(false)
@@ -65,7 +66,7 @@ model Comment {
   replies         Comment[]         @relation("ParentComment")
   CommentReaction CommentReaction[]
 
-  @@index([parentId], map: "Comment_parentId_fkey")
+  @@index([parentId], map: "Comment_parentId_fkey_unique")
 }
 
 model PostReaction {
@@ -92,7 +93,7 @@ model CommentReaction {
   user        User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, commentId])
-  @@index([commentId], map: "CommentReaction_commentId_fkey")
+  @@index([commentId], map: "CommentReaction_commentId_fkey_unique")
 }
 
 model Notification {

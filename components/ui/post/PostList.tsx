@@ -18,8 +18,6 @@ export default function PostList() {
 		return <div>Error loading posts 😢</div>
 	}
 
-	console.log(posts)
-
 	// if (isLoading || isFetching) return <div>Loading posts...</div>
 	if (isSuccess)
 		return (
