@@ -123,12 +123,6 @@ enum ContentType {
   COMMENT
 }
 
-enum MediaFormat {
-  AUDIO
-  IMAGE
-  VIDEO
-}
-
 enum NotificationType {
   FOLLOW
   COMMENT
@@ -137,12 +131,18 @@ enum NotificationType {
   POST_REACTION
 }
 
-enum PostActionType {
-  SAVE
-  IGNORE
-}
-
 enum Privacy {
   PUBLIC
   PRIVATE
+}
+
+enum MediaFormat {
+  AUDIO
+  IMAGE
+  VIDEO
+}
+
+enum PostActionType {
+  SAVE
+  IGNORE
 }
