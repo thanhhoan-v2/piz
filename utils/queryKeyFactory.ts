@@ -29,7 +29,7 @@ export const queryKey = {
 		selectReactionByUser: ({
 			userId,
 			postId,
-		}: { userId?: string; postId: string }) =>
+		}: { userId?: string | null; postId: string }) =>
 			[...queryKey.post.selectId(postId), "reaction", userId] as const,
 	},
 	comment: {

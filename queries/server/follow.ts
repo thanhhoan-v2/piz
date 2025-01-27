@@ -8,14 +8,19 @@ export async function getFollow({
 	followeeId,
 }: { followerId: string; followeeId: string }) {
 	try {
-		console.log(`[FOLLOW] Checking follow status: ${followerId} -> ${followeeId}`)
+		console.log(
+			`[FOLLOW] Checking follow status: ${followerId} -> ${followeeId}`,
+		)
 		const follow = await prisma.follow.findFirst({
 			where: { followerId, followeeId },
 		})
-		console.log('[FOLLOW] Status found:', follow)
+		console.log("[FOLLOW] Status found:", follow)
 		return follow
 	} catch (error) {
-		console.error('[FOLLOW] Error checking follow status:', JSON.stringify(error, null, 2))
+		console.error(
+			"[FOLLOW] Error checking follow status:",
+			JSON.stringify(error, null, 2),
+		)
 		throw error
 	}
 }
@@ -29,7 +34,7 @@ export async function createFollow({
 		const follow = await prisma.follow.create({
 			data: { followerId, followeeId },
 		})
-		console.log('[FOLLOW] Created:', follow)
+		console.log("[FOLLOW] Created:", follow)
 
 		// Create notification for the followee
 		await createNotification({
@@ -40,7 +45,10 @@ export async function createFollow({
 
 		return follow
 	} catch (error) {
-		console.error('[FOLLOW] Error creating follow:', JSON.stringify(error, null, 2))
+		console.error(
+			"[FOLLOW] Error creating follow:",
+			JSON.stringify(error, null, 2),
+		)
 		throw error
 	}
 }
@@ -59,10 +67,13 @@ export async function deleteFollow({
 				},
 			},
 		})
-		console.log('[FOLLOW] Deleted:', follow)
+		console.log("[FOLLOW] Deleted:", follow)
 		return follow
 	} catch (error) {
-		console.error('[FOLLOW] Error deleting follow:', JSON.stringify(error, null, 2))
+		console.error(
+			"[FOLLOW] Error deleting follow:",
+			JSON.stringify(error, null, 2),
+		)
 		throw error
 	}
 }

@@ -1,7 +1,6 @@
 import type { CommentWithChildren } from "@components/ui/comment"
 import type { Comment as IComment } from "@prisma/client"
 
-
 export const buildCommentTree = (comments: IComment[], rootId?: string) => {
 	const commentMap: { [key: string]: CommentWithChildren } = {}
 	const roots: CommentWithChildren[] = []
@@ -18,7 +17,7 @@ export const buildCommentTree = (comments: IComment[], rootId?: string) => {
 				roots.push(commentMap[comment.id])
 			} else {
 				// and link children to their respective parents
-				if (commentMap[comment.parentId]) {
+				if (comment.parentId && commentMap[comment.parentId]) {
 					commentMap[comment.parentId].children?.push(commentMap[comment.id])
 				}
 			}
@@ -30,7 +29,7 @@ export const buildCommentTree = (comments: IComment[], rootId?: string) => {
 				roots.push(commentMap[comment.id])
 			} else {
 				// and link children to their respective parents
-				if (commentMap[comment.parentId]) {
+				if (comment.parentId && commentMap[comment.parentId]) {
 					commentMap[comment.parentId].children?.push(commentMap[comment.id])
 				}
 			}

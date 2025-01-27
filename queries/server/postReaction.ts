@@ -4,7 +4,7 @@ import type { PostReaction } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
 import { createNotification } from "@queries/server/noti"
 
-export type PostReactionProps = {
+export type GetPostReactionProps = {
 	userId?: string
 	postId: string
 }
@@ -12,17 +12,22 @@ export type PostReactionProps = {
 export const getPostReaction = async ({
 	userId,
 	postId,
-}: PostReactionProps) => {
+}: GetPostReactionProps) => {
 	return await prisma.postReaction.findFirst({
-		where: { userId, postId },
+		where: { userId: userId, postId: postId },
 	})
+}
+
+export type CreatePostReactionProps = {
+	userId?: string | null
+	postId: string
 }
 
 // CREATE a new post reaction or DELETE the existing one
 export const createPostReaction = async ({
 	userId,
 	postId,
-}: PostReactionProps) => {
+}: CreatePostReactionProps) => {
 	try {
 		if (!userId) {
 			console.log("[POST_REACTION] Missing userId when creating reaction")
@@ -30,12 +35,12 @@ export const createPostReaction = async ({
 		}
 
 		const reaction = await prisma.postReaction.create({
-			data: { userId, postId }
+			data: { userId, postId },
 		})
 
 		// Get post owner
 		const post = await prisma.post.findUnique({
-			where: { id: postId }
+			where: { id: postId },
 		})
 
 		if (post && post.userId !== userId) {
@@ -49,7 +54,10 @@ export const createPostReaction = async ({
 
 		return reaction
 	} catch (error) {
-		console.error("[POST_REACTION] Error creating: ", JSON.stringify(error, null, 2))
+		console.error(
+			"[POST_REACTION] Error creating: ",
+			JSON.stringify(error, null, 2),
+		)
 	}
 }
 
@@ -57,7 +65,7 @@ export const createPostReaction = async ({
 export const deletePostReaction = async ({
 	userId,
 	postId,
-}: PostReactionProps) => {
+}: CreatePostReactionProps) => {
 	try {
 		if (userId) {
 			const existingReaction = await getPostReaction({ userId, postId })

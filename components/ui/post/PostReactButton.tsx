@@ -9,12 +9,12 @@ import { Heart } from "lucide-react"
 import React from "react"
 
 interface PostReactButtonProps {
-	userId?: string | null;
-	postId: string;
-	className?: string;
-	wrapperClassName?: string;
-	initialReactionCount: number;
-	isReacted: boolean;
+	userId?: string | null
+	postId: string
+	className?: string
+	wrapperClassName?: string
+	initialReactionCount: number
+	isReacted: boolean
 }
 
 export type PostCounts = {

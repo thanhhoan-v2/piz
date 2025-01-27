@@ -43,7 +43,7 @@ export default function Post({
 	const router = useRouter()
 	const [posterInfo, setPosterInfo] = React.useState<{
 		userName: string
-		avatarUrl: string
+		userAvatarUrl: string
 		userId: string
 	}>()
 	const user = useUser()
@@ -92,7 +92,7 @@ export default function Post({
 		}
 	}
 
-	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => { }
+	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {}
 
 	if (isDeleted) return null
 
@@ -113,7 +113,7 @@ export default function Post({
 								<PostUserInfo
 									userId={userId}
 									userName={posterInfo?.userName}
-									userAvatarUrl={posterInfo?.avatarUrl}
+									userAvatarUrl={posterInfo?.userAvatarUrl}
 									title={title}
 									content={content}
 									createdAt={createdAt}
@@ -168,7 +168,7 @@ export default function Post({
 										// User related props
 										userId={userId}
 										userName={posterInfo?.userName ?? null}
-										userAvatarUrl={posterInfo?.avatarUrl ?? null}
+										userAvatarUrl={posterInfo?.userAvatarUrl ?? null}
 										// Post related props
 										postId={id}
 										postContent={content}
@@ -181,7 +181,7 @@ export default function Post({
 										wrapperClassName={postButtonWrapperClassName}
 										userId={userId}
 										postId={id}
-									// initialShareCount={noShares ?? 0}
+										// initialShareCount={noShares ?? 0}
 									/>
 								</>
 							</div>
@@ -230,7 +230,7 @@ export default function Post({
 							<PostUserInfo
 								userId={userId}
 								userName={posterInfo?.userName}
-								userAvatarUrl={posterInfo?.avatarUrl}
+								userAvatarUrl={posterInfo?.userAvatarUrl}
 								title={title}
 								content={content}
 								createdAt={createdAt}
@@ -285,7 +285,7 @@ export default function Post({
 									// User related props
 									userId={userId}
 									userName={posterInfo?.userName ?? null}
-									userAvatarUrl={posterInfo?.avatarUrl ?? null}
+									userAvatarUrl={posterInfo?.userAvatarUrl ?? null}
 									// Post related props
 									postId={id}
 									postContent={content}
@@ -298,7 +298,7 @@ export default function Post({
 									wrapperClassName={postButtonWrapperClassName}
 									userId={userId}
 									postId={id}
-								// initialShareCount={noShares ?? 0}
+									// initialShareCount={noShares ?? 0}
 								/>
 							</>
 						</div>

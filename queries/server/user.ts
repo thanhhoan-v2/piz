@@ -13,7 +13,7 @@ export const createUser = async ({
 	userName,
 	userAvatarUrl,
 }: {
-	id?: string
+	id: string
 	email?: string | null
 	userName?: string | null
 	userAvatarUrl?: string | null

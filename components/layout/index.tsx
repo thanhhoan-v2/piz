@@ -28,12 +28,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const { toast } = useToast()
 	const customTheme = useAtomValue(customThemeAtom)
 
-	useQueryCreateUser({
-		id: user?.id,
-		email: user?.primaryEmail,
-		userName: user?.displayName,
-		userAvatarUrl: user?.profileImageUrl,
-	})
+	if (user)
+		useQueryCreateUser({
+			id: user?.id,
+			email: user?.primaryEmail,
+			userName: user?.displayName,
+			userAvatarUrl: user?.profileImageUrl,
+		})
 
 	useEffect(() => {
 		const handleScroll = () => {
