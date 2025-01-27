@@ -6,14 +6,7 @@ import { useUser } from "@stackframe/stack"
 import { Search } from "lucide-react"
 import React from "react"
 
-interface SearchBarProps {
-	className?: string
-	placeholder?: string
-}
-
-export default function SearchBar({
-	placeholder = "Type here to search",
-}: SearchBarProps) {
+export default function SearchBar() {
 	const [searchValue, setSearchValue] = React.useState("")
 	const [isSearching, setIsSearching] = React.useState(false)
 	const [searchResults, setSearchResults] = React.useState<any[]>([])
@@ -54,7 +47,7 @@ export default function SearchBar({
 				<div className="relative flex-1">
 					<Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
 					<Input
-						placeholder={placeholder}
+						placeholder="Type here to search..."
 						value={searchValue}
 						onChange={(e) => {
 							console.log("[SearchBar] Input changed:", e.target.value)
