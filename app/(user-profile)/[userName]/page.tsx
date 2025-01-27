@@ -1,10 +1,10 @@
 import UserProfile from "@components/ui/profile/UserProfile"
 import { stackServerApp } from "../../../stack"
 
-type Params = Promise<{ userName: string }>
-
-export default async function UserPage(props: { params: Params }) {
-	const { userName } = await props.params
+export default async function UserPage({
+	params,
+}: { params: Promise<{ userName: string }> }) {
+	const { userName } = await params
 	const user = await stackServerApp.getUser(userName)
 
 	const serializedUser = {
