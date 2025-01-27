@@ -1,10 +1,13 @@
 "use client"
 import { getUserById } from "@app/actions/user"
-import { type Noti, getNotificationMessage } from "@app/activity/page"
+import type { Noti } from "@app/activity/page"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { cn } from "@utils/cn"
+import {
+	getNotificationLink,
+	getNotificationMessage,
+} from "@utils/notification.helpers"
 import { formatDistanceToNow } from "date-fns"
-import type { Route } from "next"
 import Link from "next/link"
 import React from "react"
 
@@ -50,26 +53,4 @@ export function NotificationItem({ notification }: { notification: Noti }) {
 			</div>
 		</Link>
 	)
-}
-
-function getNotificationLink(notification: Noti): Route {
-	const senderIdRoute = `/${notification.senderId}` as Route
-	const postIdRoute = `${senderIdRoute}/post/${notification.postId}` as Route
-	const commentIdRoute =
-		`${postIdRoute}/comment/${notification.commentId}` as Route
-
-	switch (notification.notificationType) {
-		case "FOLLOW":
-			return senderIdRoute
-		case "COMMENT":
-			return commentIdRoute
-		case "COMMENT_REACTION":
-			return commentIdRoute
-		case "POST":
-			return postIdRoute
-		case "POST_REACTION":
-			return postIdRoute
-		default:
-			return "/" as Route
-	}
 }

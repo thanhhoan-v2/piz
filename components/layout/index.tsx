@@ -12,7 +12,7 @@ import React, { useEffect } from "react"
 
 export type SenderInfo = {
 	userName: string
-	avatarUrl: string
+	userAvatarUrl: string
 }
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {

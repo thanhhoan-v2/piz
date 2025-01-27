@@ -21,18 +21,3 @@ export const useQueryNotifications = (userId?: string) => {
 		// },
 	})
 }
-
-function getNotificationMessage(notification: any) {
-	const senderName = notification.sender.userName
-
-	switch (notification.notificationType) {
-		case "REACT":
-			return `${senderName} reacted to your post`
-		case "COMMENT":
-			return `${senderName} commented on your post: "${notification.comment.content.substring(0, 50)}..."`
-		case "NEW_POST":
-			return `${senderName} created a new post`
-		default:
-			return "New notification"
-	}
-}
