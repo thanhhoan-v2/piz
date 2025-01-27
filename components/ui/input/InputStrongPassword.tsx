@@ -1,7 +1,5 @@
 import { InputPassword } from "@components/ui/input/InputPassword"
 import { useEffect, useState } from "react"
-import { MdDone } from "react-icons/md"
-import { RxCross1 } from "react-icons/rx"
 
 type StrongPasswordProps = {
 	onPasswordChange: (password: string) => void
@@ -82,56 +80,56 @@ const InputStrongPassword = ({
 					</h3>
 
 					<div className="mt-2 flex w-full flex-col gap-[6px]">
-						<div
-							className={`${signal.length ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`}
-						>
-							{signal.length ? (
-								<MdDone className={"text-[1rem]"} />
-							) : (
-								<RxCross1 />
-							)}
-							Minimum number of characters is 8.
-						</div>
-						<div
-							className={`${signal.uppercase ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`}
-						>
-							{signal.uppercase ? (
-								<MdDone className={"text-[1rem]"} />
-							) : (
-								<RxCross1 />
-							)}
-							Should contain uppercase.
-						</div>
-						<div
-							className={`${signal.lowercase ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`}
-						>
-							{signal.lowercase ? (
-								<MdDone className={"text-[1rem]"} />
-							) : (
-								<RxCross1 />
-							)}
-							Should contain lowercase.
-						</div>
-						<div
-							className={`${signal.number ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`}
-						>
-							{signal.number ? (
-								<MdDone className={"text-[1rem]"} />
-							) : (
-								<RxCross1 />
-							)}
-							Should contain numbers.
-						</div>
-						<div
-							className={`${signal.symbol ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`}
-						>
-							{signal.symbol ? (
-								<MdDone className={"text-[1rem]"} />
-							) : (
-								<RxCross1 />
-							)}
-							Should contain special characters.
-						</div>
+						{/* <div */}
+						{/* 	className={`${signal.length ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`} */}
+						{/* > */}
+						{/* 	{signal.length ? ( */}
+						{/* 		<MdDone className={"text-[1rem]"} /> */}
+						{/* 	) : ( */}
+						{/* 		<RxCross1 /> */}
+						{/* 	)} */}
+						{/* 	Minimum number of characters is 8. */}
+						{/* </div> */}
+						{/* <div */}
+						{/* 	className={`${signal.uppercase ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`} */}
+						{/* > */}
+						{/* 	{signal.uppercase ? ( */}
+						{/* 		<MdDone className={"text-[1rem]"} /> */}
+						{/* 	) : ( */}
+						{/* 		<RxCross1 /> */}
+						{/* 	)} */}
+						{/* 	Should contain uppercase. */}
+						{/* </div> */}
+						{/* <div */}
+						{/* 	className={`${signal.lowercase ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`} */}
+						{/* > */}
+						{/* 	{signal.lowercase ? ( */}
+						{/* 		<MdDone className={"text-[1rem]"} /> */}
+						{/* 	) : ( */}
+						{/* 		<RxCross1 /> */}
+						{/* 	)} */}
+						{/* 	Should contain lowercase. */}
+						{/* </div> */}
+						{/* <div */}
+						{/* 	className={`${signal.number ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`} */}
+						{/* > */}
+						{/* 	{signal.number ? ( */}
+						{/* 		<MdDone className={"text-[1rem]"} /> */}
+						{/* 	) : ( */}
+						{/* 		<RxCross1 /> */}
+						{/* 	)} */}
+						{/* 	Should contain numbers. */}
+						{/* </div> */}
+						{/* <div */}
+						{/* 	className={`${signal.symbol ? "text-green-500" : "text-gray-500"} flex items-center gap-[8px] text-[0.8rem]`} */}
+						{/* > */}
+						{/* 	{signal.symbol ? ( */}
+						{/* 		<MdDone className={"text-[1rem]"} /> */}
+						{/* 	) : ( */}
+						{/* 		<RxCross1 /> */}
+						{/* 	)} */}
+						{/* 	Should contain special characters. */}
+						{/* </div> */}
 					</div>
 				</div>
 			</div>
