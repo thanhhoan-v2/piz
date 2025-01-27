@@ -8,22 +8,15 @@ import { buildCommentTree } from "@utils/comment-tree.helpers"
 import { RefreshCw } from "lucide-react"
 import React from "react"
 
-/**
- * Page for a single post.
- *
- * It will fetch the post and its comments from the database and display them.
- * It also provides a button to refetch the comments.
- *
- * @param {{ params: { postId: string } }} props
- * @returns {JSX.Element}
- */
-export default function PostPage({ params }: { params: { postId: string } }) {
+export default function PostPage({
+	params,
+}: { params: Promise<{ postId: string }> }) {
 	const [postId, setPostId] = React.useState("")
 
 	React.useEffect(() => {
 		const getPostId = async () => {
-			const paramsRes = await params
-			setPostId(paramsRes.postId)
+			const { postId } = await params
+			setPostId(postId)
 		}
 		getPostId()
 	}, [params])
