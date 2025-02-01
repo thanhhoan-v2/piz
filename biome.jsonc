@@ -43,6 +43,7 @@
 			"recommended": true,
 			"a11y": {
 				"noAriaUnsupportedElements": "warn",
+				"useKeyWithClickEvents": "off",
 				"noBlankTarget": "off",
 				"noSvgWithoutTitle": "off",
 				"useAltText": "warn",

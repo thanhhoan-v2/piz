@@ -1,11 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"lib": [
-			"dom",
-			"dom.iterable",
-			"esnext"
-		],
+		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
 		"skipLibCheck": true,
 		"strict": true,
@@ -24,68 +20,32 @@
 			}
 		],
 		"paths": {
-			"@app/*": [
-				"./app/*"
-			],
-			"@assets/*": [
-				"./assets/*"
-			],
-			"@styles/*": [
-				"./styles/*"
-			],
-			"@components/*": [
-				"./components/*"
-			],
-			"@constants/*": [
-				"./constants/*"
-			],
-			"@utils/*": [
-				"./utils/*"
-			],
-			"@models/*": [
-				"./models/*"
-			],
-			"@services/*": [
-				"./services/*"
-			],
-			"@providers/*": [
-				"./providers/*"
-			],
-			"@hooks/*": [
-				"./hooks/*"
-			],
-			"@schemas/*": [
-				"./schemas/*"
-			],
-			"@prisma/*": [
-				"./prisma/*"
-			],
-			"@supabase/*": [
-				"./supabase/*"
-			],
-			"@stores/*": [
-				"./stores/*"
-			],
-			"@queries/*": [
-				"./queries/*"
-			],
-			"@atoms/*": [
-				"./atoms/*"
-			],
-			"@/*": [
-				"./*"
-			]
+			"@app/*": ["./app/*"],
+			"@assets/*": ["./assets/*"],
+			"@styles/*": ["./styles/*"],
+			"@components/*": ["./components/*"],
+			"@constants/*": ["./constants/*"],
+			"@utils/*": ["./utils/*"],
+			"@models/*": ["./models/*"],
+			"@services/*": ["./services/*"],
+			"@providers/*": ["./providers/*"],
+			"@hooks/*": ["./hooks/*"],
+			"@schemas/*": ["./schemas/*"],
+			"@prisma/*": ["./prisma/*"],
+			"@supabase/*": ["./supabase/*"],
+			"@stores/*": ["./stores/*"],
+			"@queries/*": ["./queries/*"],
+			"@atoms/*": ["./atoms/*"],
+			"@/*": ["./*"]
 		},
 		"baseUrl": "."
 	},
 	"include": [
 		"next-env.d.ts",
+		"video.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts"
 	],
-	"exclude": [
-		"node_modules",
-		"node_modules/@radix-ui/**"
-	]
+	"exclude": ["node_modules", "node_modules/@radix-ui/**"]
 }

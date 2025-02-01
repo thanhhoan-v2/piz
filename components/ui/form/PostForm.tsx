@@ -20,7 +20,22 @@ import {
 	DrawerTitle,
 	DrawerTrigger,
 } from "@components/ui/Drawer"
+import { ScrollArea } from "@components/ui/ScrollArea"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@components/ui/Select"
 import { Textarea } from "@components/ui/Textarea"
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@components/ui/Tooltip"
+import CodeEditor from "@components/ui/form/CodeEditor"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
 import SearchList from "@components/ui/search/SearchList"
@@ -33,11 +48,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { Sparkles } from "lucide-react"
+import { CodeXml, ImageIcon } from "lucide-react"
 import React from "react"
 import { getUserById } from "../../../app/actions/user"
-import { Input } from "../Input"
-import { Separator } from "../Separator"
 
 export type PostVisibilityEnumType =
 	| "PUBLIC"
@@ -73,12 +86,15 @@ export default function PostForm({
 	children: React.ReactNode
 }) {
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
-	const [alertIsOpen, setOpenAlert] = React.useState<boolean>(false)
+	const [postDiscardAlert, setAlertPostDiscard] = React.useState<boolean>(false)
+	const [snippetDiscardAlert, setAlertSnippetDiscard] =
+		React.useState<boolean>(false)
 	const [postTitle, setPostTitle] = React.useState("")
 	const [postContent, setPostContent] = React.useState("")
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 	const [postVisibility, setPostVisibility] =
 		React.useState<PostVisibilityEnumType>("PUBLIC")
+
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
 	const [showMentionSuggestions, setShowMentionSuggestions] =
 		React.useState<boolean>(false)
@@ -90,7 +106,6 @@ export default function PostForm({
 	const [mentionedUsers, setMentionedUsers] = React.useState<
 		IMentionedResult[]
 	>([])
-	const [isSearching, setIsSearching] = React.useState<boolean>(false)
 	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
 		[],
 	)
@@ -99,9 +114,12 @@ export default function PostForm({
 		userAvatarUrl: string
 		userId: string
 	}>()
+
+	const [isAddSnippet, setIsAddSnippet] = React.useState<boolean>(false)
+	const [isAddMedia, setIsAddMedia] = React.useState<boolean>(false)
+
 	const user = useUser()
 	const userId = user?.id
-	const userAvatarUrl = user?.profileImageUrl
 	const { toast } = useToast()
 
 	// Fetch user info when userId changes
@@ -229,7 +247,8 @@ export default function PostForm({
 		}
 	}, [mentionSearchValue])
 
-	const handleDiscard = () => {
+	const handlePostDiscard = () => {
+		setIsAddSnippet(false)
 		setOpenDrawer(false)
 		setPostTitle("")
 		setPostContent("")
@@ -241,9 +260,13 @@ export default function PostForm({
 		setLastMentionIndexes([])
 	}
 
+	const handleSnippetDiscard = () => {
+		setIsAddSnippet(false)
+	}
+
 	const handleTouchOutsideModal = () => {
-		// If the value is not empty, open the alert
-		if (postContent.length > 0) setOpenAlert(true)
+		if (postContent.length > 0) setAlertPostDiscard(true)
+		if (isAddSnippet) setAlertSnippetDiscard(true)
 
 		setSearchResults([])
 		setMentionedUsers([])
@@ -335,10 +358,9 @@ export default function PostForm({
 		setPostVisibility("PUBLIC")
 	}
 
-	// Post length, mid warning
-	const mid_threshold = 500
-	// and last warning
-	const last_threshold = 550
+	// Post length warning thresholds
+	const mid_threshold = 4000
+	const last_threshold = mid_threshold + 100
 
 	// Textarea auto increases its height on value length
 	// biome-ignore lint/correctness/useExhaustiveDependencies: value is only needed here
@@ -357,7 +379,7 @@ export default function PostForm({
 				<DrawerTrigger asChild>{children}</DrawerTrigger>
 
 				<DrawerContent
-					className="h-[90vh] dark:bg-background-item"
+					className="h-auto max-h-[90vh] min-h-[90vh] dark:bg-background-item"
 					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					{/* header */}
@@ -365,8 +387,10 @@ export default function PostForm({
 						<DrawerTitle>New post</DrawerTitle>
 						<DrawerDescription>What are you thinking?</DrawerDescription>
 					</DrawerHeader>
-					<div className="flex-col items-start gap-3 p-4">
-						{/* <PostUserInfo
+
+					<ScrollArea className="h-[80vh] p-4">
+						<div className="flex-col items-start gap-3 p-4">
+							{/* <PostUserInfo
 							isWriteOnly
 							userName={posterInfo?.userName}
 							userAvatarUrl={userAvatarUrl}
@@ -375,113 +399,158 @@ export default function PostForm({
 							createdAt={new Date()}
 							updatedAt={null}
 						/> */}
-						<div className="flex-y-center gap-2">
-							{mentionedUsers.length > 0 &&
-								mentionedUsers.map((mentionedUser) => (
-									<>
-										<Badge variant="outline" key={mentionedUser.id}>
-											@{mentionedUser.userName}
-										</Badge>
-									</>
-								))}
+							<div className="flex-y-center gap-2">
+								{mentionedUsers.length > 0 &&
+									mentionedUsers.map((mentionedUser) => (
+										<>
+											<Badge variant="outline" key={mentionedUser.id}>
+												@{mentionedUser.userName}
+											</Badge>
+										</>
+									))}
+							</div>
+							<div className="mb-1 w-full flex-start flex-col gap-2">
+								{/* <div className="flex-col gap-4"> */}
+								{/* 	<h1>Title</h1> */}
+								{/* 	<Input */}
+								{/* 		value={postTitle} */}
+								{/* 		onChange={(e) => setPostTitle(e.target.value)} */}
+								{/* 		placeholder={cn( */}
+								{/* 			"Dear ", */}
+								{/* 			posterInfo?.userName, */}
+								{/* 			", what is the title of your topic?", */}
+								{/* 		)} */}
+								{/* 		className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0" */}
+								{/* 	/> */}
+								{/* </div> */}
+								{/* <div className="my-1 flex-center gap-3"> */}
+								{/* 	<Separator className="w-1/3" /> */}
+								{/* 	<Sparkles color="#272727" size={15} /> */}
+								{/* 	<Separator className="w-1/3" /> */}
+								{/* </div> */}
+								<div className="flex-col gap-4">
+									{/* <h1>Description</h1> */}
+									<Textarea
+										autoFocus
+										ref={textareaRef}
+										value={postContent}
+										onChange={handleInputChange}
+										placeholder="What's on your mind?"
+										className={cn(
+											"min-h-[10px] max-w-[90vw] resize-none border-none p-0 text-xl focus-visible:ring-0",
+											// isAddSnippet && "max-h-[20vh]",
+										)}
+									/>
+								</div>
+							</div>
+							{isAddSnippet && <CodeEditor className="w-screen" />}
+							{/* {isAddMedia && <MediaUploadForm setIsAddMedia={setIsAddMedia} />} */}
 						</div>
-						<div className="mb-8 w-full flex-start flex-col gap-2">
-							<div className="flex-col gap-4">
-								<h1>Title</h1>
-								<Input
-									value={postTitle}
-									onChange={(e) => setPostTitle(e.target.value)}
-									placeholder={cn(
-										"Dear ",
-										posterInfo?.userName,
-										", what is the title of your topic?",
-									)}
-									className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
-								/>
-							</div>
-							<div className="my-4 flex-center gap-3">
-								<Separator className="w-1/3" />
-								<Sparkles color="#272727" size={15} />
-								<Separator className="w-1/3" />
-							</div>
-							<div className="flex-col gap-4">
-								<h1>Description</h1>
-								<Textarea
-									ref={textareaRef}
-									value={postContent}
-									onChange={handleInputChange}
-									placeholder={cn("Describe your topic here")}
-									className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
-								/>
-							</div>
-						</div>
-					</div>
 
-					{/* Mention suggestions */}
-					{showMentionSuggestions && searchResults?.length > 0 && (
-						<div className="mt-[20px] h-fit w-full flex-center">
-							<SearchList
-								searchResults={searchResults}
-								appUserId={userId}
-								isMention
-								containerClassname="my-0 w-[90%] rounded-lg border-2 border-white"
-								onSearchResultClick={handleSelectUser}
-							/>
-						</div>
-					)}
+						{/* Mention suggestions */}
+						{showMentionSuggestions && searchResults?.length > 0 && (
+							<div className="mt-[20px] h-fit w-full flex-center">
+								<SearchList
+									searchResults={searchResults}
+									appUserId={userId}
+									isMention
+									containerClassname="my-0 w-[90%] rounded-lg border-2 border-white"
+									onSearchResultClick={handleSelectUser}
+								/>
+							</div>
+						)}
+					</ScrollArea>
 
 					<DrawerFooter>
 						<div className="flex-between">
-							{/* Select post visibility */}
-							<div className="h-[10px] w-[100px]" onClick={handleFakePost} />
-							{/* <Select
-								onValueChange={(value: PostVisibilityEnumType) =>
-									setPostVisibility(value)
-								}
-							>
-								<SelectTrigger className="w-fit gap-2">
-									<SelectValue placeholder="Anyone can view" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value={PostVisibilityEnumMap.PUBLIC}>
-										Anyone can view
-									</SelectItem>
-									<SelectItem value={PostVisibilityEnumMap.FOLLOWERS_ONLY}>
-										Only followers can view
-									</SelectItem>
-									<SelectItem value={PostVisibilityEnumMap.MENTIONED_ONLY}>
-										Only metioned users can view
-									</SelectItem>
-									<SelectItem value={PostVisibilityEnumMap.FANS_ONLY}>
-										Only fans can view 🔞
-									</SelectItem>
-									<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>
-										Only you can view, because you are an introvert 😃
-									</SelectItem>
-								</SelectContent>
-							</Select> */}
+							<div className="flex-center gap-2">
+								<Select
+									onValueChange={(value: PostVisibilityEnumType) =>
+										setPostVisibility(value)
+									}
+								>
+									<SelectTrigger className="w-fit gap-2">
+										<SelectValue placeholder="Anyone can see" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={PostVisibilityEnumMap.PUBLIC}>
+											Anyone can see
+										</SelectItem>
+										{/* <SelectItem value={PostVisibilityEnumMap.FOLLOWERS_ONLY}> */}
+										{/* 	Only followers can view */}
+										{/* </SelectItem> */}
+										{/* <SelectItem value={PostVisibilityEnumMap.MENTIONED_ONLY}> */}
+										{/* 	Only metioned users can view */}
+										{/* </SelectItem> */}
+										{/* <SelectItem value={PostVisibilityEnumMap.FANS_ONLY}> */}
+										{/* 	Only fans can view 🔞 */}
+										{/* </SelectItem> */}
+										<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>
+											Only me can see
+										</SelectItem>
+									</SelectContent>
+								</Select>
+
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="outline"
+												onClick={() => setIsAddMedia(true)}
+											>
+												<ImageIcon />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Add image/video</p>
+										</TooltipContent>
+									</Tooltip>
+
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="outline"
+												onClick={() => {
+													if (isAddSnippet) {
+														setAlertSnippetDiscard(true)
+													} else {
+														setIsAddSnippet(!isAddSnippet)
+													}
+												}}
+											>
+												<CodeXml />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Add code snippet</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+
+								<div className="h-[10px] w-[100px]" onClick={handleFakePost} />
+							</div>
 
 							{/* Controls post length */}
-							{postContent.length >= mid_threshold && (
-								<div
-									className={cn(
-										"w-[100px] text-center font-black",
-										postContent.length > last_threshold && "text-red-500",
-									)}
-								>
-									{last_threshold - postContent.length}
-								</div>
-							)}
+							{/* {postContent.length >= mid_threshold && ( */}
+							{/* 	<div */}
+							{/* 		className={cn( */}
+							{/* 			"w-[100px] text-center font-black", */}
+							{/* 			postContent.length > last_threshold && "text-red-500", */}
+							{/* 		)} */}
+							{/* 	> */}
+							{/* 		{last_threshold - postContent.length} */}
+							{/* 	</div> */}
+							{/* )} */}
 
 							{/* Post button */}
 							<div className="flex gap-4">
 								<Button
 									className="w-[100px]"
-									disabled={
-										postContent.length > last_threshold ||
-										postContent.length === 0
-									}
 									onClick={handleSubmitPost}
+									// disabled={
+									// 	postContent.length > last_threshold ||
+									// 	postContent.length === 0
+									// }
 								>
 									Post
 								</Button>
@@ -491,17 +560,37 @@ export default function PostForm({
 				</DrawerContent>
 			</Drawer>
 
-			<AlertDialog open={alertIsOpen} onOpenChange={setOpenAlert}>
+			<AlertDialog
+				open={snippetDiscardAlert}
+				onOpenChange={setAlertSnippetDiscard}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Discard comment ?</AlertDialogTitle>
+						<AlertDialogTitle>Discard code snippet ?</AlertDialogTitle>
 						<AlertDialogDescription />
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setOpenDrawer(true)}>
 							Cancel
 						</AlertDialogCancel>
-						<AlertDialogAction onClick={handleDiscard}>
+						<AlertDialogAction onClick={handleSnippetDiscard}>
+							Discard
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={postDiscardAlert} onOpenChange={setAlertPostDiscard}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Discard post ?</AlertDialogTitle>
+						<AlertDialogDescription />
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => setOpenDrawer(true)}>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction onClick={handlePostDiscard}>
 							Discard
 						</AlertDialogAction>
 					</AlertDialogFooter>
