@@ -41,7 +41,11 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"complexity": {
+				"noForEach": "off"
+			},
 			"a11y": {
+				"useMediaCaption": "off",
 				"noAriaUnsupportedElements": "warn",
 				"useKeyWithClickEvents": "off",
 				"noBlankTarget": "off",
@@ -73,6 +77,7 @@
 				}
 			},
 			"style": {
+				"noNonNullAssertion": "off",
 				"useNamingConvention": {
 					"level": "off",
 					"fix": "safe",

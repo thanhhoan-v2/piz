@@ -10,18 +10,16 @@ import {
 } from "@components/ui/Select"
 import { codeViewThemes } from "@components/ui/form/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
-import { cn } from "@utils/cn"
 import { firstLetterToUpper } from "@utils/string.helpers"
+import { X } from "lucide-react"
 import type { FormEvent } from "react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
 
-type CodeEditorProps = {
-	className?: string
-}
-
-export default function CodeEditor({ className }: CodeEditorProps) {
-	const [code, setCode] = useState<string>("")
+export default function CodeEditor({
+	setIsAddingSnippet,
+}: { setIsAddingSnippet: (isAddingSnippet: boolean) => void }) {
+	const [code, setCode] = useState<string | null>(null)
 	const [editorLanguage, setEditorLanguage] = useState<string>("javascript")
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
@@ -95,31 +93,45 @@ export default function CodeEditor({ className }: CodeEditorProps) {
 				</div>
 			) : (
 				<div className="flex w-full flex-col">
-					<div className={cn("", className)}>
+					<div className="w-screen">
 						<div className="w-full max-w-[1000px] flex-col gap-2 rounded-lg border p-4">
-							<Select onValueChange={(e) => setEditorLanguage(e)}>
-								<SelectTrigger className="w-[130px] self-end">
-									<SelectValue placeholder={editorLanguage} />
-								</SelectTrigger>
-								<SelectContent>
-									{SyntaxHighlighter.supportedLanguages.map(
-										(language: string) => (
-											<SelectItem key={language} value={language}>
-												{firstLetterToUpper(language)}
-											</SelectItem>
-										),
-									)}
-								</SelectContent>
-							</Select>
+							<div className="flex-between">
+								<Select onValueChange={(e) => setEditorLanguage(e)}>
+									<SelectTrigger className="w-[130px] self-end">
+										<SelectValue placeholder={editorLanguage} />
+									</SelectTrigger>
+									<SelectContent>
+										{SyntaxHighlighter.supportedLanguages.map(
+											(language: string) => (
+												<SelectItem key={language} value={language}>
+													{firstLetterToUpper(language)}
+												</SelectItem>
+											),
+										)}
+									</SelectContent>
+								</Select>
+
+								<Button
+									variant="ghost"
+									onClick={() => {
+										setCode(null)
+										setEditorLanguage("javascript")
+										setIsAddingSnippet(false)
+									}}
+								>
+									<X />
+								</Button>
+							</div>
 
 							<form onSubmit={handleSubmit}>
 								<div className="">
 									<label htmlFor="comment" className="sr-only">
 										Add your code
 									</label>
+
 									<Editor
 										height="300px"
-										value={code}
+										value={code || ""}
 										onChange={(value) => setCode(value || "")}
 										theme="vs-dark"
 										language={editorLanguage}

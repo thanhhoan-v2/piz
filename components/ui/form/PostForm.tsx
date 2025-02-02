@@ -36,6 +36,7 @@ import {
 	TooltipTrigger,
 } from "@components/ui/Tooltip"
 import CodeEditor from "@components/ui/form/CodeEditor"
+import VideoUploadForm from "@components/ui/form/VideoUploadForm"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
 import SearchList from "@components/ui/search/SearchList"
@@ -48,7 +49,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { CodeXml, ImageIcon } from "lucide-react"
+import { CodeXml, FileVideoIcon, ImageIcon } from "lucide-react"
 import React from "react"
 import { getUserById } from "../../../app/actions/user"
 
@@ -115,8 +116,9 @@ export default function PostForm({
 		userId: string
 	}>()
 
-	const [isAddSnippet, setIsAddSnippet] = React.useState<boolean>(false)
-	const [isAddMedia, setIsAddMedia] = React.useState<boolean>(false)
+	const [isAddingSnippet, setIsAddingSnippet] = React.useState<boolean>(false)
+	const [isAddingVideo, setIsAddingVideo] = React.useState<boolean>(false)
+	const [isAddingImage, setIsAddingImage] = React.useState<boolean>(false)
 
 	const user = useUser()
 	const userId = user?.id
@@ -248,7 +250,7 @@ export default function PostForm({
 	}, [mentionSearchValue])
 
 	const handlePostDiscard = () => {
-		setIsAddSnippet(false)
+		setIsAddingSnippet(false)
 		setOpenDrawer(false)
 		setPostTitle("")
 		setPostContent("")
@@ -261,12 +263,12 @@ export default function PostForm({
 	}
 
 	const handleSnippetDiscard = () => {
-		setIsAddSnippet(false)
+		setIsAddingSnippet(false)
 	}
 
 	const handleTouchOutsideModal = () => {
 		if (postContent.length > 0) setAlertPostDiscard(true)
-		if (isAddSnippet) setAlertSnippetDiscard(true)
+		if (isAddingSnippet) setAlertSnippetDiscard(true)
 
 		setSearchResults([])
 		setMentionedUsers([])
@@ -443,8 +445,12 @@ export default function PostForm({
 									/>
 								</div>
 							</div>
-							{isAddSnippet && <CodeEditor className="w-screen" />}
-							{/* {isAddMedia && <MediaUploadForm setIsAddMedia={setIsAddMedia} />} */}
+							{isAddingSnippet && (
+								<CodeEditor setIsAddingSnippet={setIsAddingSnippet} />
+							)}
+							{isAddingVideo && (
+								<VideoUploadForm setIsAddingVideo={setIsAddingVideo} />
+							)}
 						</div>
 
 						{/* Mention suggestions */}
@@ -476,15 +482,6 @@ export default function PostForm({
 										<SelectItem value={PostVisibilityEnumMap.PUBLIC}>
 											Anyone can see
 										</SelectItem>
-										{/* <SelectItem value={PostVisibilityEnumMap.FOLLOWERS_ONLY}> */}
-										{/* 	Only followers can view */}
-										{/* </SelectItem> */}
-										{/* <SelectItem value={PostVisibilityEnumMap.MENTIONED_ONLY}> */}
-										{/* 	Only metioned users can view */}
-										{/* </SelectItem> */}
-										{/* <SelectItem value={PostVisibilityEnumMap.FANS_ONLY}> */}
-										{/* 	Only fans can view 🔞 */}
-										{/* </SelectItem> */}
 										<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>
 											Only me can see
 										</SelectItem>
@@ -496,13 +493,16 @@ export default function PostForm({
 										<TooltipTrigger asChild>
 											<Button
 												variant="outline"
-												onClick={() => setIsAddMedia(true)}
+												onClick={() => setIsAddingImage(true)}
+												disabled={
+													isAddingImage || isAddingVideo || isAddingSnippet
+												}
 											>
 												<ImageIcon />
 											</Button>
 										</TooltipTrigger>
 										<TooltipContent>
-											<p>Add image/video</p>
+											<p>Add image</p>
 										</TooltipContent>
 									</Tooltip>
 
@@ -510,12 +510,29 @@ export default function PostForm({
 										<TooltipTrigger asChild>
 											<Button
 												variant="outline"
+												onClick={() => setIsAddingVideo(true)}
+												disabled={
+													isAddingImage || isAddingVideo || isAddingSnippet
+												}
+											>
+												<FileVideoIcon />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Add video</p>
+										</TooltipContent>
+									</Tooltip>
+
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="outline"
+												disabled={
+													isAddingImage || isAddingVideo || isAddingSnippet
+												}
 												onClick={() => {
-													if (isAddSnippet) {
-														setAlertSnippetDiscard(true)
-													} else {
-														setIsAddSnippet(!isAddSnippet)
-													}
+													if (isAddingSnippet) setAlertSnippetDiscard(true)
+													else setIsAddingSnippet(!isAddingSnippet)
 												}}
 											>
 												<CodeXml />
