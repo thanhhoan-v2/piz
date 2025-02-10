@@ -19,14 +19,7 @@ export const createUser = async ({
 	userAvatarUrl?: string | null
 }) => {
 	try {
-		if (
-			email !== null &&
-			email !== undefined
-			// userName !== null &&
-			// userName !== undefined &&
-			// userAvatarUrl !== null &&
-			// userAvatarUrl !== undefined
-		) {
+		if (email !== null && email !== undefined) {
 			const upsertedUser = await prisma.user.upsert({
 				where: { id: id },
 				update: {

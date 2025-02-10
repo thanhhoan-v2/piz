@@ -116,6 +116,16 @@ model User {
   Post_Post_userIdToUser   Post[]            @relation("Post_userIdToUser")
   Post_Post_userNameToUser Post[]            @relation("Post_userNameToUser")
   PostReaction             PostReaction[]
+  Snippet                  Snippet[]
+}
+
+model Snippet {
+  id         String   @id
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  value      String?
+  lang       String?  @default("\"plain\"")
+  userId     String?
+  User       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum ContentType {

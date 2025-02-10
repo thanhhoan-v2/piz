@@ -10,7 +10,10 @@ import {
 } from "@components/ui/Select"
 import { codeViewThemes } from "@components/ui/form/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
+import { type CreateSnippetProps, createSnippet } from "@queries/server/snippet"
+import { useUser } from "@stackframe/stack"
 import { firstLetterToUpper } from "@utils/string.helpers"
+import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
 import type { FormEvent } from "react"
 import { useEffect, useState } from "react"
@@ -19,21 +22,35 @@ import SyntaxHighlighter from "react-syntax-highlighter"
 export default function CodeEditor({
 	setIsAddingSnippet,
 }: { setIsAddingSnippet: (isAddingSnippet: boolean) => void }) {
-	const [code, setCode] = useState<string | null>(null)
+	const [code, setCode] = useState<string>("")
 	const [editorLanguage, setEditorLanguage] = useState<string>("javascript")
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
-	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		setIsSubmitted(true)
-	}
-	const defaultCodeEditorValue = ""
-
+	// Code view related
 	const [codeViewThemeName, setCodeViewThemeName] = useState<string>("dark")
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
+	const user = useUser()
+	const defaultCodeEditorValue = ""
+
+	const handleCodeSave = (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		setIsSubmitted(true)
+
+		const newSnippet: CreateSnippetProps = {
+			id: generateBase64uuid(),
+			userId: user?.id,
+			value: code,
+			lang: editorLanguage,
+		}
+
+		console.log(newSnippet)
+
+		createSnippet(newSnippet)
+	}
+
 	useEffect(() => {
-		const loadStyle = async () => {
+		const loadCodeViewStyle = async () => {
 			try {
 				const style = await import(
 					`react-syntax-highlighter/dist/esm/styles/hljs/${codeViewThemeName}`
@@ -44,7 +61,7 @@ export default function CodeEditor({
 			}
 		}
 
-		loadStyle()
+		loadCodeViewStyle()
 	}, [codeViewThemeName])
 
 	return (
@@ -114,7 +131,7 @@ export default function CodeEditor({
 								<Button
 									variant="ghost"
 									onClick={() => {
-										setCode(null)
+										setCode("")
 										setEditorLanguage("javascript")
 										setIsAddingSnippet(false)
 									}}
@@ -123,7 +140,7 @@ export default function CodeEditor({
 								</Button>
 							</div>
 
-							<form onSubmit={handleSubmit}>
+							<form onSubmit={handleCodeSave}>
 								<div className="">
 									<label htmlFor="comment" className="sr-only">
 										Add your code

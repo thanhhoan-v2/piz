@@ -5,7 +5,7 @@ export type RouteProps = {
 	SIGN_IN: Route
 	SIGN_UP: Route
 	SEARCH: Route
-	ACTIVITY: Route
+	NOTIFICATION: Route
 	SAVED_POSTS: Route
 	SETTINGS: Route
 }
@@ -15,7 +15,7 @@ export const ROUTE: RouteProps = {
 	SIGN_IN: "/sign-in" as Route,
 	SIGN_UP: "/sign-up" as Route,
 	SEARCH: "/search" as Route,
-	ACTIVITY: "/activity" as Route,
+	NOTIFICATION: "/notification" as Route,
 	SAVED_POSTS: "/saved_posts" as Route,
 	SETTINGS: "/settings" as Route,
 }

@@ -28,7 +28,7 @@ export type Noti = {
 	updatedAt: Date | null
 }
 
-export default function ActivityPage() {
+export default function NotificationPage() {
 	const user = useUser()
 	const { toast } = useToast()
 	const previousNotifications = useRef<any[]>([])

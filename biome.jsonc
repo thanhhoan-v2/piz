@@ -46,6 +46,7 @@
 			},
 			"a11y": {
 				"useMediaCaption": "off",
+				"noRedundantAlt": "off",
 				"noAriaUnsupportedElements": "warn",
 				"useKeyWithClickEvents": "off",
 				"noBlankTarget": "off",

@@ -10,7 +10,7 @@ export default function DesktopSideBar() {
 				<div className="h-full flex-center flex-col gap-2">
 					<SideBarItem href={ROUTE.HOME} icon={Home} />
 					<SideBarItem href={ROUTE.SEARCH} icon={Search} />
-					<SideBarItem href={ROUTE.ACTIVITY} icon={Bell} />
+					<SideBarItem href={ROUTE.NOTIFICATION} icon={Bell} />
 					<SideBarItem href="profile" icon={User} />
 				</div>
 			</div>

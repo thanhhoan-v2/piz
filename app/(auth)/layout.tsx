@@ -1,4 +1,5 @@
 import Footer from "@components/layout/footer"
+import { LoadingScreen } from "@components/ui/loadings/loading-screen"
 
 /**
  * A layout component for authentication pages.
@@ -14,7 +15,8 @@ export default function AuthLayout({
 }: { children: React.ReactNode }) {
 	return (
 		<>
-      {/* h-screen -> signin page OK, singup NOT OK */}
+			<LoadingScreen />
+
 			<div className="h-screen w-screen flex-center">
 				<main className="w-full flex-center px-4">{children}</main>
 				<Footer />

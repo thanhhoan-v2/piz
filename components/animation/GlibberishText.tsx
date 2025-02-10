@@ -20,11 +20,11 @@ interface LetterProps {
 /**
  * Component that animates a letter by cycling through random letters and colors
  * before settling on the given letter.
- * 
+ *
  * @param {string} letter - The letter to animate.
  * @param {string} [className] - Optional class names to apply to the letter.
  * @param {string[]} [colors=["text-foreground"]] - List of color classes to cycle through.
- * 
+ *
  * @returns {JSX.Element} A span element displaying the animated letter.
  */
 const Letter = ({

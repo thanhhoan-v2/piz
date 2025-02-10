@@ -1,6 +1,4 @@
 "use server"
-
-import type { $Enums } from "@prisma/client"
 import { prisma } from "@prisma/createClient"
 import { createNotification } from "@queries/server/noti"
 
@@ -56,13 +54,7 @@ export const createPost = async ({
 			return
 		}
 
-		if (
-			!id ||
-			!userId ||
-			!userName ||
-			!title ||
-			!content 
-		) {
+		if (!id || !userId || !userName || !title || !content) {
 			console.log("[POST] Missing required fields when creating post")
 			return
 		}
@@ -89,22 +81,25 @@ export const createPost = async ({
 
 		// Create notifications for all followers
 		const followers = await prisma.follow.findMany({
-			where: { followeeId: userId }
+			where: { followeeId: userId },
 		})
 
 		try {
 			await Promise.all(
-				followers.map(follower =>
+				followers.map((follower) =>
 					createNotification({
 						receiverId: follower.followerId,
 						senderId: userId,
 						type: "POST",
-						postId: newPost.id
-					})
-				)
+						postId: newPost.id,
+					}),
+				),
 			)
 		} catch (error) {
-			console.error("[POST] Error creating notifications:", JSON.stringify(error, null, 2))
+			console.error(
+				"[POST] Error creating notifications:",
+				JSON.stringify(error, null, 2),
+			)
 		}
 
 		return newPost

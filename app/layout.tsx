@@ -5,7 +5,6 @@ import "@styles/globals.css"
 import NextTopLoader from "nextjs-toploader"
 import "jotai-devtools/styles.css"
 import { AppLayout } from "@components/layout"
-import { LoadingScreen } from "@components/ui/loadings/loading-screen"
 import { Toaster } from "@components/ui/toast/Toaster"
 import QueryProvider from "@providers/QueryProvider"
 import { Analytics } from "@vercel/analytics/react"
@@ -63,7 +62,9 @@ export default function RootLayout({
 						<Analytics />
 						<SpeedInsights />
 						<QueryProvider>
-							<LoadingScreen duration={200} />
+							{/* <Suspense> */}
+							{/* 	<LoadingScreen duration={200} /> */}
+							{/* </Suspense> */}
 							<ThemeProvider
 								attribute="class"
 								defaultTheme="system"

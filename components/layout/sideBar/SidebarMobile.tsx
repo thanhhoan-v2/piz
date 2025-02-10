@@ -20,7 +20,7 @@ export default function MobileSideBar({
 					<SideBarItem href={ROUTE.HOME} icon={Home} />
 					<SideBarItem href={ROUTE.SEARCH} icon={Search} />
 					<SideBarItem href="post" icon={Plus} />
-					<SideBarItem href={ROUTE.ACTIVITY} icon={Bell} />
+					<SideBarItem href={ROUTE.NOTIFICATION} icon={Bell} />
 					<SideBarItem href="profile" icon={User} />
 				</div>
 			</div>
