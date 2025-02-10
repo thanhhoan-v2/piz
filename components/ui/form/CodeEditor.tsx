@@ -22,8 +22,15 @@ import SyntaxHighlighter from "react-syntax-highlighter"
 export default function CodeEditor({
 	setIsAddingSnippet,
 }: { setIsAddingSnippet: (isAddingSnippet: boolean) => void }) {
-	const [code, setCode] = useState<string>("")
-	const [editorLanguage, setEditorLanguage] = useState<string>("javascript")
+	const [code, setCode] = useState<string>(() => {
+		const storedCode = localStorage.getItem("code")
+		return storedCode ? storedCode : ""
+	})
+	const [snippetId, setSnippetId] = useState<string>("")
+	const [editorLanguage, setEditorLanguage] = useState<string>(() => {
+		const storedEditorLanguage = localStorage.getItem("editorLanguage")
+		return storedEditorLanguage ? storedEditorLanguage : "javascript"
+	})
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
 	// Code view related
@@ -33,18 +40,35 @@ export default function CodeEditor({
 	const user = useUser()
 	const defaultCodeEditorValue = ""
 
+	useEffect(() => {
+		const storedSnippetId = localStorage.getItem("snippetId")
+		if (storedSnippetId) {
+			setSnippetId(storedSnippetId)
+		} else {
+			const newSnippetId = generateBase64uuid()
+			setSnippetId(newSnippetId)
+			localStorage.setItem("snippetId", newSnippetId)
+		}
+	}, [])
+
+	useEffect(() => {
+		localStorage.setItem("code", code)
+	}, [code])
+
+	useEffect(() => {
+		localStorage.setItem("editorLanguage", editorLanguage)
+	}, [editorLanguage])
+
 	const handleCodeSave = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		setIsSubmitted(true)
 
 		const newSnippet: CreateSnippetProps = {
-			id: generateBase64uuid(),
+			id: snippetId,
 			userId: user?.id,
 			value: code,
 			lang: editorLanguage,
 		}
-
-		console.log(newSnippet)
 
 		createSnippet(newSnippet)
 	}
@@ -63,6 +87,16 @@ export default function CodeEditor({
 
 		loadCodeViewStyle()
 	}, [codeViewThemeName])
+
+	const handleDiscardSnippet = () => {
+		setCode("")
+		setEditorLanguage("javascript")
+		setIsAddingSnippet(false)
+		// Removes all values in localStorage
+		localStorage.removeItem("code")
+		localStorage.removeItem("editorLanguage")
+		localStorage.removeItem("snippetId")
+	}
 
 	return (
 		<>
@@ -128,14 +162,7 @@ export default function CodeEditor({
 									</SelectContent>
 								</Select>
 
-								<Button
-									variant="ghost"
-									onClick={() => {
-										setCode("")
-										setEditorLanguage("javascript")
-										setIsAddingSnippet(false)
-									}}
-								>
+								<Button variant="ghost" onClick={handleDiscardSnippet}>
 									<X />
 								</Button>
 							</div>
