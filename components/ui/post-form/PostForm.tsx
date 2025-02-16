@@ -5,52 +5,40 @@ import {
 	type PostVisibilityEnumType,
 } from "@/types/post.types"
 import { Drawer, DrawerContent, DrawerTrigger } from "@components/ui/Drawer"
-import { PostFormAlerts } from "@components/ui/form/PostFormAlerts"
-import { PostFormHeader } from "@components/ui/form/PostFormHeader"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
+import { PostFormAlerts } from "@components/ui/post-form/PostFormAlerts"
+import { PostFormHeader } from "@components/ui/post-form/PostFormHeader"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
 import { useToast } from "@components/ui/toast/useToast"
 import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@queries/server/post"
+import { type CreateSnippetProps, createSnippet } from "@queries/server/snippet"
 import { useUser } from "@stackframe/stack"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { STORAGE_KEY_SNIPPET_ID, storageRemoveSnippet } from "@utils/local-storage.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import React from "react"
+import React, { useState } from "react"
 import { getUserById } from "../../../app/actions/user"
 import { PostFormContent } from "./PostFormContent"
 import { PostFormFooter } from "./PostFormFooter"
 
-export default function PostForm({
-	children,
-}: {
-	children: React.ReactNode
-}) {
+export default function PostForm({ children }: { children: React.ReactNode }) {
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
 	const [postDiscardAlert, setAlertPostDiscard] = React.useState<boolean>(false)
-	const [snippetDiscardAlert, setAlertSnippetDiscard] =
-		React.useState<boolean>(false)
-	const [postTitle, setPostTitle] = React.useState("")
+	const [snippetDiscardAlert, setAlertSnippetDiscard] = React.useState<boolean>(false)
 	const [postContent, setPostContent] = React.useState("")
-	const [postVisibility, setPostVisibility] =
-		React.useState<PostVisibilityEnumType>("PUBLIC")
+	const [postVisibility, setPostVisibility] = React.useState<PostVisibilityEnumType>("PUBLIC")
 
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-	const [showMentionSuggestions, setShowMentionSuggestions] =
-		React.useState<boolean>(false)
+	const [showMentionSuggestions, setShowMentionSuggestions] = React.useState<boolean>(false)
 	const [startMentionIndex, setStartMentionIndex] = React.useState<number>(-1)
-	const [lastMentionIndexes, setLastMentionIndexes] = React.useState<number[]>(
-		[],
-	)
+	const [lastMentionIndexes, setLastMentionIndexes] = React.useState<number[]>([])
 	const [mentionSearchValue, setMentionSearchValue] = React.useState<string>("")
-	const [mentionedUsers, setMentionedUsers] = React.useState<
-		IMentionedResult[]
-	>([])
-	const [searchResults, setSearchResults] = React.useState<SearchResultProps>(
-		[],
-	)
+	const [mentionedUsers, setMentionedUsers] = React.useState<IMentionedResult[]>([])
+	const [searchResults, setSearchResults] = React.useState<SearchResultProps>([])
 	const [posterInfo, setPosterInfo] = React.useState<{
 		userName: string
 		userAvatarUrl: string
@@ -61,9 +49,18 @@ export default function PostForm({
 	const [isAddingVideo, setIsAddingVideo] = React.useState<boolean>(false)
 	const [isAddingImage, setIsAddingImage] = React.useState<boolean>(false)
 
+	const [postImageUrl, setPostImageUrl] = React.useState<string | null>(null)
+	const [postVideoUrl, setPostVideoUrl] = React.useState<string | null>(null)
+	const [snippetId, setSnippetId] = React.useState<string | null>(null)
+	const [snippetCode, setSnippetCode] = useState<string>("")
+	const [snippetLang, setSnippetLang] = useState<string>("javascript")
+	const [snippetPreview, setSnippetPreview] = useState<boolean>(false)
+
 	const user = useUser()
 	const userId = user?.id
 	const { toast } = useToast()
+
+	const codeSaveRef = React.useRef<(() => void) | undefined>()
 
 	// Fetch user info when userId changes
 	React.useEffect(() => {
@@ -109,18 +106,12 @@ export default function PostForm({
 			const substringFromLastMentionIndex = newValue.slice(lastMentionIndex)
 
 			// Check if we are still in mention mode after the last stored "@" mention
-			if (
-				newValue.length > lastMentionIndex &&
-				!substringFromLastMentionIndex.includes(" ")
-			) {
+			if (newValue.length > lastMentionIndex && !substringFromLastMentionIndex.includes(" ")) {
 				setMentionSearchValue(substringFromLastMentionIndex)
 				setShowMentionSuggestions(true)
 			}
 
-			if (
-				postContent.length <
-				lastMentionIndexes[lastMentionIndexes.length - 1] + 2
-			) {
+			if (postContent.length < lastMentionIndexes[lastMentionIndexes.length - 1] + 2) {
 				deleteLastMentionedUser()
 				deleteLastMentionIndex()
 			}
@@ -193,7 +184,6 @@ export default function PostForm({
 	const handlePostDiscard = () => {
 		setIsAddingSnippet(false)
 		setOpenDrawer(false)
-		setPostTitle("")
 		setPostContent("")
 		setPostVisibility("PUBLIC")
 		setSearchResults([])
@@ -201,10 +191,6 @@ export default function PostForm({
 		setShowMentionSuggestions(false)
 		setStartMentionIndex(-1)
 		setLastMentionIndexes([])
-	}
-
-	const handleSnippetDiscard = () => {
-		setIsAddingSnippet(false)
 	}
 
 	const handleTouchOutsideModal = () => {
@@ -223,7 +209,6 @@ export default function PostForm({
 			Math.floor(Math.random() * PostVisibilityEnumArray.length)
 		] as PostVisibilityEnumType
 
-		setPostTitle(fake_title)
 		setPostContent(fake_content)
 		setPostVisibility(fake_visibility)
 	}
@@ -232,7 +217,24 @@ export default function PostForm({
 
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
-		mutationFn: async (newPost: CreatePostProps) => await createPost(newPost),
+		mutationFn: async (newPost: CreatePostProps) => {
+			// Handle snippet creation first if needed
+			if (isAddingSnippet && snippetCode && snippetId !== null) {
+				try {
+					const newSnippet: CreateSnippetProps = {
+						id: snippetId,
+						userId: userId,
+						value: snippetCode,
+						lang: snippetLang,
+					}
+					await createSnippet(newSnippet)
+				} catch (error) {
+					throw new Error("Failed to save code snippet")
+				}
+			}
+			// Then create the post
+			return await createPost(newPost)
+		},
 		onMutate: async (newPost) => {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({ queryKey: queryKey.post.all })
@@ -240,10 +242,7 @@ export default function PostForm({
 			// Snapshot the previous value
 			const previousPosts = queryClient.getQueryData(queryKey.post.all)
 
-			queryClient.setQueryData(queryKey.post.all, (old: Post[]) => [
-				newPost,
-				...old,
-			])
+			queryClient.setQueryData(queryKey.post.all, (old: Post[]) => [newPost, ...old])
 			queryClient.setQueryData(queryKey.post.selectCount(newPost.id), {
 				noReactions: 0,
 				noShares: 0,
@@ -261,8 +260,17 @@ export default function PostForm({
 			toast({
 				title: "Success!",
 				description: "Your post has been created.",
-				// className: "bg-green-500",
 			})
+
+			// Clean up
+			setOpenDrawer(false)
+			setPostContent("")
+			setPostVisibility("PUBLIC")
+			setIsAddingSnippet(false)
+			setIsAddingImage(false)
+			setIsAddingVideo(false)
+
+			storageRemoveSnippet()
 		},
 		onError: (error) => {
 			toast({
@@ -272,6 +280,18 @@ export default function PostForm({
 			})
 		},
 	})
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	React.useEffect(() => {
+		const storedSnippetId = localStorage.getItem(STORAGE_KEY_SNIPPET_ID)
+		if (storedSnippetId) {
+			setSnippetId(storedSnippetId)
+		} else {
+			const newSnippetId = generateBase64uuid()
+			setSnippetId(newSnippetId)
+			localStorage.setItem(STORAGE_KEY_SNIPPET_ID, newSnippetId)
+		}
+	}, [snippetCode])
 
 	const handleSubmitPost = () => {
 		if (!user?.id) {
@@ -283,27 +303,23 @@ export default function PostForm({
 			return
 		}
 
+		setOpenDrawer(false)
+
 		const date = new Date()
 		const newPost: CreatePostProps = {
 			id: generateBase64uuid(),
 			userId: user.id,
 			userName: user.displayName,
 			userAvatarUrl: user.profileImageUrl || null,
-			title: postTitle,
 			content: postContent,
 			createdAt: date,
+			postImageUrl: postImageUrl,
+			postVideoUrl: postVideoUrl,
+			snippetId: snippetId,
 		}
 
 		addPostMutation.mutate(newPost)
-		setOpenDrawer(false)
-		setPostTitle("")
-		setPostContent("")
-		setPostVisibility("PUBLIC")
 	}
-
-	// Post length warning thresholds
-	const mid_threshold = 4000
-	const last_threshold = mid_threshold + 100
 
 	// Textarea auto increases its height on value length
 	// biome-ignore lint/correctness/useExhaustiveDependencies: value is only needed here
@@ -340,6 +356,18 @@ export default function PostForm({
 						searchResults={searchResults}
 						userId={userId}
 						handleSelectUser={handleSelectUser}
+						onImageRemove={() => setPostImageUrl(null)}
+						onImageUpload={(url) => setPostImageUrl(url)}
+						onVideoRemove={() => setPostVideoUrl(null)}
+						onVideoUpload={(url) => setPostVideoUrl(url)}
+						onSnippetRemove={() => {
+							setSnippetId(null)
+							setSnippetPreview(false)
+						}}
+						onSnippetUpload={(id) => setSnippetId(id)}
+						onSnippetCodeChange={(code) => setSnippetCode(code)}
+						onSnippetLangChange={(lang) => setSnippetLang(lang)}
+						onSnippetPreview={(isSnippetPreviewed) => setSnippetPreview(isSnippetPreviewed)}
 					/>
 					<PostFormFooter
 						setPostVisibility={setPostVisibility}
@@ -352,17 +380,15 @@ export default function PostForm({
 						isAddingImage={isAddingImage}
 						isAddingVideo={isAddingVideo}
 						isAddingSnippet={isAddingSnippet}
+						isSnippetPreviewed={snippetPreview}
 					/>
 				</DrawerContent>
 			</Drawer>
 
 			<PostFormAlerts
-				snippetDiscardAlert={snippetDiscardAlert}
-				setAlertSnippetDiscard={setAlertSnippetDiscard}
 				postDiscardAlert={postDiscardAlert}
 				setAlertPostDiscard={setAlertPostDiscard}
 				setOpenDrawer={setOpenDrawer}
-				handleSnippetDiscard={handleSnippetDiscard}
 				handlePostDiscard={handlePostDiscard}
 			/>
 		</>

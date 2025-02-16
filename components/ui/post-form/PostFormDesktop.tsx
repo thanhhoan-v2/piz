@@ -2,12 +2,12 @@
 
 import { Button } from "@components/ui/Button"
 import { Separator } from "@components/ui/Separator"
-import PostForm from "@components/ui/form/PostForm"
 import { postWidths } from "@components/ui/post"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { RefreshCw, Sparkle } from "lucide-react"
+import PostForm from "./PostForm"
 
 export default function PostFormDesktop() {
 	const queryClient = useQueryClient()

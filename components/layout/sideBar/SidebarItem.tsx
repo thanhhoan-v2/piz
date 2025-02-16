@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@components/ui/Button"
-import PostForm from "@components/ui/form/PostForm"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
+import PostForm from "@components/ui/post-form/PostForm"
 import { ROUTE } from "@constants/route"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
@@ -52,8 +52,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const userId = user?.id
 
 	// Icon fill for different pages
-	const iconFill =
-		pathname === href ? (theme === "dark" ? "white" : "black") : "none"
+	const iconFill = pathname === href ? (theme === "dark" ? "white" : "black") : "none"
 
 	// If user is signed in and the href is post
 	if (href === "post" && userId) {
@@ -69,15 +68,8 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	// If user is signed in and the href is profile
 	if (href === "profile" && userId) {
 		return (
-			<Link
-				prefetch={true}
-				href={`/${userId}` as Route}
-				aria-disabled={!userId && true}
-			>
-				<Button
-					variant="ghost"
-					className={cn(sideBarItemClass, !userId && "pointer-events-none")}
-				>
+			<Link prefetch={true} href={`/${userId}` as Route} aria-disabled={!userId && true}>
+				<Button variant="ghost" className={cn(sideBarItemClass, !userId && "pointer-events-none")}>
 					{!userId ? <UserRoundX className="w-full" /> : <Icon />}
 				</Button>
 			</Link>

@@ -1,49 +1,37 @@
 "use client"
 
 import { Button } from "@components/ui/Button"
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@components/ui/Card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/Card"
 import { Input } from "@components/ui/Input"
-import VideoPlayer from "@components/ui/form/VideoPlayer"
 import { createSupabaseBrowserClient } from "@utils/supabase/client"
+import { SUPABASE_STORAGE_PREFIX_URL } from "@utils/supabase/storage"
 import { X } from "lucide-react"
+import Image from "next/image"
 import type { ChangeEvent } from "react"
-import { Suspense } from "react"
-import { useState } from "react"
+import { Suspense, useEffect, useState } from "react"
+import LoadingSpinnerUploadForm from "./LoadingSpinnerUploadForm"
 
-const supabaseStoragePrefixURL =
-	"https://gqbxsozrrjnfbqqctqji.supabase.co/storage/v1/object/public/media_files//"
-
-export default function VideoUploadForm({
-	setIsAddingVideo,
-}: { setIsAddingVideo: (isAddingVideo: boolean) => void }) {
-	const [uploadedVideoPath, setUploadedVideoPath] = useState<string | null>()
+export default function ImageUploadForm({
+	setIsAddingImage,
+	onImageUpload,
+	onImageRemove,
+}: {
+	setIsAddingImage: (isAddingImage: boolean) => void
+	onImageUpload: (url: string) => void
+	onImageRemove: () => void
+}) {
+	// "https://gqbxsozrrjnfbqqctqji.supabase.co/storage/v1/object/public/media_files//image.png"
+	const [uploadedImagePath, setUploadedImageUrl] = useState<string | null>()
+	// "media_files/image.png"
+	const [uploadedImageBucket, setUploadedImageBucketFolder] = useState<string | null>()
 	const [uploading, setUploading] = useState(false)
 
 	const supabase = createSupabaseBrowserClient()
 
-	// useEffect(() => {
-	// 	if (url) downloadImage(url)
-	// }, [url])
-
-	// async function downloadImage(path) {
-	// 	try {
-	// 		const { data, error } = await supabase.storage
-	// 			.from("media_files")
-	// 			.download(path)
-	// 		if (error) {
-	// 			throw error
-	// 		}
-	// 		const url = URL.createObjectURL(data)
-	// 	} catch (error) {
-	// 		console.log("Error downloading image: ", error.message)
-	// 	}
-	// }
+	useEffect(() => {
+		const storedPostImageUrl = localStorage.getItem("postImageUrl")
+		if (storedPostImageUrl) setUploadedImageUrl(storedPostImageUrl)
+	}, [])
 
 	const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
 		setUploading(true)
@@ -66,8 +54,13 @@ export default function VideoUploadForm({
 				throw uploadError
 			}
 
+			const urlPath = SUPABASE_STORAGE_PREFIX_URL + data.path
+
 			if (data) {
-				setUploadedVideoPath(data.path)
+				setUploadedImageUrl(urlPath)
+				setUploadedImageBucketFolder(data.path)
+				onImageUpload(urlPath)
+				localStorage.setItem("postImageUrl", urlPath)
 			}
 		} catch (error) {
 			console.error("Error uploading file:", error)
@@ -76,38 +69,41 @@ export default function VideoUploadForm({
 		}
 	}
 
+	const handleRemoveImage = async () => {
+		if (uploadedImageBucket) {
+			await supabase.storage.from("media_files").remove([uploadedImageBucket])
+		}
+
+		setUploadedImageUrl(null)
+		setUploading(false)
+		setIsAddingImage(false)
+		onImageRemove()
+		localStorage.removeItem("postImageUrl")
+	}
+
 	return (
 		<Card className="w-full max-w-lg">
 			<CardHeader>
 				<CardTitle className="flex-between">
-					<p>Upload video</p>
-					<Button
-						variant="ghost"
-						onClick={() => {
-							setUploadedVideoPath(null)
-							setUploading(false)
-							setIsAddingVideo(false)
-						}}
-					>
+					<p>Upload image</p>
+					<Button variant="ghost" onClick={handleRemoveImage}>
 						<X />
 					</Button>
 				</CardTitle>
-				<CardDescription>
-					Drop a video or click to select a file.
-				</CardDescription>
+				<CardDescription>Drop an image or click to select a file.</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				{uploadedVideoPath ? (
+				{uploadedImagePath ? (
 					<div className="space-y-2">
 						<Suspense fallback={<p>Loading...</p>}>
-							<VideoPlayer src={supabaseStoragePrefixURL + uploadedVideoPath} />
+							<Image width={300} height={300} src={uploadedImagePath} alt="Uploaded Image" />
 						</Suspense>
 					</div>
 				) : (
 					<div className="flex h-48 items-center justify-center rounded-md border-2 border-muted-foreground border-dashed p-6 text-center">
 						<div className="space-y-2">
 							<Input
-								accept="video/*"
+								accept="image/*"
 								type="file"
 								id="file-input"
 								className="hidden"
@@ -118,7 +114,7 @@ export default function VideoUploadForm({
 								htmlFor="file-input"
 								className="inline-flex h-full cursor-pointer items-center justify-center self-center rounded-md border border-gray-200 bg-white px-4 py-2 font-medium text-sm shadow-sm transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:focus-visible:ring-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50"
 							>
-								{uploading ? "Loading..." : "Select a video"}
+								{uploading ? <LoadingSpinnerUploadForm /> : "Select an image"}
 							</label>
 						</div>
 					</div>

@@ -17,10 +17,8 @@ import { getUserById } from "../../../app/actions/user"
 import WelcomeModal from "../modal/WelcomeModal"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
-export const postButtonSkeletonClassName =
-	"flex flex-none h-[30px] w-[70px] gap-2"
-export const postButtonWrapperClassName =
-	"flex-y-center gap-2 bg-background-item"
+export const postButtonSkeletonClassName = "flex flex-none h-[30px] w-[70px] gap-2"
+export const postButtonWrapperClassName = "flex-y-center gap-2 bg-background-item"
 export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
 
@@ -73,13 +71,11 @@ export default function Post({
 	// const noShares = postCounts?.noShares
 
 	// Get the reaction of the post by the app user by query data
-	const {
-		data: queriedPostReactionByAppUser,
-		isSuccess: isPostReactionQuerySuccess,
-	} = useQueryPostReaction({
-		userId: appUserId ?? undefined,
-		postId: id,
-	})
+	const { data: queriedPostReactionByAppUser, isSuccess: isPostReactionQuerySuccess } =
+		useQueryPostReaction({
+			userId: appUserId ?? undefined,
+			postId: id,
+		})
 
 	/*
 	 ** Avoid click on not-content part of the post
@@ -186,12 +182,7 @@ export default function Post({
 								</>
 							</div>
 						) : (
-							<div
-								className={cn(
-									"h-4 rounded-b-lg bg-background-item",
-									postWidths,
-								)}
-							/>
+							<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
 						)}
 
 						{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}
@@ -303,9 +294,7 @@ export default function Post({
 							</>
 						</div>
 					) : (
-						<div
-							className={cn("h-4 rounded-b-lg bg-background-item", postWidths)}
-						/>
+						<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
 					)}
 
 					{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}

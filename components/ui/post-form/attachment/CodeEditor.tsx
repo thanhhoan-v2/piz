@@ -8,71 +8,72 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@components/ui/Select"
-import { codeViewThemes } from "@components/ui/form/CodeViewThemes"
+import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
-import { type CreateSnippetProps, createSnippet } from "@queries/server/snippet"
-import { useUser } from "@stackframe/stack"
+import {
+	STORAGE_KEY_SNIPPET_CODE,
+	STORAGE_KEY_SNIPPET_LANG,
+	storageRemoveSnippet,
+} from "@utils/local-storage.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
-import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
-import type { FormEvent } from "react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
 
 export default function CodeEditor({
 	setIsAddingSnippet,
-}: { setIsAddingSnippet: (isAddingSnippet: boolean) => void }) {
+	onSnippetUpload,
+	onSnippetRemove,
+	onSnippetLangChange,
+	onSnippetCodeChange,
+	onSnippetPreview,
+}: {
+	setIsAddingSnippet: (isAddingSnippet: boolean) => void
+	onSnippetUpload: (id: string) => void
+	onSnippetRemove: () => void
+	onSnippetCodeChange: (code: string) => void
+	onSnippetLangChange: (lang: string) => void
+	onSnippetPreview: (isSnippetPreviewed: boolean) => void
+}) {
 	const [code, setCode] = useState<string>(() => {
-		const storedCode = localStorage.getItem("code")
-		return storedCode ? storedCode : ""
+		const storedCode = localStorage.getItem(STORAGE_KEY_SNIPPET_CODE)
+		return storedCode || ""
 	})
-	const [snippetId, setSnippetId] = useState<string>("")
-	const [editorLanguage, setEditorLanguage] = useState<string>(() => {
-		const storedEditorLanguage = localStorage.getItem("editorLanguage")
-		return storedEditorLanguage ? storedEditorLanguage : "javascript"
-	})
-	const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
-	// Code view related
+	const [snippetLang, setEditorLanguage] = useState<string>(() => {
+		const storedEditorLanguage = localStorage.getItem(STORAGE_KEY_SNIPPET_LANG)
+		return storedEditorLanguage || "javascript"
+	})
+
+	const [isSaved, setIsSaved] = useState<boolean>(false)
+
 	const [codeViewThemeName, setCodeViewThemeName] = useState<string>("dark")
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
-	const user = useUser()
-	const defaultCodeEditorValue = ""
+	const defaultCodeEditorValue = "// Write your code here"
 
-	useEffect(() => {
-		const storedSnippetId = localStorage.getItem("snippetId")
-		if (storedSnippetId) {
-			setSnippetId(storedSnippetId)
-		} else {
-			const newSnippetId = generateBase64uuid()
-			setSnippetId(newSnippetId)
-			localStorage.setItem("snippetId", newSnippetId)
-		}
-	}, [])
-
-	useEffect(() => {
-		localStorage.setItem("code", code)
-	}, [code])
-
-	useEffect(() => {
-		localStorage.setItem("editorLanguage", editorLanguage)
-	}, [editorLanguage])
-
-	const handleCodeSave = (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		setIsSubmitted(true)
-
-		const newSnippet: CreateSnippetProps = {
-			id: snippetId,
-			userId: user?.id,
-			value: code,
-			lang: editorLanguage,
-		}
-
-		createSnippet(newSnippet)
+	const handlePreviewSnippet = () => {
+		onSnippetPreview(true)
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		if (code.length > 0) {
+			localStorage.setItem(STORAGE_KEY_SNIPPET_CODE, code)
+			onSnippetCodeChange(code)
+		} else if (code.length === 0) {
+			localStorage.removeItem(STORAGE_KEY_SNIPPET_CODE)
+			onSnippetCodeChange("")
+		}
+	}, [code])
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		localStorage.setItem(STORAGE_KEY_SNIPPET_LANG, snippetLang)
+		onSnippetLangChange(snippetLang)
+	}, [snippetLang])
+
+	// Dynamically import react-syntax-highlighter's style
 	useEffect(() => {
 		const loadCodeViewStyle = async () => {
 			try {
@@ -92,25 +93,28 @@ export default function CodeEditor({
 		setCode("")
 		setEditorLanguage("javascript")
 		setIsAddingSnippet(false)
-		// Removes all values in localStorage
-		localStorage.removeItem("code")
-		localStorage.removeItem("editorLanguage")
-		localStorage.removeItem("snippetId")
+		onSnippetRemove()
+		onSnippetPreview(false)
+
+		storageRemoveSnippet()
 	}
 
 	return (
 		<>
-			{isSubmitted ? (
+			{isSaved ? (
 				<div className="w-[80vw] flex-col gap-2">
 					<div className="flex w-full items-center justify-between gap-2">
 						<div>
-							<Badge className="italic">{editorLanguage}</Badge>
+							<Badge className="italic">{snippetLang}</Badge>
 						</div>
 						<div className="flex items-center gap-2">
 							<Button
 								variant="outline"
 								className="p-5"
-								onClick={() => setIsSubmitted(false)}
+								onClick={() => {
+									setIsSaved(false)
+									onSnippetPreview(false)
+								}}
 							>
 								Edit
 							</Button>
@@ -132,42 +136,38 @@ export default function CodeEditor({
 
 					<div>
 						{codeViewStyle && (
-							<SyntaxHighlighter
-								showLineNumbers={true}
-								language="javascript"
-								style={codeViewStyle}
-							>
+							<SyntaxHighlighter showLineNumbers={true} language="javascript" style={codeViewStyle}>
 								{code}
 							</SyntaxHighlighter>
 						)}
 					</div>
 				</div>
 			) : (
-				<div className="flex w-full flex-col">
-					<div className="w-screen">
+				<div className="flex w-[600px] flex-col">
+					<div className="">
 						<div className="w-full max-w-[1000px] flex-col gap-2 rounded-lg border p-4">
 							<div className="flex-between">
 								<Select onValueChange={(e) => setEditorLanguage(e)}>
 									<SelectTrigger className="w-[130px] self-end">
-										<SelectValue placeholder={editorLanguage} />
+										<SelectValue placeholder={snippetLang} />
 									</SelectTrigger>
 									<SelectContent>
-										{SyntaxHighlighter.supportedLanguages.map(
-											(language: string) => (
-												<SelectItem key={language} value={language}>
-													{firstLetterToUpper(language)}
-												</SelectItem>
-											),
-										)}
+										{SyntaxHighlighter.supportedLanguages.map((language: string) => (
+											<SelectItem key={language} value={language}>
+												{firstLetterToUpper(language)}
+											</SelectItem>
+										))}
 									</SelectContent>
 								</Select>
+
+								{code.length > 0 && <p className="text-red-400">Not saved</p>}
 
 								<Button variant="ghost" onClick={handleDiscardSnippet}>
 									<X />
 								</Button>
 							</div>
 
-							<form onSubmit={handleCodeSave}>
+							<form onSubmit={() => setIsSaved(true)}>
 								<div className="">
 									<label htmlFor="comment" className="sr-only">
 										Add your code
@@ -175,10 +175,11 @@ export default function CodeEditor({
 
 									<Editor
 										height="300px"
+										width="500px"
 										value={code || ""}
 										onChange={(value) => setCode(value || "")}
 										theme="vs-dark"
-										language={editorLanguage}
+										language={snippetLang}
 										options={{
 											minimap: {
 												enabled: false,
@@ -201,7 +202,7 @@ export default function CodeEditor({
 									<div className="flex items-center space-x-5" />
 									<div className="flex-shrink-0">
 										<Button
-											type="submit"
+											onClick={handlePreviewSnippet}
 											className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white hover:bg-indigo-500"
 										>
 											Save

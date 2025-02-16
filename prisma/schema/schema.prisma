@@ -75,13 +75,16 @@ model Post {
   userId                   String
   userName                 String?
   userAvatarUrl            String?
-  title                    String
   content                  String
   createdAt                DateTime       @default(now()) @db.Timestamp(6)
   updatedAt                DateTime?      @db.Timestamp(6)
   isDeleted                Boolean        @default(false)
+  postImageUrl             String?
+  postVideoUrl             String?
+  snippetId                String?
   Comment                  Comment[]
   Notification             Notification[]
+  Snippet                  Snippet?       @relation(fields: [snippetId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User_Post_userIdToUser   User           @relation("Post_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
   User_Post_userNameToUser User?          @relation("Post_userNameToUser", fields: [userName], references: [userName], onDelete: Cascade)
   PostReaction             PostReaction[]
@@ -125,6 +128,7 @@ model Snippet {
   value      String?
   lang       String?  @default("\"plain\"")
   userId     String?
+  Post       Post[]
   User       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

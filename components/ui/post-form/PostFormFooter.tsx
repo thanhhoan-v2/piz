@@ -1,7 +1,4 @@
-import {
-	PostVisibilityEnumMap,
-	type PostVisibilityEnumType,
-} from "@/types/post.types"
+import { PostVisibilityEnumMap, type PostVisibilityEnumType } from "@/types/post.types"
 import { Button } from "@components/ui/Button"
 import { DrawerFooter } from "@components/ui/Drawer"
 import {
@@ -11,12 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@components/ui/Select"
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@components/ui/Tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/Tooltip"
 import { CodeXml, FileVideoIcon, ImageIcon } from "lucide-react"
 
 interface PostFormFooterProps {
@@ -30,6 +22,7 @@ interface PostFormFooterProps {
 	isAddingImage: boolean
 	isAddingVideo: boolean
 	isAddingSnippet: boolean
+	isSnippetPreviewed: boolean
 }
 
 export function PostFormFooter({
@@ -43,26 +36,22 @@ export function PostFormFooter({
 	isAddingImage,
 	isAddingVideo,
 	isAddingSnippet,
+	isSnippetPreviewed,
 }: PostFormFooterProps) {
+	const storedPostImageUrl = localStorage.getItem("postImageUrl")
+	const storedPostVideoUrl = localStorage.getItem("postVideoUrl")
+
 	return (
 		<DrawerFooter>
 			<div className="flex-between">
 				<div className="flex-center gap-2">
-					<Select
-						onValueChange={(value: PostVisibilityEnumType) =>
-							setPostVisibility(value)
-						}
-					>
+					<Select onValueChange={(value: PostVisibilityEnumType) => setPostVisibility(value)}>
 						<SelectTrigger className="w-fit gap-2">
 							<SelectValue placeholder="Anyone can see" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={PostVisibilityEnumMap.PUBLIC}>
-								Anyone can see
-							</SelectItem>
-							<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>
-								Only me can see
-							</SelectItem>
+							<SelectItem value={PostVisibilityEnumMap.PUBLIC}>Anyone can see</SelectItem>
+							<SelectItem value={PostVisibilityEnumMap.ME_ONLY}>Only me can see</SelectItem>
 						</SelectContent>
 					</Select>
 
@@ -120,7 +109,15 @@ export function PostFormFooter({
 				</div>
 
 				<div className="flex gap-4">
-					<Button className="w-[100px]" onClick={handleSubmitPost}>
+					<Button
+						className="w-[100px]"
+						onClick={handleSubmitPost}
+						disabled={
+							(isAddingImage && storedPostImageUrl == undefined) ||
+							(isAddingVideo && storedPostVideoUrl == undefined) ||
+							(isAddingSnippet && !isSnippetPreviewed)
+						}
+					>
 						Post
 					</Button>
 				</div>

@@ -1,4 +1,4 @@
-import PostFormDesktop from "@components/ui/post/PostFormDesktop"
+import PostFormDesktop from "@components/ui/post-form/PostFormDesktop"
 import PostList from "@components/ui/post/PostList"
 import type { Post as IPost } from "@prisma/client"
 import { getQueryClient } from "@queries/getQueryClient"
@@ -9,13 +9,6 @@ import { queryKey } from "@utils/queryKeyFactory"
 // Must be created outside of the component,
 // to avoid recreating the instance on each render
 const queryClient = getQueryClient()
-
-/**
- * Prefetches all posts data and optionally prefetches related data for each post.
- *
- * This function initiates a prefetch query to retrieve all posts using the query client.
- * It stores the fetched posts data in the query cache using a specific query key.
- */
 
 async function prefetchPosts() {
 	await queryClient.prefetchQuery({

@@ -7,9 +7,11 @@ export type CreatePostProps = {
 	userId?: string | null
 	userName?: string | null
 	userAvatarUrl?: string | null
-	title: string
 	content: string
 	createdAt: Date
+	postImageUrl: string | null
+	postVideoUrl: string | null
+	snippetId: string | null
 }
 
 // export const createPost = async ({
@@ -45,8 +47,10 @@ export const createPost = async ({
 	userId,
 	userName,
 	userAvatarUrl,
-	title,
 	content,
+	postImageUrl,
+	postVideoUrl,
+	snippetId,
 }: CreatePostProps) => {
 	try {
 		if (!userId) {
@@ -54,18 +58,10 @@ export const createPost = async ({
 			return
 		}
 
-		if (!id || !userId || !userName || !title || !content) {
-			console.log("[POST] Missing required fields when creating post")
-			return
-		}
-
-		console.log("Creating post with the following data:")
-		console.log("id:", id)
-		console.log("userId:", userId)
-		console.log("userName:", userName)
-		console.log("userAvatarUrl:", userAvatarUrl)
-		console.log("title:", title)
-		console.log("content:", content)
+		// if (!id || !userId || !userName || !content) {
+		// 	console.log("[POST] Missing required fields when creating post")
+		// 	return
+		// }
 
 		const newPost = await prisma.post.create({
 			data: {
@@ -73,11 +69,12 @@ export const createPost = async ({
 				userId: userId,
 				userName: userName,
 				userAvatarUrl: userAvatarUrl ?? null,
-				title: title,
 				content: content,
+				postImageUrl: postImageUrl,
+				postVideoUrl: postVideoUrl,
+				snippetId: snippetId,
 			},
 		})
-		console.log("Created post successfully")
 
 		// Create notifications for all followers
 		const followers = await prisma.follow.findMany({

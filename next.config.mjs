@@ -13,6 +13,13 @@ const nextConfig = {
 			destination: "/doc/index.html",
 		},
 	],
+	images: {
+		remotePatterns: [
+			{
+				hostname: "gqbxsozrrjnfbqqctqji.supabase.co",
+			},
+		],
+	},
 }
 
 export default withNextVideo(nextConfig)

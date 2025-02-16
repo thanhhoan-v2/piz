@@ -2,14 +2,14 @@ import type { IMentionedResult } from "@/types/post.types"
 import { Badge } from "@components/ui/Badge"
 import { ScrollArea } from "@components/ui/ScrollArea"
 import { Textarea } from "@components/ui/Textarea"
-import SearchList from "@components/ui/search/SearchList"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
+import SearchList from "@components/ui/search/SearchList"
 import { cn } from "@utils/cn"
-import CodeEditor from "./CodeEditor"
-import ImageUploadForm from "./ImageUploadForm"
-import VideoUploadForm from "./VideoUploadForm"
+import CodeEditor from "./attachment/CodeEditor"
+import ImageUploadForm from "./attachment/ImageUploadForm"
+import { VideoUploadForm } from "./attachment/VideoUploadForm"
 
-interface PostFormContentProps {
+type PostFormContentProps = {
 	mentionedUsers: IMentionedResult[]
 	postContent: string
 	textareaRef: React.RefObject<HTMLTextAreaElement>
@@ -24,6 +24,15 @@ interface PostFormContentProps {
 	searchResults: SearchResultProps
 	userId?: string
 	handleSelectUser: (id: string, userName: string) => void
+	onImageRemove: () => void
+	onImageUpload: (url: string) => void
+	onVideoRemove: () => void
+	onVideoUpload: (url: string) => void
+	onSnippetRemove: () => void
+	onSnippetUpload: (id: string) => void
+	onSnippetCodeChange: (code: string) => void
+	onSnippetLangChange: (lang: string) => void
+	onSnippetPreview: (isSnippetPreviewed: boolean) => void
 }
 
 export function PostFormContent({
@@ -41,6 +50,15 @@ export function PostFormContent({
 	searchResults,
 	userId,
 	handleSelectUser,
+	onImageRemove,
+	onImageUpload,
+	onVideoUpload,
+	onVideoRemove,
+	onSnippetRemove,
+	onSnippetUpload,
+	onSnippetCodeChange,
+	onSnippetLangChange,
+	onSnippetPreview,
 }: PostFormContentProps) {
 	return (
 		<ScrollArea className="h-[80vh] p-4">
@@ -68,13 +86,28 @@ export function PostFormContent({
 					</div>
 				</div>
 				{isAddingSnippet && (
-					<CodeEditor setIsAddingSnippet={setIsAddingSnippet} />
+					<CodeEditor
+						onSnippetUpload={onSnippetUpload}
+						onSnippetRemove={onSnippetRemove}
+						setIsAddingSnippet={setIsAddingSnippet}
+						onSnippetCodeChange={onSnippetCodeChange}
+						onSnippetLangChange={onSnippetLangChange}
+						onSnippetPreview={onSnippetPreview}
+					/>
 				)}
 				{isAddingVideo && (
-					<VideoUploadForm setIsAddingVideo={setIsAddingVideo} />
+					<VideoUploadForm
+						onVideoUpload={onVideoUpload}
+						onVideoRemove={onVideoRemove}
+						setIsAddingVideo={setIsAddingVideo}
+					/>
 				)}
 				{isAddingImage && (
-					<ImageUploadForm setIsAddingImage={setIsAddingImage} />
+					<ImageUploadForm
+						onImageRemove={onImageRemove}
+						onImageUpload={onImageUpload}
+						setIsAddingImage={setIsAddingImage}
+					/>
 				)}
 			</div>
 
