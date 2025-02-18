@@ -1,4 +1,5 @@
 "use client"
+
 import { getUserById } from "@app/actions/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { getFollow } from "@queries/server/follow"
@@ -11,29 +12,30 @@ import { formatDistanceToNow } from "date-fns"
 import type { Route } from "next"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import PostContent from "./PostContent"
 
-interface PostUserInfoProps {
+type PostUserInfoProps = {
 	userName?: string | null
 	userAvatarUrl?: string | null
 	userId?: string
-	title?: string
-	content: string
 	visibility?: string
 	createdAt: Date
 	updatedAt: Date | null
 	appUserName?: string | null
+	content: string
+	postImageUrl: string | null
+	postVideoUrl: string | null
+	snippetId: string | null
 }
 
 export default function PostUserInfo({
-	// userName,
-	// userAvatarUrl,
 	userId,
-	title,
-	content,
 	visibility,
 	createdAt,
-	updatedAt,
-	appUserName,
+	content,
+	postImageUrl,
+	postVideoUrl,
+	snippetId,
 }: PostUserInfoProps) {
 	const user = useUser()
 
@@ -103,6 +105,8 @@ export default function PostUserInfo({
 		return null
 	}
 
+	console.log(postImageUrl)
+
 	return (
 		<>
 			<div className="w-full flex-col gap-4">
@@ -114,15 +118,11 @@ export default function PostUserInfo({
 							<Avatar>
 								<AvatarImage
 									src={
-										posterInfo?.userAvatarUrl === ""
-											? avatarPlaceholder
-											: posterInfo?.userAvatarUrl
+										posterInfo?.userAvatarUrl === "" ? avatarPlaceholder : posterInfo?.userAvatarUrl
 									}
 									alt={`${posterInfo?.userName}'s avatar`}
 								/>
-								<AvatarFallback>
-									{firstLetterToUpper(posterInfo?.userName ?? "")}
-								</AvatarFallback>
+								<AvatarFallback>{firstLetterToUpper(posterInfo?.userName ?? "")}</AvatarFallback>
 							</Avatar>
 						</Link>
 
@@ -145,23 +145,18 @@ export default function PostUserInfo({
 							<div>{getFollowStatus()}</div>
 						</div>
 					</div>
-
 					{/* Right side */}
 					<div>
-						{userId === user?.id && (
-							<span className="text-muted-foreground text-sm">You</span>
-						)}
+						{userId === user?.id && <span className="text-muted-foreground text-sm">You</span>}
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-4">
-					<div className="font-bold text-[1.2rem] text-wrap-pretty">
-						<h2>{title}</h2>
-					</div>
-					<div className="text-wrap-pretty">
-						<p>{content}</p>
-					</div>
-				</div>
+				<PostContent
+					content={content}
+					postImageUrl={postImageUrl}
+					postVideoUrl={postVideoUrl}
+					snippetId={snippetId}
+				/>
 			</div>
 		</>
 	)

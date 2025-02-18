@@ -32,6 +32,7 @@ type PostFormContentProps = {
 	onSnippetUpload: (id: string) => void
 	onSnippetCodeChange: (code: string) => void
 	onSnippetLangChange: (lang: string) => void
+	onSnippetThemeChange: (theme: string) => void
 	onSnippetPreview: (isSnippetPreviewed: boolean) => void
 }
 
@@ -40,24 +41,27 @@ export function PostFormContent({
 	postContent,
 	textareaRef,
 	handleInputChange,
-	isAddingSnippet,
-	setIsAddingSnippet,
-	isAddingVideo,
-	setIsAddingVideo,
-	isAddingImage,
-	setIsAddingImage,
 	showMentionSuggestions,
 	searchResults,
 	userId,
 	handleSelectUser,
+	// Image's
+	isAddingImage,
+	setIsAddingImage,
 	onImageRemove,
 	onImageUpload,
+	// Video's
+	isAddingVideo,
+	setIsAddingVideo,
 	onVideoUpload,
 	onVideoRemove,
+	// Snippet's
+	isAddingSnippet,
+	setIsAddingSnippet,
 	onSnippetRemove,
-	onSnippetUpload,
 	onSnippetCodeChange,
 	onSnippetLangChange,
+	onSnippetThemeChange,
 	onSnippetPreview,
 }: PostFormContentProps) {
 	return (
@@ -87,26 +91,26 @@ export function PostFormContent({
 				</div>
 				{isAddingSnippet && (
 					<CodeEditor
-						onSnippetUpload={onSnippetUpload}
-						onSnippetRemove={onSnippetRemove}
-						setIsAddingSnippet={setIsAddingSnippet}
-						onSnippetCodeChange={onSnippetCodeChange}
-						onSnippetLangChange={onSnippetLangChange}
-						onSnippetPreview={onSnippetPreview}
+						onSnippetRemoveAction={onSnippetRemove}
+						setIsAddingSnippetAction={setIsAddingSnippet}
+						onSnippetCodeChangeAction={onSnippetCodeChange}
+						onSnippetLangChangeAction={onSnippetLangChange}
+						onSnippetThemeChangeAction={onSnippetThemeChange}
+						onSnippetPreviewAction={onSnippetPreview}
 					/>
 				)}
 				{isAddingVideo && (
 					<VideoUploadForm
-						onVideoUpload={onVideoUpload}
-						onVideoRemove={onVideoRemove}
-						setIsAddingVideo={setIsAddingVideo}
+						onVideoUploadAction={onVideoUpload}
+						onVideoRemoveAction={onVideoRemove}
+						setIsAddingVideoAction={setIsAddingVideo}
 					/>
 				)}
 				{isAddingImage && (
 					<ImageUploadForm
-						onImageRemove={onImageRemove}
-						onImageUpload={onImageUpload}
-						setIsAddingImage={setIsAddingImage}
+						onImageRemoveAction={onImageRemove}
+						onImageUploadAction={onImageUpload}
+						setIsAddingImageAction={setIsAddingImage}
 					/>
 				)}
 			</div>

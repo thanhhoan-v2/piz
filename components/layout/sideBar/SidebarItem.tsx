@@ -24,25 +24,6 @@ const sideBarItemClass = cn(
 	sizes,
 )
 
-/**
- * Renders a sidebar item with different behaviors based on user authentication
- * status and the provided href.
- *
- * - If the user is signed in and the href is "post", renders a button inside a
- *   PostForm.
- * - If the user is signed in and the href is "profile", renders a link to the
- *   user's profile or a placeholder icon if the userName is not available.
- * - If the href is ROUTE.HOME, always renders a link to the home route.
- * - If the user is not signed in, renders a button inside a WelcomeModal.
- * - If none of the above conditions are met, renders a simple link.
- *
- * The icon's fill color is determined by whether the current pathname matches
- * the href and the current theme.
- *
- * @param {string} href - The target URL or route for the sidebar item.
- * @param {LucideIcon} icon - The icon component to display in the sidebar item.
- * @returns {JSX.Element} The rendered sidebar item component.
- */
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	const pathname = usePathname()
 	const { theme } = useTheme()

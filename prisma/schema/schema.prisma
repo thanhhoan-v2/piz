@@ -128,6 +128,7 @@ model Snippet {
   value      String?
   lang       String?  @default("\"plain\"")
   userId     String?
+  theme      String?
   Post       Post[]
   User       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

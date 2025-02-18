@@ -2,12 +2,10 @@
 import { customThemeAtom } from "@atoms/theme"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
-import { useToast } from "@components/ui/toast/useToast"
 import { useQueryCreateUser } from "@queries/client/appUser"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import { useAtomValue } from "jotai"
-import { useTheme } from "next-themes"
 import React, { useEffect } from "react"
 
 export type SenderInfo = {
@@ -18,14 +16,8 @@ export type SenderInfo = {
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const [isVisible, setIsVisible] = React.useState(true)
 	const [lastScrollY, setLastScrollY] = React.useState(0)
-	const [newNotiId, setNewNotiId] = React.useState<number | null>(null)
-	const [senderInfo, setSenderInfo] = React.useState<
-		Record<string, SenderInfo>
-	>({})
 
 	const user = useUser()
-	const { theme } = useTheme()
-	const { toast } = useToast()
 	const customTheme = useAtomValue(customThemeAtom)
 
 	if (user)
@@ -57,7 +49,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 	const headerBarIsVisible = isVisible ? "transform-y-0" : "-translate-y-full"
 	const sideBarIsVisible = isVisible ? "transform-y-0" : "translate-y-full"
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	// const previousNotifications = useRef<any[]>([])
 	// const { data: notifications } = useQueryNotifications(user?.id)
 

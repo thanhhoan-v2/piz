@@ -54,13 +54,12 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 	const [snippetId, setSnippetId] = React.useState<string | null>(null)
 	const [snippetCode, setSnippetCode] = useState<string>("")
 	const [snippetLang, setSnippetLang] = useState<string>("javascript")
+	const [snippetTheme, setSnippetTheme] = useState<string>("dark")
 	const [snippetPreview, setSnippetPreview] = useState<boolean>(false)
 
 	const user = useUser()
 	const userId = user?.id
 	const { toast } = useToast()
-
-	const codeSaveRef = React.useRef<(() => void) | undefined>()
 
 	// Fetch user info when userId changes
 	React.useEffect(() => {
@@ -204,7 +203,6 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 
 	const handleFakePost = () => {
 		const fake_content: string = faker.lorem.paragraphs()
-		const fake_title: string = faker.lorem.sentence(10)
 		const fake_visibility: PostVisibilityEnumType = PostVisibilityEnumArray[
 			Math.floor(Math.random() * PostVisibilityEnumArray.length)
 		] as PostVisibilityEnumType
@@ -226,6 +224,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						userId: userId,
 						value: snippetCode,
 						lang: snippetLang,
+						theme: snippetTheme,
 					}
 					await createSnippet(newSnippet)
 				} catch (error) {
@@ -346,20 +345,13 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						postContent={postContent}
 						textareaRef={textareaRef}
 						handleInputChange={handleInputChange}
-						isAddingSnippet={isAddingSnippet}
-						setIsAddingSnippet={setIsAddingSnippet}
-						isAddingVideo={isAddingVideo}
-						setIsAddingVideo={setIsAddingVideo}
-						isAddingImage={isAddingImage}
-						setIsAddingImage={setIsAddingImage}
 						showMentionSuggestions={showMentionSuggestions}
 						searchResults={searchResults}
 						userId={userId}
 						handleSelectUser={handleSelectUser}
-						onImageRemove={() => setPostImageUrl(null)}
-						onImageUpload={(url) => setPostImageUrl(url)}
-						onVideoRemove={() => setPostVideoUrl(null)}
-						onVideoUpload={(url) => setPostVideoUrl(url)}
+						// Snippet's
+						isAddingSnippet={isAddingSnippet}
+						setIsAddingSnippet={setIsAddingSnippet}
 						onSnippetRemove={() => {
 							setSnippetId(null)
 							setSnippetPreview(false)
@@ -367,7 +359,18 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						onSnippetUpload={(id) => setSnippetId(id)}
 						onSnippetCodeChange={(code) => setSnippetCode(code)}
 						onSnippetLangChange={(lang) => setSnippetLang(lang)}
+						onSnippetThemeChange={(theme) => setSnippetTheme(theme)}
 						onSnippetPreview={(isSnippetPreviewed) => setSnippetPreview(isSnippetPreviewed)}
+						// Video's
+						isAddingVideo={isAddingVideo}
+						setIsAddingVideo={setIsAddingVideo}
+						onVideoRemove={() => setPostVideoUrl(null)}
+						onVideoUpload={(url) => setPostVideoUrl(url)}
+						// Image's
+						isAddingImage={isAddingImage}
+						setIsAddingImage={setIsAddingImage}
+						onImageRemove={() => setPostImageUrl(null)}
+						onImageUpload={(url) => setPostImageUrl(url)}
 					/>
 					<PostFormFooter
 						setPostVisibility={setPostVisibility}

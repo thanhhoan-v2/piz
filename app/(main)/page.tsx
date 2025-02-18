@@ -16,7 +16,7 @@ async function prefetchPosts() {
 		queryFn: async () => getAllPosts(),
 	})
 
-	const allPosts = queryClient.getQueryData<IPost[]>(queryKey.post.all)
+	queryClient.getQueryData<IPost[]>(queryKey.post.all)
 }
 
 async function prefetchUser() {

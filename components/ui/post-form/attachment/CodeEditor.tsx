@@ -1,4 +1,5 @@
 "use client"
+
 import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
 import {
@@ -13,6 +14,7 @@ import { Editor } from "@monaco-editor/react"
 import {
 	STORAGE_KEY_SNIPPET_CODE,
 	STORAGE_KEY_SNIPPET_LANG,
+	STORAGE_KEY_SNIPPET_THEME,
 	storageRemoveSnippet,
 } from "@utils/local-storage.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
@@ -20,65 +22,73 @@ import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
 
+export type CodeEditorProps = {
+	setIsAddingSnippetAction: (isAddingSnippet: boolean) => void
+	onSnippetRemoveAction: () => void
+	onSnippetCodeChangeAction: (code: string) => void
+	onSnippetLangChangeAction: (lang: string) => void
+	onSnippetThemeChangeAction: (theme: string) => void
+	onSnippetPreviewAction: (isSnippetPreviewed: boolean) => void
+}
+
 export default function CodeEditor({
-	setIsAddingSnippet,
-	onSnippetUpload,
-	onSnippetRemove,
-	onSnippetLangChange,
-	onSnippetCodeChange,
-	onSnippetPreview,
-}: {
-	setIsAddingSnippet: (isAddingSnippet: boolean) => void
-	onSnippetUpload: (id: string) => void
-	onSnippetRemove: () => void
-	onSnippetCodeChange: (code: string) => void
-	onSnippetLangChange: (lang: string) => void
-	onSnippetPreview: (isSnippetPreviewed: boolean) => void
-}) {
+	setIsAddingSnippetAction,
+	onSnippetRemoveAction,
+	onSnippetCodeChangeAction,
+	onSnippetLangChangeAction,
+	onSnippetThemeChangeAction,
+	onSnippetPreviewAction,
+}: CodeEditorProps) {
 	const [code, setCode] = useState<string>(() => {
 		const storedCode = localStorage.getItem(STORAGE_KEY_SNIPPET_CODE)
 		return storedCode || ""
 	})
 
-	const [snippetLang, setEditorLanguage] = useState<string>(() => {
+	const [snippetLang, setSnippetLang] = useState<string>(() => {
 		const storedEditorLanguage = localStorage.getItem(STORAGE_KEY_SNIPPET_LANG)
 		return storedEditorLanguage || "javascript"
 	})
 
+	const [snippetTheme, setSnippetTheme] = useState<string>(() => {
+		const storedEditorTheme = localStorage.getItem(STORAGE_KEY_SNIPPET_THEME)
+		return storedEditorTheme || "dark"
+	})
+
 	const [isSaved, setIsSaved] = useState<boolean>(false)
 
-	const [codeViewThemeName, setCodeViewThemeName] = useState<string>("dark")
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
 	const defaultCodeEditorValue = "// Write your code here"
 
 	const handlePreviewSnippet = () => {
-		onSnippetPreview(true)
+		onSnippetPreviewAction(true)
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (code.length > 0) {
 			localStorage.setItem(STORAGE_KEY_SNIPPET_CODE, code)
-			onSnippetCodeChange(code)
+			onSnippetCodeChangeAction(code)
 		} else if (code.length === 0) {
 			localStorage.removeItem(STORAGE_KEY_SNIPPET_CODE)
-			onSnippetCodeChange("")
+			onSnippetCodeChangeAction("")
 		}
 	}, [code])
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		localStorage.setItem(STORAGE_KEY_SNIPPET_LANG, snippetLang)
-		onSnippetLangChange(snippetLang)
-	}, [snippetLang])
+		onSnippetLangChangeAction(snippetLang)
+		localStorage.setItem(STORAGE_KEY_SNIPPET_THEME, snippetTheme)
+		onSnippetThemeChangeAction(snippetTheme)
+	}, [snippetLang, snippetTheme])
 
 	// Dynamically import react-syntax-highlighter's style
 	useEffect(() => {
 		const loadCodeViewStyle = async () => {
 			try {
 				const style = await import(
-					`react-syntax-highlighter/dist/esm/styles/hljs/${codeViewThemeName}`
+					`react-syntax-highlighter/dist/esm/styles/hljs/${snippetTheme}`
 				).then((module) => module.default)
 				setCodeViewStyle(style)
 			} catch (error) {
@@ -87,14 +97,14 @@ export default function CodeEditor({
 		}
 
 		loadCodeViewStyle()
-	}, [codeViewThemeName])
+	}, [snippetTheme])
 
 	const handleDiscardSnippet = () => {
 		setCode("")
-		setEditorLanguage("javascript")
-		setIsAddingSnippet(false)
-		onSnippetRemove()
-		onSnippetPreview(false)
+		setSnippetLang("javascript")
+		setIsAddingSnippetAction(false)
+		onSnippetRemoveAction()
+		onSnippetPreviewAction(false)
 
 		storageRemoveSnippet()
 	}
@@ -113,15 +123,15 @@ export default function CodeEditor({
 								className="p-5"
 								onClick={() => {
 									setIsSaved(false)
-									onSnippetPreview(false)
+									onSnippetPreviewAction(false)
 								}}
 							>
 								Edit
 							</Button>
 
-							<Select onValueChange={(e) => setCodeViewThemeName(e)}>
+							<Select onValueChange={(e) => setSnippetTheme(e)}>
 								<SelectTrigger className="w-[200px]">
-									<SelectValue placeholder={codeViewThemeName} />
+									<SelectValue placeholder={snippetTheme} />
 								</SelectTrigger>
 								<SelectContent>
 									{codeViewThemes.map((theme) => (
@@ -147,7 +157,7 @@ export default function CodeEditor({
 					<div className="">
 						<div className="w-full max-w-[1000px] flex-col gap-2 rounded-lg border p-4">
 							<div className="flex-between">
-								<Select onValueChange={(e) => setEditorLanguage(e)}>
+								<Select onValueChange={(e) => setSnippetLang(e)}>
 									<SelectTrigger className="w-[130px] self-end">
 										<SelectValue placeholder={snippetLang} />
 									</SelectTrigger>

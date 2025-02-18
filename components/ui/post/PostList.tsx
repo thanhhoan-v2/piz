@@ -1,17 +1,20 @@
 "use client"
+
 import Post from "@components/ui/post"
 import { useQueryAllPosts } from "@queries/client/post"
 
 export default function PostList() {
 	const {
 		data: posts,
-		isLoading,
 		isError,
 		isSuccess,
+		error,
+		isLoading,
 		isPending,
 		isFetching,
-		error,
 	} = useQueryAllPosts()
+
+	console.log(posts)
 
 	if (isError) {
 		console.log("Error loading posts : ", error)
@@ -19,6 +22,7 @@ export default function PostList() {
 	}
 
 	// if (isLoading || isFetching) return <div>Loading posts...</div>
+
 	if (isSuccess)
 		return (
 			<>
@@ -30,11 +34,13 @@ export default function PostList() {
 								userId,
 								userName,
 								userAvatarUrl,
-								title,
 								content,
 								createdAt,
 								updatedAt,
 								isDeleted,
+								postImageUrl,
+								postVideoUrl,
+								snippetId,
 							},
 							index,
 						) => (
@@ -46,11 +52,13 @@ export default function PostList() {
 								userId={userId}
 								userName={userName}
 								userAvatarUrl={userAvatarUrl}
-								title={title}
 								content={content}
 								createdAt={createdAt}
 								updatedAt={updatedAt}
 								isDeleted={isDeleted}
+								postImageUrl={postImageUrl}
+								postVideoUrl={postVideoUrl}
+								snippetId={snippetId}
 							/>
 						),
 					)}

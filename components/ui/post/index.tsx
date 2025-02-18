@@ -1,4 +1,6 @@
 "use client"
+
+import { getUserById } from "@app/actions/user"
 import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import PostCommentButton from "@components/ui/post/PostCommentButton"
@@ -12,8 +14,7 @@ import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import { Sparkles } from "lucide-react"
 import { useRouter } from "nextjs-toploader/app"
-import React, { useState } from "react"
-import { getUserById } from "../../../app/actions/user"
+import React from "react"
 import WelcomeModal from "../modal/WelcomeModal"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
@@ -32,11 +33,13 @@ export default function Post({
 	postsLength,
 	id,
 	userId,
-	title,
 	content,
 	createdAt,
 	updatedAt,
 	isDeleted,
+	postImageUrl,
+	postVideoUrl,
+	snippetId,
 }: IPost & PostProps) {
 	const router = useRouter()
 	const [posterInfo, setPosterInfo] = React.useState<{
@@ -46,7 +49,6 @@ export default function Post({
 	}>()
 	const user = useUser()
 	const isSignedIn = !!user
-	const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
 	React.useEffect(() => {
 		const fetchUserInfo = async () => {
@@ -88,7 +90,7 @@ export default function Post({
 		}
 	}
 
-	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {}
+	const handlePostKeyUp = () => {}
 
 	if (isDeleted) return null
 
@@ -110,11 +112,13 @@ export default function Post({
 									userId={userId}
 									userName={posterInfo?.userName}
 									userAvatarUrl={posterInfo?.userAvatarUrl}
-									title={title}
-									content={content}
 									createdAt={createdAt}
 									updatedAt={updatedAt}
 									appUserName={appUserName}
+									content={content}
+									postImageUrl={postImageUrl}
+									postVideoUrl={postVideoUrl}
+									snippetId={snippetId}
 								/>
 
 								{isSignedIn && (
@@ -185,7 +189,6 @@ export default function Post({
 							<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
 						)}
 
-						{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}
 						{postIndex! < postsLength! - 1 && (
 							<div className="my-4 flex-center gap-3">
 								<Separator className="w-1/3" />
@@ -194,7 +197,6 @@ export default function Post({
 							</div>
 						)}
 
-						{/* biome-ignore lint/style/noNonNullAssertion: Last post */}
 						{postIndex === postsLength! - 1 ? (
 							<div className="mb-[100px]">
 								<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">
@@ -222,11 +224,13 @@ export default function Post({
 								userId={userId}
 								userName={posterInfo?.userName}
 								userAvatarUrl={posterInfo?.userAvatarUrl}
-								title={title}
-								content={content}
 								createdAt={createdAt}
 								updatedAt={updatedAt}
 								appUserName={appUserName}
+								content={content}
+								postImageUrl={postImageUrl}
+								postVideoUrl={postVideoUrl}
+								snippetId={snippetId}
 							/>
 
 							{/* {isSignedIn && ( */}
@@ -297,7 +301,6 @@ export default function Post({
 						<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
 					)}
 
-					{/* biome-ignore lint/style/noNonNullAssertion: All posts, except last one */}
 					{postIndex! < postsLength! - 1 && (
 						<div className="my-4 flex-center gap-3">
 							<Separator className="w-1/3" />
@@ -306,7 +309,6 @@ export default function Post({
 						</div>
 					)}
 
-					{/* biome-ignore lint/style/noNonNullAssertion: Last post */}
 					{postIndex === postsLength! - 1 ? (
 						<div className="mb-[100px]">
 							<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">

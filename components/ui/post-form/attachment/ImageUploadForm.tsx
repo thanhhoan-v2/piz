@@ -12,13 +12,13 @@ import { Suspense, useEffect, useState } from "react"
 import LoadingSpinnerUploadForm from "./LoadingSpinnerUploadForm"
 
 export default function ImageUploadForm({
-	setIsAddingImage,
-	onImageUpload,
-	onImageRemove,
+	setIsAddingImageAction,
+	onImageUploadAction,
+	onImageRemoveAction,
 }: {
-	setIsAddingImage: (isAddingImage: boolean) => void
-	onImageUpload: (url: string) => void
-	onImageRemove: () => void
+	setIsAddingImageAction: (isAddingImage: boolean) => void
+	onImageUploadAction: (url: string) => void
+	onImageRemoveAction: () => void
 }) {
 	// "https://gqbxsozrrjnfbqqctqji.supabase.co/storage/v1/object/public/media_files//image.png"
 	const [uploadedImagePath, setUploadedImageUrl] = useState<string | null>()
@@ -59,7 +59,7 @@ export default function ImageUploadForm({
 			if (data) {
 				setUploadedImageUrl(urlPath)
 				setUploadedImageBucketFolder(data.path)
-				onImageUpload(urlPath)
+				onImageUploadAction(urlPath)
 				localStorage.setItem("postImageUrl", urlPath)
 			}
 		} catch (error) {
@@ -76,8 +76,8 @@ export default function ImageUploadForm({
 
 		setUploadedImageUrl(null)
 		setUploading(false)
-		setIsAddingImage(false)
-		onImageRemove()
+		setIsAddingImageAction(false)
+		onImageRemoveAction()
 		localStorage.removeItem("postImageUrl")
 	}
 

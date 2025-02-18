@@ -12,13 +12,13 @@ import LoadingSpinnerUploadForm from "./LoadingSpinnerUploadForm"
 import VideoPlayer from "./VideoPlayer"
 
 export function VideoUploadForm({
-	setIsAddingVideo,
-	onVideoUpload,
-	onVideoRemove,
+	setIsAddingVideoAction,
+	onVideoUploadAction,
+	onVideoRemoveAction,
 }: {
-	setIsAddingVideo: (isAddingVideo: boolean) => void
-	onVideoUpload: (url: string) => void
-	onVideoRemove: () => void
+	setIsAddingVideoAction: (isAddingVideo: boolean) => void
+	onVideoUploadAction: (url: string) => void
+	onVideoRemoveAction: () => void
 }) {
 	// "https://gqbxsozrrjnfbqqctqji.supabase.co/storage/v1/object/public/media_files//video.png"
 	const [uploadedVideoPath, setUploadedVideoPath] = useState<string | null>()
@@ -59,7 +59,7 @@ export function VideoUploadForm({
 			if (data) {
 				setUploadedVideoPath(urlPath)
 				setUploadedVideoBucketFolder(data.path)
-				onVideoUpload(urlPath)
+				onVideoUploadAction(urlPath)
 				localStorage.setItem("postVideoUrl", urlPath)
 			}
 		} catch (error) {
@@ -76,8 +76,8 @@ export function VideoUploadForm({
 
 		setUploadedVideoPath(null)
 		setUploading(false)
-		setIsAddingVideo(false)
-		onVideoRemove()
+		setIsAddingVideoAction(false)
+		onVideoRemoveAction()
 		localStorage.removeItem("postVideoUrl")
 	}
 
