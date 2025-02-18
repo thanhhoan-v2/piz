@@ -4,6 +4,7 @@ import { getSnippetById } from "@queries/server/snippet"
 import Image from "next/image"
 import { Suspense, useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
+import VideoPlayer from "../post-form/attachment/VideoPlayer"
 
 export type PostContentProps = {
 	content: string
@@ -31,7 +32,7 @@ export default function PostContent({
 		if (snippetId) {
 			clientGetSnippetById()
 		}
-	})
+	}, [])
 
 	const clientGetSnippetById = async () => {
 		const data = await getSnippetById(snippetId)
@@ -69,11 +70,11 @@ export default function PostContent({
 						</Suspense>
 					)}
 
-					{/* {postVideoUrl && (
+					{postVideoUrl && (
 						<Suspense fallback={<p>Loading...</p>}>
 							<VideoPlayer src={postVideoUrl} />
 						</Suspense>
-					)} */}
+					)}
 
 					{snippetId && snippet && snippet?.value && (
 						<SyntaxHighlighter
