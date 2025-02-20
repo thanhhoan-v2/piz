@@ -16,7 +16,11 @@ import { type CreatePostProps, createPost } from "@queries/server/post"
 import { type CreateSnippetProps, createSnippet } from "@queries/server/snippet"
 import { useUser } from "@stackframe/stack"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { STORAGE_KEY_SNIPPET_ID, storageRemoveSnippet } from "@utils/local-storage.helpers"
+import {
+	STORAGE_KEY_SNIPPET_ID,
+	storageRemovePostMediaFiles,
+	storageRemoveSnippet,
+} from "@utils/local-storage.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
 import React, { useState } from "react"
@@ -216,8 +220,10 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
 		mutationFn: async (newPost: CreatePostProps) => {
+			console.log(snippetId, isAddingSnippet)
+
 			// Handle snippet creation first if needed
-			if (isAddingSnippet && snippetCode && snippetId !== null) {
+			if (isAddingSnippet == true && snippetId) {
 				try {
 					const newSnippet: CreateSnippetProps = {
 						id: snippetId,
@@ -226,6 +232,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						lang: snippetLang,
 						theme: snippetTheme,
 					}
+					console.log(newSnippet)
 					await createSnippet(newSnippet)
 				} catch (error) {
 					throw new Error("Failed to save code snippet")
@@ -269,7 +276,12 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			setIsAddingImage(false)
 			setIsAddingVideo(false)
 
+			setSnippetId(null)
 			storageRemoveSnippet()
+
+			setPostVideoUrl(null)
+			setPostImageUrl(null)
+			storageRemovePostMediaFiles()
 		},
 		onError: (error) => {
 			toast({
@@ -285,10 +297,6 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 		const storedSnippetId = localStorage.getItem(STORAGE_KEY_SNIPPET_ID)
 		if (storedSnippetId) {
 			setSnippetId(storedSnippetId)
-		} else {
-			const newSnippetId = generateBase64uuid()
-			setSnippetId(newSnippetId)
-			localStorage.setItem(STORAGE_KEY_SNIPPET_ID, newSnippetId)
 		}
 	}, [snippetCode])
 
@@ -310,8 +318,8 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			userId: user.id,
 			userName: user.displayName,
 			userAvatarUrl: user.profileImageUrl || null,
-			content: postContent,
 			createdAt: date,
+			content: postContent,
 			postImageUrl: postImageUrl,
 			postVideoUrl: postVideoUrl,
 			snippetId: snippetId,
@@ -336,7 +344,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			<Drawer open={isDrawerOpen} onOpenChange={setOpenDrawer}>
 				<DrawerTrigger asChild>{children}</DrawerTrigger>
 				<DrawerContent
-					className="h-auto max-h-[90vh] min-h-[90vh] dark:bg-background-item"
+					className="max-h-[90vh] min-h-[90vh] dark:bg-background-item"
 					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					<PostFormHeader />
@@ -352,15 +360,15 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						// Snippet's
 						isAddingSnippet={isAddingSnippet}
 						setIsAddingSnippet={setIsAddingSnippet}
-						onSnippetRemove={() => {
-							setSnippetId(null)
-							setSnippetPreview(false)
-						}}
 						onSnippetUpload={(id) => setSnippetId(id)}
 						onSnippetCodeChange={(code) => setSnippetCode(code)}
 						onSnippetLangChange={(lang) => setSnippetLang(lang)}
 						onSnippetThemeChange={(theme) => setSnippetTheme(theme)}
 						onSnippetPreview={(isSnippetPreviewed) => setSnippetPreview(isSnippetPreviewed)}
+						onSnippetRemove={() => {
+							setSnippetId(null)
+							setSnippetPreview(false)
+						}}
 						// Video's
 						isAddingVideo={isAddingVideo}
 						setIsAddingVideo={setIsAddingVideo}

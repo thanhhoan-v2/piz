@@ -22,6 +22,7 @@ type PostUserInfoProps = {
 	createdAt: Date
 	updatedAt: Date | null
 	appUserName?: string | null
+	// PostContent's
 	content: string
 	postImageUrl: string | null
 	postVideoUrl: string | null
@@ -104,8 +105,6 @@ export default function PostUserInfo({
 
 		return null
 	}
-
-	console.log(postImageUrl)
 
 	return (
 		<>

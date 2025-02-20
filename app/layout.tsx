@@ -1,16 +1,14 @@
-import { StackProvider, StackTheme } from "@stackframe/stack"
-import localFont from "next/font/local"
-import { stackServerApp } from "../stack"
-import "@styles/globals.css"
-import NextTopLoader from "nextjs-toploader"
-import "jotai-devtools/styles.css"
 import { AppLayout } from "@components/layout"
 import { Toaster } from "@components/ui/toast/Toaster"
 import QueryProvider from "@providers/QueryProvider"
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { StackProvider, StackTheme } from "@stackframe/stack"
+import "@styles/globals.css"
+import "jotai-devtools/styles.css"
 import { ThemeProvider } from "next-themes"
+import localFont from "next/font/local"
+import NextTopLoader from "nextjs-toploader"
 import { Suspense } from "react"
+import { stackServerApp } from "../stack"
 
 const geistSans = localFont({
 	src: "../assets/fonts/GeistVF.woff",
@@ -59,12 +57,9 @@ export default function RootLayout({
 							zIndex={1600}
 							showAtBottom={false}
 						/>
-						<Analytics />
-						<SpeedInsights />
+						{/* <Analytics /> */}
+						{/* <SpeedInsights /> */}
 						<QueryProvider>
-							{/* <Suspense> */}
-							{/* 	<LoadingScreen duration={200} /> */}
-							{/* </Suspense> */}
 							<ThemeProvider
 								attribute="class"
 								defaultTheme="system"

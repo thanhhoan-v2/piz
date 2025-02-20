@@ -11,3 +11,8 @@ export const storageRemoveSnippet = () => {
 	localStorage.removeItem(STORAGE_KEY_SNIPPET_CODE)
 	localStorage.removeItem(STORAGE_KEY_SNIPPET_LANG)
 }
+
+export const storageRemovePostMediaFiles = () => {
+	localStorage.removeItem(STORAGE_KEY_POST_IMAGE_URL)
+	localStorage.removeItem(STORAGE_KEY_POST_VIDEO_URL)
+}

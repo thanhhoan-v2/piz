@@ -13,11 +13,13 @@ import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThem
 import { Editor } from "@monaco-editor/react"
 import {
 	STORAGE_KEY_SNIPPET_CODE,
+	STORAGE_KEY_SNIPPET_ID,
 	STORAGE_KEY_SNIPPET_LANG,
 	STORAGE_KEY_SNIPPET_THEME,
 	storageRemoveSnippet,
 } from "@utils/local-storage.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
+import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
@@ -67,6 +69,9 @@ export default function CodeEditor({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (code.length > 0) {
+			const newSnippetId = generateBase64uuid()
+			localStorage.setItem(STORAGE_KEY_SNIPPET_ID, newSnippetId)
+
 			localStorage.setItem(STORAGE_KEY_SNIPPET_CODE, code)
 			onSnippetCodeChangeAction(code)
 		} else if (code.length === 0) {

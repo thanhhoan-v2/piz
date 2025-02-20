@@ -28,6 +28,7 @@ export default function PostContent({
 	const [snippet, setSnippet] = useState<SnippetViewProps>()
 	const [snippetThemeImport, setSnippetThemeImport] = useState()
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (snippetId) {
 			clientGetSnippetById()
@@ -64,6 +65,7 @@ export default function PostContent({
 			<div className="flex flex-col gap-4">
 				<div className="text-wrap-pretty">
 					<p>{content}</p>
+
 					{postImageUrl && (
 						<Suspense fallback={<p>Loading...</p>}>
 							<Image width={300} height={300} src={postImageUrl} alt="Uploaded Image" />

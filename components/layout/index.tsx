@@ -127,17 +127,15 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 					)}
 				/>
 
-				<div>
-					<SideBar
-						mobileSideBarClassName={cn(
-							"fixed shadow-md transition-transform duration-300 ease-in-out",
-							sideBarIsVisible,
-						)}
-					/>
-					<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
-						{children}
-					</main>
-				</div>
+				<SideBar
+					mobileSideBarClassName={cn(
+						"fixed shadow-md transition-transform duration-300 ease-in-out",
+						sideBarIsVisible,
+					)}
+				/>
+				<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
+					{children}
+				</main>
 			</div>
 		</>
 	)
