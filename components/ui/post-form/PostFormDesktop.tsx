@@ -3,14 +3,16 @@
 import { Button } from "@components/ui/Button"
 import { Separator } from "@components/ui/Separator"
 import { postWidths } from "@components/ui/post"
+import { useUser } from "@stackframe/stack"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
-import { RefreshCw, Sparkle } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import PostForm from "./PostForm"
 
 export default function PostFormDesktop() {
 	const queryClient = useQueryClient()
+	const user = useUser()
 
 	const handleRefetchPosts = () =>
 		queryClient.invalidateQueries({
@@ -24,9 +26,13 @@ export default function PostFormDesktop() {
 			<div className={cn("flex-center gap-3", postWidths)}>
 				<PostForm>
 					<Button className="w-full gap-2 rounded-lg border-2 border-pink-400 bg-background-item py-[33px] text-black text-xl shadow-lg hover:bg-background dark:text-white">
-						<Sparkle className="text-pink-400" />
-						<p>Create new post</p>
-						<Sparkle className="text-pink-400" />
+						{/* <Sparkle className="text-pink-400" /> */}
+						<p>
+							{user?.displayName
+								? `What are you thinking, ${user.displayName}? 🤔`
+								: "Sign in to create a post"}
+						</p>
+						{/* <Sparkle className="text-pink-400" /> */}
 					</Button>
 				</PostForm>
 			</div>

@@ -60,7 +60,7 @@ export default function CodeEditor({
 
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
-	const defaultCodeEditorValue = "// Write your code here"
+	const defaultCodeEditorValue = ""
 
 	const handlePreviewSnippet = () => {
 		onSnippetPreviewAction(true)

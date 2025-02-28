@@ -12,7 +12,6 @@ export type PostContentProps = {
 	postVideoUrl: string | null
 	snippetId: string | null
 }
-
 export type SnippetViewProps = {
 	value?: string | null
 	theme?: string | null
@@ -65,6 +64,8 @@ export default function PostContent({
 			<div className="flex flex-col gap-4">
 				<div className="text-wrap-pretty">
 					<p>{content}</p>
+
+					<div className="my-2" />
 
 					{postImageUrl && (
 						<Suspense fallback={<p>Loading...</p>}>

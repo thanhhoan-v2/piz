@@ -102,19 +102,19 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 		<>
 			<div className="relative flex h-screen-auto w-full flex-col text-foreground transition-colors duration-300">
 				{customTheme.value === "light_small_squares" && (
-					<div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] bg-white" />
+					<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#8080800a_1px,#ffffff_1px)] bg-[size:20px_20px]" />
 				)}
 				{customTheme.value === "light_big_squares" && (
-					<div className="-z-10 absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] bg-white" />
+					<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#f0f0f0_1px,#ffffff_1px)] bg-[size:20px_20px]" />
 				)}
 				{customTheme.value === "light_gradient_violet" && (
-					<div className="-z-10 absolute inset-0 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]" />
+					<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#63e3_1px,#ffffff_1px)] bg-[size:20px_20px]" />
 				)}
 				{customTheme.value === "dark_gradient_violet" && (
-					<div className="-z-10 absolute inset-0 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]" />
+					<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#63e3_1px,#000000_1px)] bg-[size:20px_20px]" />
 				)}
 				{customTheme.value === "dark_small_squares" && (
-					<div className="absolute top-0 right-0 bottom-0 left-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+					<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#4f4f4f2e_1px,#000000_1px)] bg-[size:20px_20px]" />
 				)}
 				{customTheme.value === "dark_dots" && (
 					<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" />

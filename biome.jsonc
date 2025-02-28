@@ -70,7 +70,6 @@
 				}
 			},
 			"nursery": {
-				// sort TailwindCSS classes
 				"useSortedClasses": {
 					"level": "info",
 					"fix": "unsafe",
