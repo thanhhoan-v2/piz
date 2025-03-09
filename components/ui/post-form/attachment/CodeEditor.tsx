@@ -23,6 +23,7 @@ import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
+import { getCodeReview } from "@services/deepseek"
 
 export type CodeEditorProps = {
 	setIsAddingSnippetAction: (isAddingSnippet: boolean) => void
@@ -60,11 +61,28 @@ export default function CodeEditor({
 
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
+	const [codeReview, setCodeReview] = useState<string>("")
+	const [isReviewing, setIsReviewing] = useState(false)
+
 	const defaultCodeEditorValue = ""
 
 	const handlePreviewSnippet = () => {
 		onSnippetPreviewAction(true)
 	}
+
+	const handleGetCodeReview = async () => {
+		if (!code) return;
+		
+		try {
+			setIsReviewing(true);
+			const review = await getCodeReview(code, snippetLang);
+			setCodeReview(review);
+		} catch (error) {
+			console.error("Failed to get code review:", error);
+		} finally {
+			setIsReviewing(false);
+		}
+	};
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -134,6 +152,15 @@ export default function CodeEditor({
 								Edit
 							</Button>
 
+							<Button
+								variant="outline"
+								className="p-5"
+								onClick={handleGetCodeReview}
+								disabled={isReviewing}
+							>
+								{isReviewing ? "Reviewing..." : "Get AI Review"}
+							</Button>
+
 							<Select onValueChange={(e) => setSnippetTheme(e)}>
 								<SelectTrigger className="w-[200px]">
 									<SelectValue placeholder={snippetTheme} />
@@ -151,9 +178,17 @@ export default function CodeEditor({
 
 					<div>
 						{codeViewStyle && (
-							<SyntaxHighlighter showLineNumbers={true} language="javascript" style={codeViewStyle}>
-								{code}
-							</SyntaxHighlighter>
+							<>
+								<SyntaxHighlighter showLineNumbers={true} language="javascript" style={codeViewStyle}>
+									{code}
+								</SyntaxHighlighter>
+								{codeReview && (
+									<div className="mt-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+										<h3 className="mb-2 text-lg font-semibold">AI Code Review</h3>
+										<p className="whitespace-pre-wrap text-sm">{codeReview}</p>
+									</div>
+								)}
+							</>
 						)}
 					</div>
 				</div>

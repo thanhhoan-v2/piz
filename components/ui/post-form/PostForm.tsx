@@ -9,7 +9,6 @@ import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import { PostFormAlerts } from "@components/ui/post-form/PostFormAlerts"
 import { PostFormHeader } from "@components/ui/post-form/PostFormHeader"
 import type { SearchResultProps } from "@components/ui/search/SearchList"
-import { useToast } from "@components/ui/toast/useToast"
 import { faker } from "@faker-js/faker"
 import type { Post } from "@prisma/client"
 import { type CreatePostProps, createPost } from "@queries/server/post"
@@ -24,6 +23,7 @@ import {
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
 import React, { useState } from "react"
+import { toast } from "sonner"
 import { getUserById } from "../../../app/actions/user"
 import { PostFormContent } from "./PostFormContent"
 import { PostFormFooter } from "./PostFormFooter"
@@ -63,7 +63,6 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 
 	const user = useUser()
 	const userId = user?.id
-	const { toast } = useToast()
 
 	// Fetch user info when userId changes
 	React.useEffect(() => {
@@ -263,10 +262,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			return { previousPosts }
 		},
 		onSuccess: () => {
-			toast({
-				title: "Success!",
-				description: "Your post has been created.",
-			})
+			toast("Your post has been created.")
 
 			// Clean up
 			setOpenDrawer(false)
@@ -284,11 +280,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			storageRemovePostMediaFiles()
 		},
 		onError: (error) => {
-			toast({
-				title: "Error",
-				description: "Failed to create post. Please try again.",
-				variant: "destructive",
-			})
+			toast("Failed to create post. Please try again.")
 		},
 	})
 
@@ -302,11 +294,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 
 	const handleSubmitPost = () => {
 		if (!user?.id) {
-			toast({
-				title: "Error",
-				description: "You must be logged in to create a post",
-				variant: "destructive",
-			})
+			toast("You must be logged in to create a post")
 			return
 		}
 

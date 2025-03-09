@@ -1,9 +1,9 @@
 "use client"
 
 import { Button } from "@components/ui/Button"
-import { useToast } from "@components/ui/toast/useToast"
 import { cn } from "@utils/cn"
 import { Share2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface PostShareButtonProps {
 	userId: string
@@ -18,25 +18,15 @@ export default function PostShareButton({
 	className,
 	wrapperClassName,
 }: PostShareButtonProps) {
-	const { toast } = useToast()
-
 	const handleShare = async () => {
 		try {
 			// Construct the URL for the post
 			const postUrl = `${window.location.origin}/${userId}/post/${postId}`
 			await navigator.clipboard.writeText(postUrl)
 
-			toast({
-				title: "Link copied!",
-				description: "Post link has been copied to clipboard",
-				duration: 1500,
-			})
+			toast("Link copied!")
 		} catch (error) {
-			toast({
-				title: "Error",
-				description: "Failed to copy link to clipboard",
-				variant: "destructive",
-			})
+			toast("Error")
 		}
 	}
 

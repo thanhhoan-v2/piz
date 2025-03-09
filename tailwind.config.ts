@@ -79,6 +79,10 @@ const config = {
 				unfillHeart: "unfillHeart 1s forwards",
 			},
 			keyframes: {
+				spin: {
+					"0%": { transform: "rotate(0deg)" },
+					"100%": { transform: "rotate(360deg)" },
+				},
 				accordionDown: {
 					from: { height: "0" },
 					to: { height: "var(--radix-accordion-content-height)" },

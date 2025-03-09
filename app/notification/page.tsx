@@ -1,6 +1,5 @@
 "use client"
 import { NotificationItem } from "@components/ui/notification/NotificationItem"
-import { useToast } from "@components/ui/toast/useToast"
 import { useQueryNotifications } from "@queries/client/noti"
 import { useUser } from "@stackframe/stack"
 import { useEffect, useRef } from "react"
@@ -19,9 +18,7 @@ export type Noti = {
 	receiverId: string
 	postId: string | null
 	commentId: string | null
-	notificationType:
-		| ("FOLLOW" | "POST" | "POST_REACTION" | "COMMENT" | "COMMENT_REACTION")
-		| null
+	notificationType: ("FOLLOW" | "POST" | "POST_REACTION" | "COMMENT" | "COMMENT_REACTION") | null
 	isRead: boolean
 	isDeleted: boolean
 	createdAt: Date
@@ -30,7 +27,6 @@ export type Noti = {
 
 export default function NotificationPage() {
 	const user = useUser()
-	const { toast } = useToast()
 	const previousNotifications = useRef<any[]>([])
 
 	const { data: notifications, isSuccess } = useQueryNotifications(user?.id)
@@ -39,13 +35,11 @@ export default function NotificationPage() {
 		if (isSuccess && notifications) {
 			const newNotifications = notifications.filter(
 				(notification) =>
-					!previousNotifications.current.find(
-						(prev) => prev.id === notification.id,
-					),
+					!previousNotifications.current.find((prev) => prev.id === notification.id),
 			)
 			previousNotifications.current = notifications
 		}
-	}, [notifications, isSuccess, toast])
+	}, [notifications, isSuccess])
 
 	return (
 		<div className="mt-[100px] flex-col gap-4">

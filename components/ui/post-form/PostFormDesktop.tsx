@@ -8,6 +8,8 @@ import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { RefreshCw } from "lucide-react"
+import { Route } from "next"
+import Link from "next/link"
 import PostForm from "./PostForm"
 
 export default function PostFormDesktop() {
@@ -25,7 +27,7 @@ export default function PostFormDesktop() {
 		<>
 			<div className={cn("flex-center gap-3", postWidths)}>
 				<PostForm>
-					<Button className="w-full gap-2 rounded-lg border-2 border-pink-400 bg-background-item py-[33px] text-black text-xl shadow-lg hover:bg-background dark:text-white">
+					<Button className="w-full gap-2 rounded-lg border-2 bg-background-item py-[33px] text-black text-xl shadow-lg hover:bg-background dark:text-white">
 						{/* <Sparkle className="text-pink-400" /> */}
 						<p>
 							{user?.displayName
@@ -35,6 +37,9 @@ export default function PostFormDesktop() {
 						{/* <Sparkle className="text-pink-400" /> */}
 					</Button>
 				</PostForm>
+				<Button>
+					<Link href={`collab/${3}` as Route}>Collab</Link>
+				</Button>
 			</div>
 
 			<div className="my-4 flex-center gap-3">

@@ -1,22 +1,20 @@
 "use client"
 import { Button } from "@components/ui/Button"
-import { useToast } from "@components/ui/toast/useToast"
 import { createFollow, deleteFollow, getFollow } from "@queries/server/follow"
 import { useUser } from "@stackframe/stack"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
 import { UserMinus2, UserPlus2 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function FollowButton({ userId }: { userId: string }) {
 	const user = useUser()
-	const { toast } = useToast()
 	const queryClient = useQueryClient()
 
 	// Check if already following
 	const { data: followData } = useQuery({
 		queryKey: queryKey.follow.selectFollower(user?.id ?? ""),
-		queryFn: () =>
-			getFollow({ followerId: user?.id ?? "", followeeId: userId }),
+		queryFn: () => getFollow({ followerId: user?.id ?? "", followeeId: userId }),
 		enabled: !!user?.id,
 	})
 
@@ -28,24 +26,13 @@ export default function FollowButton({ userId }: { userId: string }) {
 				: createFollow({ followerId: user.id, followeeId: userId })
 		},
 		onSuccess: () => {
-			toast({
-				title: followData ? "Unfollowed" : "Following",
-				description: followData
-					? "You unfollowed this user"
-					: "You are now following this user",
-				duration: 1500,
-			})
+			toast(followData ? "You unfollowed this user" : "You are now following this user")
 			queryClient.invalidateQueries({
 				queryKey: queryKey.follow.all,
 			})
 		},
 		onError: () => {
-			toast({
-				title: "Error",
-				description: `Failed to ${followData ? "unfollow" : "follow"} user`,
-				variant: "destructive",
-				duration: 1500,
-			})
+			toast(`Failed to ${followData ? "unfollow" : "follow"} user`)
 		},
 	})
 

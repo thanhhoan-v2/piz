@@ -71,11 +71,19 @@
 			},
 			"nursery": {
 				"useSortedClasses": {
-					"level": "info",
+					"level": "off",
 					"fix": "unsafe",
 					"options": {
-						"attributes": ["classList", "className", "cn"],
-						"functions": ["clsx", "cva", "tw"]
+						"attributes": [
+							"classList",
+							"className",
+							"cn"
+						],
+						"functions": [
+							"clsx",
+							"cva",
+							"tw"
+						]
 					}
 				}
 			},
