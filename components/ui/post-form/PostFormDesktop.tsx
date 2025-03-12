@@ -25,9 +25,9 @@ export default function PostFormDesktop() {
 
 	return (
 		<>
-			<div className={cn("flex-center gap-3", postWidths)}>
+			<div className={cn("flex-column gap-[10px]", postWidths)}>
 				<PostForm>
-					<Button className="w-full gap-2 rounded-lg border-2 bg-background-item py-[33px] text-black text-xl shadow-lg hover:bg-background dark:text-white">
+					<Button className="gap-2 bg-background-item hover:bg-background shadow-lg py-[33px] rounded-lg w-full text-black dark:text-white text-xl">
 						{/* <Sparkle className="text-pink-400" /> */}
 						<p>
 							{user?.displayName
@@ -37,17 +37,19 @@ export default function PostFormDesktop() {
 						{/* <Sparkle className="text-pink-400" /> */}
 					</Button>
 				</PostForm>
-				<Button>
-					<Link href={`collab/${3}` as Route}>Collab</Link>
-				</Button>
+				<div className="mt-3">
+					<Button asChild className="w-full">
+						<Link href={`collab/${3}` as Route}>Collab</Link>
+					</Button>
+				</div>
 			</div>
 
-			<div className="my-4 flex-center gap-3">
+			<div className="flex-center gap-3 my-4">
 				<Separator className="w-1/3" />
 				<RefreshCw
 					onClick={handleRefetchPosts}
 					size={15}
-					className="cursor-pointer text-[#272727] hover:text-white"
+					className="text-[#272727] hover:text-white cursor-pointer"
 				/>
 				<Separator className="w-1/3" />
 			</div>
