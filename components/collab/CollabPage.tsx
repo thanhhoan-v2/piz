@@ -16,7 +16,7 @@ type PresenceState = {
 	[key: string]: PresenceUser[]
 }
 
-export default function Collab({ params }: { params: Promise<{ roomId: string }> }) {
+export default function Collab({ params }: { params: { roomId: string } }) {
 	const [roomId, setRoomId] = useState("")
 	const [code, setCode] = useState("")
 	const [users, setUsers] = useState<PresenceState>({})
@@ -30,13 +30,13 @@ export default function Collab({ params }: { params: Promise<{ roomId: string }>
 	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null) // Ref for the save timeout
 	const isRemoteChangeRef = useRef(false) // Track if change is from remote source
 
-	useEffect(() => {
-		const getRoomId = async () => {
-			const { roomId } = await params
-			setRoomId(roomId)
-		}
-		getRoomId()
-	}, [params])
+	// useEffect(() => {
+	// 	const getRoomId = async () => {
+	// 		const { roomId } = await params
+	// 		setRoomId(roomId)
+	// 	}
+	// 	getRoomId()
+	// }, [params])
 
 	// Function to check and update presence state - memoized with useCallback
 	const checkPresenceState = useCallback(() => {
