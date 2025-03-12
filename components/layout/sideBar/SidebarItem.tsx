@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@components/ui/Button"
+import CollabRoomInputModal from "@components/ui/modal/CollabRoomInputModal"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import PostForm from "@components/ui/post-form/PostForm"
 import { ROUTE } from "@constants/route"
@@ -20,7 +21,7 @@ const sizes =
 	"mobile_s:w-[60px] mobile_m:w-[60px] mobile_l:w-[70px] mobile_s:h-[40px] tablet:h-[70px]"
 
 const sideBarItemClass = cn(
-	"dark:hover:background-item flex items-center gap-3 rounded-md font-medium text-sm transition-colors hover:bg-muted flex-center",
+	"cursor-pointer dark:hover:background-item flex items-center gap-3 rounded-md font-medium text-sm transition-colors hover:bg-muted flex-center",
 	sizes,
 )
 
@@ -54,6 +55,17 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 					{!userId ? <UserRoundX className="w-full" /> : <Icon />}
 				</Button>
 			</Link>
+		)
+	}
+
+	// If user is signed in and the href is collab
+	if (href === "collab" && userId) {
+		return (
+			<CollabRoomInputModal>
+				<Button variant="ghost" className={sideBarItemClass}>
+					<Icon fill={iconFill} />
+				</Button>
+			</CollabRoomInputModal>
 		)
 	}
 
