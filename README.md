@@ -16,3 +16,4 @@
   - Update Home page UI: add Dialog to input collab room's number
   - Add collab editor theme + language
   - Update other user presence immediately after they entered the room
+  - fix: after Ctrl+A delete, sync fails
