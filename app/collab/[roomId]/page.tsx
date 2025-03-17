@@ -33,7 +33,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	const user = useUser()
 	const userId = user?.id
 	const userName = user?.displayName || "Anonymous"
-	const channelRef = useRef<any>(null) // Use useRef to hold the channel
+	const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null) // Use useRef to hold the channel
 	const presenceCheckIntervalRef = useRef<NodeJS.Timeout | null>(null) // Ref for the presence check interval
 	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null) // Ref for the save timeout
 	const isRemoteChangeRef = useRef(false) // Track if change is from remote source
@@ -83,6 +83,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 	// Function to track presence with the current timestamp
 	const trackPresence = useCallback(
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		async (channel: any) => {
 			if (!userId || !channel) return
 
@@ -115,6 +116,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 	// Function to broadcast presence to all users
 	const broadcastPresence = useCallback(
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		(channel: any) => {
 			if (!userId || !channel) return
 
@@ -124,7 +126,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					event: "presence_sync_request",
 					payload: { userId, timestamp: Date.now() },
 				})
-				.catch((err: any) => {
+				.catch((err: Error) => {
 					console.error("Error broadcasting presence:", err)
 				})
 		},
@@ -174,9 +176,11 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		}
 	}, [roomId, supabase, userId])
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!roomId || !userId) return
 
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		let channel: any = null
 
 		const setupChannel = async () => {
@@ -199,48 +203,64 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					console.log("Sync presence state:", state)
 					setUsers(state as PresenceState)
 				})
-				.on("presence", { event: "join" }, ({ key, newPresences }) => {
-					console.log("Join:", key, newPresences)
-					// Update the state immediately when someone joins
-					checkPresenceState()
+				.on(
+					"presence",
+					{ event: "join" },
+					({ key, newPresences }: { key: string; newPresences: PresenceUser[] }) => {
+						console.log("Join:", key, newPresences)
+						// Update the state immediately when someone joins
+						checkPresenceState()
 
-					// Broadcast our presence to the new user
-					if (key !== userId) {
-						setTimeout(() => {
+						// Broadcast our presence to the new user
+						if (key !== userId) {
+							setTimeout(() => {
+								trackPresence(channel)
+								broadcastPresence(channel)
+							}, 500)
+						}
+					},
+				)
+				.on(
+					"presence",
+					{ event: "leave" },
+					({ key, leftPresences }: { key: string; leftPresences: PresenceUser[] }) => {
+						console.log("Leave:", key, leftPresences)
+						// Update the state immediately when someone leaves
+						checkPresenceState()
+
+						// Broadcast a leave notification to make sure everyone updates
+						channel
+							.send({
+								type: "broadcast",
+								event: "user_left",
+								payload: { userId: key, timestamp: Date.now() },
+							})
+							.catch((err: Error) => {
+								console.error("Error sending leave broadcast:", err)
+							})
+					},
+				)
+				.on(
+					"broadcast",
+					{ event: "presence_sync_request" },
+					({ payload }: { payload: { userId: string; timestamp: number } }) => {
+						// When receiving a sync request, re-track our presence to make sure
+						// everyone can see us
+						if (payload.userId !== userId) {
+							console.log("Received sync request from:", payload.userId)
 							trackPresence(channel)
-							broadcastPresence(channel)
-						}, 500)
-					}
-				})
-				.on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-					console.log("Leave:", key, leftPresences)
-					// Update the state immediately when someone leaves
-					checkPresenceState()
-
-					// Broadcast a leave notification to make sure everyone updates
-					channel
-						.send({
-							type: "broadcast",
-							event: "user_left",
-							payload: { userId: key, timestamp: Date.now() },
-						})
-						.catch((err: any) => {
-							console.error("Error sending leave broadcast:", err)
-						})
-				})
-				.on("broadcast", { event: "presence_sync_request" }, ({ payload }) => {
-					// When receiving a sync request, re-track our presence to make sure
-					// everyone can see us
-					if (payload.userId !== userId) {
-						console.log("Received sync request from:", payload.userId)
-						trackPresence(channel)
-					}
-				})
-				.on("broadcast", { event: "user_left" }, ({ payload }) => {
-					// Force a presence check when we receive a user_left broadcast
-					console.log("User left notification received:", payload.userId)
-					checkPresenceState()
-				})
+						}
+					},
+				)
+				.on(
+					"broadcast",
+					{ event: "user_left" },
+					({ payload }: { payload: { userId: string; timestamp: number } }) => {
+						// Force a presence check when we receive a user_left broadcast
+						console.log("User left notification received:", payload.userId)
+						checkPresenceState()
+					},
+				)
 				.on(
 					"postgres_changes",
 					{
@@ -249,7 +269,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						table: "Collab",
 						filter: `id=eq.${roomId}`,
 					},
-					(payload) => {
+					(payload: { new: { updated_by_userId: string; content: string } }) => {
 						// Only update if the change was made by another user
 						if (payload.new && payload.new.updated_by_userId !== userId) {
 							console.log("Received database change:", payload)
@@ -384,29 +404,31 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					})
 					.then(() => {
 						// Untrack and then unsubscribe
-						channelRef.current
-							.untrack()
-							.then(() => {
-								channelRef.current.unsubscribe()
-								channelRef.current = null
-							})
-							.catch((err: any) => {
-								console.error("Error untracking:", err)
-								channelRef.current.unsubscribe()
-								channelRef.current = null
-							})
+						if (channelRef.current) {
+							channelRef.current
+								.untrack()
+								.then(() => {
+									channelRef.current?.unsubscribe()
+									channelRef.current = null
+								})
+								.catch((err: Error) => {
+									console.error("Error untracking:", err)
+									channelRef.current?.unsubscribe()
+									channelRef.current = null
+								})
+						}
 					})
-					.catch((err: any) => {
+					.catch((err: Error) => {
 						console.error("Error sending leave broadcast:", err)
 						channelRef.current
-							.untrack()
+							?.untrack()
 							.then(() => {
-								channelRef.current.unsubscribe()
+								channelRef.current?.unsubscribe()
 								channelRef.current = null
 							})
 							.catch(() => {
 								try {
-									channelRef.current.unsubscribe()
+									channelRef.current?.unsubscribe()
 								} catch (e) {
 									console.error("Final unsubscribe error:", e)
 								}
