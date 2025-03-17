@@ -1,11 +1,8 @@
-import type { Noti } from "@app/activity/page"
+import type { Noti } from "@app/notification/page"
 import type { SenderInfo } from "@components/layout"
 import type { Route } from "next"
 
-export const getNotificationMessage = (
-	notification: Noti,
-	senderInfo?: SenderInfo,
-) => {
+export const getNotificationMessage = (notification: Noti, senderInfo?: SenderInfo) => {
 	if (!senderInfo) return "Loading..."
 
 	switch (notification.notificationType) {
@@ -27,8 +24,7 @@ export const getNotificationMessage = (
 export const getNotificationLink = (notification: Noti): Route => {
 	const senderIdRoute = `/${notification.senderId}` as Route
 	const postIdRoute = `${senderIdRoute}/post/${notification.postId}` as Route
-	const commentIdRoute =
-		`${postIdRoute}/comment/${notification.commentId}` as Route
+	const commentIdRoute = `${postIdRoute}/comment/${notification.commentId}` as Route
 
 	switch (notification.notificationType) {
 		case "FOLLOW":

@@ -1,12 +1,10 @@
-import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
+import type { PostVisibilityEnumType } from "@/types/post.types"
 
 type PostVisibilityBadgeProps = {
 	visibility: PostVisibilityEnumType
 }
 
-export default function PostVisibilityBadge({
-	visibility,
-}: PostVisibilityBadgeProps) {
+export default function PostVisibilityBadge({ visibility }: PostVisibilityBadgeProps) {
 	// Get label based on the visibility of the post
 	// const visibilityMap: { [key in PostVisibility]: string } = {
 	// 	[PostVisibility.PUBLIC]: "Public",

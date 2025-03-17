@@ -1,12 +1,9 @@
 "use client"
 import { getUserById } from "@app/actions/user"
-import type { Noti } from "@app/activity/page"
+import type { Noti } from "@app/notification/page"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { cn } from "@utils/cn"
-import {
-	getNotificationLink,
-	getNotificationMessage,
-} from "@utils/notification.helpers"
+import { getNotificationLink, getNotificationMessage } from "@utils/notification.helpers"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import React from "react"
@@ -39,9 +36,7 @@ export function NotificationItem({ notification }: { notification: Noti }) {
 		>
 			<Avatar>
 				<AvatarImage src={senderInfo?.userAvatarUrl} />
-				<AvatarFallback>
-					{senderInfo?.userName?.[0].toUpperCase()}
-				</AvatarFallback>
+				<AvatarFallback>{senderInfo?.userName?.[0].toUpperCase()}</AvatarFallback>
 			</Avatar>
 			<div className="flex-1">
 				<p>{getNotificationMessage(notification, senderInfo)}</p>

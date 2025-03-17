@@ -1,5 +1,6 @@
 "use client"
 
+import type { PostVisibilityEnumType } from "@/types/post.types"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -13,7 +14,6 @@ import {
 import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent, DialogTitle } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
-import type { PostVisibilityEnumType } from "@components/ui/form/PostForm"
 import type { PostCounts } from "@components/ui/post/PostReactButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
@@ -61,33 +61,28 @@ export default function CommentCommentButton({
 	degree,
 }: CommentCommentButtonProps) {
 	// If degree is 2 or greater, don't render the button
-	if (degree >= 2) return null;
+	if (degree >= 2) return null
 
 	const [modalIsOpen, setOpenModal] = React.useState<boolean>(false)
-	const [discardAlertIsOpen, setOpenDiscardAlert] =
-		React.useState<boolean>(false)
+	const [discardAlertIsOpen, setOpenDiscardAlert] = React.useState<boolean>(false)
 	const [userInput, setUserInput] = React.useState("")
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-	const handleInputChange = React.useCallback(
-		(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-			setUserInput(e.target.value)
-		},
-		[],
-	)
+	const handleInputChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setUserInput(e.target.value)
+	}, [])
 
 	const queryClient = useQueryClient()
 
 	const addCommentMutation = useMutation({
 		mutationKey: queryKey.comment.insert(),
-		mutationFn: async (newComment: CreateCommentProps) =>
-			await createComment(newComment),
+		mutationFn: async (newComment: CreateCommentProps) => await createComment(newComment),
 		onSuccess: () => {
 			// Invalidate and refetch comments for this post
 			queryClient.invalidateQueries({
 				queryKey: queryKey.comment.selectPost(postId),
 				exact: true,
-				refetchType: 'all'
+				refetchType: "all",
 			})
 		},
 		onMutate: async (newComment) => {
@@ -98,7 +93,7 @@ export default function CommentCommentButton({
 
 			queryClient.setQueryData(queryKey.comment.all, (old: Comment[]) => [
 				newComment,
-				...(old??[]),
+				...(old ?? []),
 			])
 
 			queryClient.setQueryData(queryKey.comment.selectCountByPost(postId), {
@@ -113,13 +108,10 @@ export default function CommentCommentButton({
 				}),
 				null,
 			)
-			queryClient.setQueryData(
-				queryKey.post.selectCount(postId),
-				(prev: PostCounts) => ({
-					...prev,
-					noComments: prev.noComments + 1,
-				}),
-			)
+			queryClient.setQueryData(queryKey.post.selectCount(postId), (prev: PostCounts) => ({
+				...prev,
+				noComments: prev.noComments + 1,
+			}))
 
 			// Return a context object with the snapshotted value
 			return { previousComments }
@@ -183,7 +175,7 @@ export default function CommentCommentButton({
 					<DialogTitle />
 				</VisuallyHidden.Root>
 				<DialogContent
-					className="flex-col rounded-lg border-0"
+					className="flex-col border-0 rounded-lg"
 					onPointerDownOutside={handleOpenDiscardAlert}
 				>
 					<PostUserInfo
@@ -194,16 +186,19 @@ export default function CommentCommentButton({
 						createdAt={postCreatedAt}
 						updatedAt={postUpdatedAt}
 						appUserName={userName}
+						postImageUrl={null}
+						postVideoUrl={null}
+						snippetId={null}
 					/>
 
 					{/* form */}
-					<div className="mb-8 w-full flex-start flex-col gap-2">
+					<div className="flex-col flex-start gap-2 mb-8 w-full">
 						<Textarea
 							ref={textareaRef}
 							value={userInput}
 							onChange={handleInputChange}
 							placeholder={cn("Reply to ", userName)}
-							className=" min-h-[10px] resize-none border-none p-0 focus-visible:ring-0"
+							className="p-0 border-none focus-visible:ring-0 min-h-[10px] resize-none"
 						/>
 						<div className="flex space-x-4">
 							<ImageIcon />
@@ -231,12 +226,8 @@ export default function CommentCommentButton({
 						<AlertDialogDescription />
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setOpenModal(true)}>
-							Cancel
-						</AlertDialogCancel>
-						<AlertDialogAction onClick={() => setUserInput("")}>
-							Discard
-						</AlertDialogAction>
+						<AlertDialogCancel onClick={() => setOpenModal(true)}>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={() => setUserInput("")}>Discard</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>

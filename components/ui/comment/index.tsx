@@ -11,10 +11,7 @@ import {
 } from "@components/ui/post"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
-import {
-	useQueryCommentCounts,
-	useQueryCommentReaction,
-} from "@queries/client/comment"
+import { useQueryCommentCounts, useQueryCommentReaction } from "@queries/client/comment"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
 import Image from "next/image"
@@ -53,13 +50,11 @@ export default function PostComment({
 	// const noShares = commentCounts?.noShares
 
 	// Get the reaction of the comment by the app user by query data
-	const {
-		data: queriedCommentReactionByAppUser,
-		isSuccess: isCommentReactionQuerySuccess,
-	} = useQueryCommentReaction({
-		userId: appUserId,
-		commentId: id,
-	})
+	const { data: queriedCommentReactionByAppUser, isSuccess: isCommentReactionQuerySuccess } =
+		useQueryCommentReaction({
+			userId: appUserId,
+			commentId: id,
+		})
 
 	const handleCommentClick = () => {
 		router.push(`/${userName}/post/${postId}/comment/${id}`)
@@ -90,26 +85,20 @@ export default function PostComment({
 							createdAt={new Date()}
 							updatedAt={null}
 							content={content}
+							postImageUrl={null}
+							postVideoUrl={null}
+							snippetId={null}
 						/>
 					</div>
 					{isCommentCountsQueryLoading && (
-						<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
-							<Skeleton
-								key={`${id}1`}
-								className={postButtonSkeletonClassName}
-							/>
-							<Skeleton
-								key={`${id}2`}
-								className={postButtonSkeletonClassName}
-							/>
-							<Skeleton
-								key={`${id}3`}
-								className={postButtonSkeletonClassName}
-							/>
+						<div className="flex gap-5 bg-background-item px-2 py-3 pl-4 rounded-b-lg">
+							<Skeleton key={`${id}1`} className={postButtonSkeletonClassName} />
+							<Skeleton key={`${id}2`} className={postButtonSkeletonClassName} />
+							<Skeleton key={`${id}3`} className={postButtonSkeletonClassName} />
 						</div>
 					)}
 					{isCommentCountsQuerySuccess && (
-						<div className="mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6">
+						<div className="flex gap-5 bg-background-item mt-0 px-2 py-6 rounded-b-lg h-[30px]">
 							<>
 								{isCommentReactionQuerySuccess ? (
 									<CommentReactButton
@@ -156,19 +145,14 @@ export default function PostComment({
 
 				{/* Recursive child comments */}
 				{degree < 2 && childrenComment ? (
-					<div key={userId + id} className=" ml-[10px] flex gap-4">
+					<div key={userId + id} className="flex gap-4 ml-[10px]">
 						{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
 						{childrenComment!.children!.length > 0 && (
 							<div>
-								<Image
-									src={DownRightArrowSVG}
-									width={35}
-									height={35}
-									alt=" Comment arrow"
-								/>
+								<Image src={DownRightArrowSVG} width={35} height={35} alt=" Comment arrow" />
 							</div>
 						)}
-						<div className="w-full flex-col">
+						<div className="flex-col w-full">
 							{childrenComment?.children?.map((child, index) => (
 								<PostComment
 									key={`comment-${child.id}-${child.userId}-${child.parentId}-${index}`}
