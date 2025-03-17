@@ -16,6 +16,14 @@ type PresenceState = {
 	[key: string]: PresenceUser[]
 }
 
+// Define the type for the payload
+type Payload = {
+	new: {
+		updated_by_userId: string
+		content: string
+	}
+}
+
 export default function CollabPage({ params }: { params: Promise<{ roomId: string }> }) {
 	const [roomId, setRoomId] = useState("")
 	const [code, setCode] = useState("")
@@ -123,7 +131,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		[userId],
 	)
 
-	// Set up realtime subscription for code changes
+	// Update the subscription callback to use the defined type
 	useEffect(() => {
 		if (!roomId) return
 
@@ -133,14 +141,14 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		const subscription = supabase
 			.channel("table-db-changes")
 			.on(
-				"postgres_changes",
+				"system",
 				{
 					event: "*", // Listen to all events
 					schema: "public",
 					table: "Collab",
 					filter: `id=eq.${roomId}`,
 				},
-				(payload) => {
+				(payload: { new: { updated_by_userId: string; content: string } }) => {
 					console.log("Database change received:", payload)
 
 					// Only update if the change was made by another user
@@ -501,14 +509,14 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 	return (
 		<div className="flex flex-col w-full h-screen">
-			<div className="flex flex-col max-w-5xl mx-auto w-full h-full pt-10 px-4">
+			<div className="flex flex-col mx-auto px-4 pt-10 w-full max-w-5xl h-full">
 				{/* Header with room info */}
 				<div className="mb-4">
-					<h1 className="text-2xl font-bold text-white mb-1">Collaborative Editor</h1>
-					<div className="flex items-center justify-between">
+					<h1 className="mb-1 font-bold text-white text-2xl">Collaborative Editor</h1>
+					<div className="flex justify-between items-center">
 						<p className="text-gray-400 text-sm">Room ID: {roomId}</p>
 						<div className="flex items-center">
-							<Badge variant="secondary" className="bg-blue-900/30 text-blue-400 border-blue-800">
+							<Badge variant="secondary" className="bg-blue-900/30 border-blue-800 text-blue-400">
 								<UserIcon size={14} className="mr-1.5" />
 								<span>Logged in as: {userName}</span>
 							</Badge>
@@ -517,14 +525,14 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 				</div>
 
 				{/* Main content area */}
-				<div className="flex flex-col flex-grow bg-gray-800 rounded-lg overflow-hidden border border-gray-700 shadow-xl">
+				<div className="flex flex-col flex-grow bg-gray-800 shadow-xl border border-gray-700 rounded-lg overflow-hidden">
 					{/* Top bar with users and status */}
-					<div className="bg-gray-800 p-4 border-b border-gray-700">
-						<div className="flex items-center justify-between">
+					<div className="bg-gray-800 p-4 border-gray-700 border-b">
+						<div className="flex justify-between items-center">
 							{/* Users section */}
 							<div className="flex items-center gap-3">
 								{/* Current user */}
-								{/* <Badge variant="secondary" className="bg-blue-900/30 text-blue-400 border-blue-800">
+								{/* <Badge variant="secondary" className="bg-blue-900/30 border-blue-800 text-blue-400">
 									<UserIcon size={14} className="mr-1.5" />
 									<span>You ({userName})</span>
 								</Badge> */}
@@ -540,14 +548,14 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 											<Badge
 												key={user.presence_ref}
 												variant="outline"
-												className="bg-purple-900/20 text-purple-400 border-purple-800"
+												className="bg-purple-900/20 border-purple-800 text-purple-400"
 											>
 												<UserIcon size={14} className="mr-1.5" />
 												<span>{user.userName || "Anonymous"}</span>
 											</Badge>
 										))
 								) : (
-									<Badge variant="outline" className="bg-gray-800 text-gray-400 border-gray-700">
+									<Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-400">
 										<span>No one else is here</span>
 									</Badge>
 								)}
@@ -558,7 +566,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 								{saveStatus === "saving" ? (
 									<Badge
 										variant="outline"
-										className="bg-yellow-900/20 text-yellow-400 border-yellow-800"
+										className="bg-yellow-900/20 border-yellow-800 text-yellow-400"
 									>
 										<Clock size={14} className="mr-1.5 animate-pulse" />
 										Saving...
@@ -566,7 +574,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 								) : (
 									<Badge
 										variant="outline"
-										className="bg-green-900/20 text-green-400 border-green-800"
+										className="bg-green-900/20 border-green-800 text-green-400"
 									>
 										<CheckCircle size={14} className="mr-1.5" />
 										Saved

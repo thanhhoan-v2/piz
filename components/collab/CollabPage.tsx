@@ -141,7 +141,7 @@ export default function Collab({ params }: { params: { roomId: string } }) {
 		const subscription = supabase
 			.channel("table-db-changes")
 			.on(
-				"postgres_changes", // Correct event type
+				"postgres_changes",
 				{
 					event: "*", // Listen to all events
 					schema: "public",
@@ -152,9 +152,7 @@ export default function Collab({ params }: { params: { roomId: string } }) {
 					console.log("Database change received:", payload)
 
 					// Only update if the change was made by another user
-					if (payload.new && payload.new.updated_by_userId !== userId) {
-						console.log("Applying remote change from user:", payload.new.updated_by_userId)
-
+					if (payload.new && payload?.new?.updated_by_userId !== userId) {
 						// Set flag to indicate this is a remote change
 						isRemoteChangeRef.current = true
 
