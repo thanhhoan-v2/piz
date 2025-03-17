@@ -141,7 +141,7 @@ export default function Collab({ params }: { params: { roomId: string } }) {
 		const subscription = supabase
 			.channel("table-db-changes")
 			.on(
-				"postgres_changes",
+				"postgres_changes", // Correct event type
 				{
 					event: "*", // Listen to all events
 					schema: "public",
