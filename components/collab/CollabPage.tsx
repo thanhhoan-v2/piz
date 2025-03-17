@@ -148,7 +148,7 @@ export default function Collab({ params }: { params: { roomId: string } }) {
 					table: "Collab",
 					filter: `id=eq.${roomId}`,
 				},
-				(payload: Payload) => {
+				(payload: { new: { updated_by_userId: string; content: string } }) => {
 					console.log("Database change received:", payload)
 
 					// Only update if the change was made by another user
