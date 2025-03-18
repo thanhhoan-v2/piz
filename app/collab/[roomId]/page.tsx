@@ -1,9 +1,10 @@
 "use client"
+import { ChatBox } from "@components/chat/ChatBox"
 import { Badge } from "@components/ui/Badge"
 import { Editor } from "@monaco-editor/react"
 import { useUser } from "@stackframe/stack"
 import { createSupabaseBrowserClient } from "@utils/supabase/client"
-import { CheckCircle, Clock, UserIcon } from "lucide-react"
+import { CheckCircle, Clock, MessageSquare, UserIcon } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 type PresenceUser = {
@@ -37,6 +38,8 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	const presenceCheckIntervalRef = useRef<NodeJS.Timeout | null>(null) // Ref for the presence check interval
 	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null) // Ref for the save timeout
 	const isRemoteChangeRef = useRef(false) // Track if change is from remote source
+	// Store collabInfo to access the BigInt id for the chat
+	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string } | null>(null)
 
 	useEffect(() => {
 		const getRoomId = async () => {
@@ -138,6 +141,28 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		if (!roomId) return
 
 		console.log("Setting up realtime subscription for code changes")
+
+		// Get initial collab info to retrieve the BigInt id
+		const fetchCollabInfo = async () => {
+			try {
+				const { data, error } = await supabase.from("Collab").select("*").eq("id", roomId).single()
+
+				if (error) {
+					console.error("Error fetching collab info:", error)
+					return
+				}
+
+				console.log("Fetched collab info:", data)
+				setCollabInfo(data)
+				if (data?.content) {
+					setCode(data.content)
+				}
+			} catch (err) {
+				console.error("Failed to fetch collab info:", err)
+			}
+		}
+
+		fetchCollabInfo()
 
 		// Subscribe to changes on the Collab table
 		const subscription = supabase
@@ -529,103 +554,126 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		}
 	}, [])
 
+	const [showChat, setShowChat] = useState(true)
+
 	return (
 		<div className="flex flex-col w-full h-screen">
-			<div className="flex flex-col mx-auto px-4 pt-10 w-full max-w-5xl h-full">
+			<div className="flex flex-col mx-auto px-4 pt-10 w-full max-w-6xl h-[80vh]">
 				{/* Header with room info */}
 				<div className="mb-4">
 					<h1 className="mb-1 font-bold text-white text-2xl">Collaborative Editor</h1>
 					<div className="flex justify-between items-center">
 						<p className="text-gray-400 text-sm">Room ID: {roomId}</p>
-						<div className="flex items-center">
-							<Badge variant="secondary" className="bg-blue-900/30 border-blue-800 text-blue-400">
+						<div className="flex items-center gap-2">
+							<Badge
+								variant="secondary"
+								className="bg-blue-900/30 border-blue-800 text-blue-400 py-[7px]"
+							>
 								<UserIcon size={14} className="mr-1.5" />
 								<span>Logged in as: {userName}</span>
 							</Badge>
+							<button
+								type="button"
+								onClick={() => setShowChat(!showChat)}
+								className="p-2 rounded-md bg-blue-900/30 border border-blue-800 text-blue-400 hover:bg-blue-800/50 transition-colors"
+								title={showChat ? "Hide chat" : "Show chat"}
+							>
+								<MessageSquare size={14} />
+							</button>
 						</div>
 					</div>
 				</div>
 
 				{/* Main content area */}
-				<div className="flex flex-col flex-grow bg-gray-800 shadow-xl border border-gray-700 rounded-lg overflow-hidden">
-					{/* Top bar with users and status */}
-					<div className="bg-gray-800 p-4 border-gray-700 border-b">
-						<div className="flex justify-between items-center">
-							{/* Users section */}
-							<div className="flex items-center gap-3">
-								{/* Current user */}
-								{/* <Badge variant="secondary" className="bg-blue-900/30 border-blue-800 text-blue-400">
-									<UserIcon size={14} className="mr-1.5" />
-									<span>You ({userName})</span>
-								</Badge> */}
-
-								{/* Other users */}
-								{Object.values(users)
-									.flat()
-									.filter((user) => user.userId !== userId).length > 0 ? (
-									Object.values(users)
+				<div className="flex flex-row gap-4 h-full">
+					{/* Editor container */}
+					<div
+						className={`flex flex-col flex-grow ${showChat ? "w-2/3" : "w-full"} bg-gray-800 shadow-xl border border-gray-700 rounded-lg overflow-hidden transition-all duration-300`}
+					>
+						{/* Top bar with users and status */}
+						<div className="bg-gray-800 p-4 border-gray-700 border-b">
+							<div className="flex justify-between items-center">
+								{/* Users section */}
+								<div className="flex items-center gap-3">
+									{/* Other users */}
+									{Object.values(users)
 										.flat()
-										.filter((user) => user.userId !== userId)
-										.map((user) => (
-											<Badge
-												key={user.presence_ref}
-												variant="outline"
-												className="bg-purple-900/20 border-purple-800 text-purple-400"
-											>
-												<UserIcon size={14} className="mr-1.5" />
-												<span>{user.userName || "Anonymous"}</span>
-											</Badge>
-										))
-								) : (
-									<Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-400">
-										<span>No one else is here</span>
-									</Badge>
-								)}
-							</div>
+										.filter((user) => user.userId !== userId).length > 0 ? (
+										Object.values(users)
+											.flat()
+											.filter((user) => user.userId !== userId)
+											.map((user) => (
+												<Badge
+													key={user.presence_ref}
+													variant="outline"
+													className="bg-purple-900/20 border-purple-800 text-purple-400"
+												>
+													<UserIcon size={14} className="mr-1.5" />
+													<span>{user.userName || "Anonymous"}</span>
+												</Badge>
+											))
+									) : (
+										<Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-400">
+											<span>No one else is here</span>
+										</Badge>
+									)}
+								</div>
 
-							{/* Save status */}
-							<div>
-								{saveStatus === "saving" ? (
-									<Badge
-										variant="outline"
-										className="bg-yellow-900/20 border-yellow-800 text-yellow-400"
-									>
-										<Clock size={14} className="mr-1.5 animate-pulse" />
-										Saving...
-									</Badge>
-								) : (
-									<Badge
-										variant="outline"
-										className="bg-green-900/20 border-green-800 text-green-400"
-									>
-										<CheckCircle size={14} className="mr-1.5" />
-										Saved
-									</Badge>
-								)}
+								{/* Save status */}
+								<div>
+									{saveStatus === "saving" ? (
+										<Badge
+											variant="outline"
+											className="bg-yellow-900/20 border-yellow-800 text-yellow-400"
+										>
+											<Clock size={14} className="mr-1.5 animate-pulse" />
+											Saving...
+										</Badge>
+									) : (
+										<Badge
+											variant="outline"
+											className="bg-green-900/20 border-green-800 text-green-400"
+										>
+											<CheckCircle size={14} className="mr-1.5" />
+											Saved
+										</Badge>
+									)}
+								</div>
 							</div>
+						</div>
+
+						{/* Editor */}
+						<div className="flex-grow">
+							<Editor
+								height="100%"
+								defaultLanguage="typescript"
+								value={code}
+								onChange={handleCodeChange}
+								options={{
+									minimap: { enabled: false },
+									fontSize: 14,
+									lineHeight: 1.5,
+									fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
+									scrollBeyondLastLine: false,
+									automaticLayout: true,
+									padding: { top: 16 },
+								}}
+								theme="vs-dark"
+								className="h-full"
+							/>
 						</div>
 					</div>
 
-					{/* Editor */}
-					<div className="flex-grow">
-						<Editor
-							height="100%"
-							defaultLanguage="typescript"
-							value={code}
-							onChange={handleCodeChange}
-							options={{
-								minimap: { enabled: false },
-								fontSize: 14,
-								lineHeight: 1.5,
-								fontFamily: "'Menlo', 'Monaco', 'Courier New', monospace",
-								scrollBeyondLastLine: false,
-								automaticLayout: true,
-								padding: { top: 16 },
-							}}
-							theme="vs-dark"
-							className="h-full"
-						/>
-					</div>
+					{/* Chat box */}
+					{showChat && (
+						<div className="w-1/3 flex-shrink-0 transition-all duration-300">
+							<ChatBox
+								roomId={collabInfo?.id?.toString() || roomId}
+								userId={userId || ""}
+								userName={userName}
+							/>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

@@ -27,6 +27,7 @@ export type Noti = {
 
 export default function NotificationPage() {
 	const user = useUser()
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const previousNotifications = useRef<any[]>([])
 
 	const { data: notifications, isSuccess } = useQueryNotifications(user?.id)
