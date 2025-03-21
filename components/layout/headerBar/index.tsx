@@ -16,22 +16,53 @@ import HeaderBarNavigation from "./HeaderBarNavigation"
 export default function HeaderBar({ className }: { className: string }) {
 	return (
 		<>
-			<header className={className}>
+			<style jsx>{`
+				@keyframes slideDown {
+					from { transform: translateY(-100%); opacity: 0; }
+					to { transform: translateY(0); opacity: 1; }
+				}
+				.header-animate {
+					animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+				.glass-effect {
+					background: rgba(255, 255, 255, 0.01);
+					backdrop-filter: blur(8px);
+					-webkit-backdrop-filter: blur(8px);
+				}
+				.dark .glass-effect {
+					background: rgba(0, 0, 0, 0.01);
+				}
+				@media (max-width: 640px) {
+					.glass-effect {
+						backdrop-filter: blur(6px);
+						-webkit-backdrop-filter: blur(6px);
+					}
+				}
+			`}</style>
+			<header className={`${className} header-animate glass-effect fixed top-0 left-0 right-0 z-50 border-b border-border/40 shadow-sm transition-all duration-300 hover:shadow-md px-4 sm:px-6 py-2 sm:py-3`}>
 				{/* lefty - desktop view */}
-				<div className="desktop-only gap-4">
+				<div className="desktop-only gap-4 transition-all duration-300 hover:scale-105 hover:brightness-110">
 					<Logo />
 				</div>
 
 				{/* lefty - mobile view */}
-				<HeaderBarNavigation />
+				<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+					<HeaderBarNavigation />
+				</div>
 
 				{/* center */}
-				<HeaderBarLogo />
+				<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+					<HeaderBarLogo />
+				</div>
 
 				{/* righty */}
-				<div className="ml-auto flex items-center gap-4">
-					<HeaderBarCustomTheme />
-					<HeaderDropdownMenu />
+				<div className="ml-auto flex items-center gap-3 sm:gap-6">
+					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+						<HeaderBarCustomTheme />
+					</div>
+					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+						<HeaderDropdownMenu />
+					</div>
 				</div>
 			</header>
 		</>
