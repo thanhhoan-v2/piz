@@ -3,6 +3,8 @@ import { createSupabaseBrowserClient } from "@utils/supabase/client"
 import { RefreshCw, Send, WifiOff } from "lucide-react"
 import { useCallback, useEffect, useRef, useState, type FC, type ReactElement } from "react"
 import type { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js"
+import { Input } from "@components/ui/Input"
+import { Button } from "@components/ui/Button"
 
 export type ChatMessage = {
   id?: string
@@ -345,7 +347,7 @@ export const ChatBox: FC<ChatBoxProps> = ({ roomId, userId, userName }): ReactEl
         
         {/* Connection status indicator */}
         {connectionStatus === 'disconnected' && (
-          <button 
+          <Button 
             type="button"
             onClick={handleReconnect}
             disabled={reconnecting}
@@ -363,7 +365,7 @@ export const ChatBox: FC<ChatBoxProps> = ({ roomId, userId, userName }): ReactEl
                 <span>Reconnect</span>
               </>
             )}
-          </button>
+          </Button>
         )}
       </div>
       
@@ -398,7 +400,7 @@ export const ChatBox: FC<ChatBoxProps> = ({ roomId, userId, userName }): ReactEl
       {/* Message input */}
       <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-700">
         <div className="flex">
-          <input
+          <Input
             type="text"
             value={newMessage}
             onChange={(e) => handleMessageChange(e.target.value)}
@@ -406,13 +408,13 @@ export const ChatBox: FC<ChatBoxProps> = ({ roomId, userId, userName }): ReactEl
             className="flex-grow bg-gray-700 text-white rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading || connectionStatus === 'disconnected'}
           />
-          <button
+          <Button
             type="submit"
             disabled={!newMessage.trim() || isLoading || connectionStatus === 'disconnected'}
             className="bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg px-3 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={16} />
-          </button>
+          </Button>
         </div>
       </form>
     </div>

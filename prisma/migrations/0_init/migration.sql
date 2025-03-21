@@ -54,7 +54,7 @@ CREATE TABLE "Follow" (
 
 -- CreateTable
 CREATE TABLE "Notification" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "senderId" TEXT NOT NULL,
     "receiverId" TEXT NOT NULL,
     "postId" TEXT,
@@ -74,11 +74,13 @@ CREATE TABLE "Post" (
     "userId" TEXT NOT NULL,
     "userName" TEXT,
     "userAvatarUrl" TEXT,
-    "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(6),
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "postImageUrl" TEXT,
+    "postVideoUrl" TEXT,
+    "snippetId" TEXT,
 
     CONSTRAINT "post_pkey" PRIMARY KEY ("id")
 );
@@ -110,6 +112,43 @@ CREATE TABLE "User" (
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Snippet" (
+    "id" TEXT NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "value" TEXT,
+    "lang" TEXT DEFAULT '"plain"',
+    "userId" TEXT,
+    "theme" TEXT,
+
+    CONSTRAINT "Snippet_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CollabChat" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "roomId" BIGINT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "userName" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CollabChat_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Collab" (
+    "id" BIGSERIAL NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "content" TEXT,
+    "updated_at" TIMESTAMPTZ(6),
+    "updated_by_userId" TEXT,
+    "version" TEXT,
+    "room_id" TEXT,
+
+    CONSTRAINT "Collab_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "Comment_parentId_fkey_unique" ON "Comment"("parentId");
 
@@ -137,6 +176,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 -- CreateIndex
 CREATE UNIQUE INDEX "User_userName_key" ON "User"("userName");
 
+-- CreateIndex
+CREATE INDEX "CollabChat_roomId_idx" ON "CollabChat"("roomId");
+
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Comment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -159,6 +201,9 @@ ALTER TABLE "Notification" ADD CONSTRAINT "Notification_commentId_fkey" FOREIGN 
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_snippetId_fkey" FOREIGN KEY ("snippetId") REFERENCES "Snippet"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -169,3 +214,10 @@ ALTER TABLE "PostReaction" ADD CONSTRAINT "PostReaction_postId_fkey_unique" FORE
 
 -- AddForeignKey
 ALTER TABLE "PostReaction" ADD CONSTRAINT "PostReaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Snippet" ADD CONSTRAINT "Snippet_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CollabChat" ADD CONSTRAINT "CollabChat_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "Collab"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
