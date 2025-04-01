@@ -25,7 +25,7 @@ export default function PostFormDesktop() {
 		<>
 			<div className={cn("flex-column gap-[10px]", postWidths)}>
 				<PostForm>
-					<Button className="gap-2 bg-background-item hover:bg-background shadow-lg py-[33px] rounded-lg w-full text-black dark:text-white text-xl">
+					<Button className="gap-2 bg-gray-800 text-white hover:bg-background shadow-lg py-[33px] rounded-lg w-full text-black dark:text-white text-xl">
 						{/* <Sparkle className="text-pink-400" /> */}
 						<p>
 							{user?.displayName

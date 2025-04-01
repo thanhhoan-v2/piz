@@ -103,7 +103,7 @@ export default function Post({
 							key={id}
 							onKeyUp={handlePostKeyUp}
 							className={cn(
-								"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3 transition-transform hover:scale-103",
+								"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-gray-800 px-5 py-3 transition-transform hover:scale-103",
 								postWidths,
 							)}
 						>
@@ -215,7 +215,7 @@ export default function Post({
 						onClick={handlePostClick}
 						onKeyUp={handlePostKeyUp}
 						className={cn(
-							"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3 transition-transform hover:scale-103",
+							"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-white px-5 py-3 transition-transform hover:scale-103",
 							postWidths,
 						)}
 					>

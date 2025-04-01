@@ -70,18 +70,18 @@ export default function HeaderDropdownMenu() {
 
 	if (!user)
 		return (
-			<>
-				<Link href={ROUTE.SIGN_UP} className="desktop-only">
-					<Button variant="link">Create account</Button>
+			<div className="flex gap-2 text-gray-400">
+				<Link href={ROUTE.SIGN_UP} className="desktop-only text-gray-400">
+					<Button variant="link" className="text-gray-400">Create account</Button>
 				</Link>
 				<Link href={ROUTE.SIGN_IN}>
 					<Button>Log in</Button>
 				</Link>
-			</>
+			</div>
 		)
 
 	return (
-		<>
+		<div className="flex gap-2 text-gray-400">
 			<UserButton />
 			{/* <DropdownMenu> */}
 			{/* 	<DropdownMenuTrigger asChild> */}
@@ -124,6 +124,6 @@ export default function HeaderDropdownMenu() {
 			{/* 		</DropdownMenuItem> */}
 			{/* 	</DropdownMenuContent> */}
 			{/* </DropdownMenu> */}
-		</>
+		</div>
 	)
 }

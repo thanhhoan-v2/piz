@@ -109,7 +109,7 @@ export default function PostUserInfo({
 	return (
 		<>
 			<div className="w-full flex-col gap-4">
-				<div className="w-full flex-between">
+				<div className="w-full flex-between text-white">
 					{/* Left side */}
 					<div className="flex-y-center gap-3">
 						{/* Avatar */}
