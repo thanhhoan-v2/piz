@@ -74,6 +74,7 @@
 		"next-themes": "^0.3.0",
 		"next-video": "^2.1.0",
 		"nextjs-toploader": "^3.7.15",
+		"normalize.css": "^8.0.1",
 		"ollama": "^0.5.14",
 		"ollama-ai-provider": "^1.2.0",
 		"openai": "^4.86.1",
