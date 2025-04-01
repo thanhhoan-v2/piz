@@ -11,6 +11,7 @@ import {
 } from "@components/ui/Select"
 import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
+import { getCodeReview } from "@services/deepseek"
 import {
 	STORAGE_KEY_SNIPPET_CODE,
 	STORAGE_KEY_SNIPPET_ID,
@@ -23,7 +24,6 @@ import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
-import { getCodeReview } from "@services/deepseek"
 
 export type CodeEditorProps = {
 	setIsAddingSnippetAction: (isAddingSnippet: boolean) => void
@@ -71,18 +71,18 @@ export default function CodeEditor({
 	}
 
 	const handleGetCodeReview = async () => {
-		if (!code) return;
-		
+		if (!code) return
+
 		try {
-			setIsReviewing(true);
-			const review = await getCodeReview(code, snippetLang);
-			setCodeReview(review);
+			setIsReviewing(true)
+			const review = await getCodeReview(code, snippetLang)
+			setCodeReview(review)
 		} catch (error) {
-			console.error("Failed to get code review:", error);
+			console.error("Failed to get code review:", error)
 		} finally {
-			setIsReviewing(false);
+			setIsReviewing(false)
 		}
-	};
+	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -152,14 +152,14 @@ export default function CodeEditor({
 								Edit
 							</Button>
 
-							<Button
-								variant="outline"
-								className="p-5"
-								onClick={handleGetCodeReview}
-								disabled={isReviewing}
-							>
-								{isReviewing ? "Reviewing..." : "Get AI Review"}
-							</Button>
+							{/* <Button */}
+							{/* 	variant="outline" */}
+							{/* 	className="p-5" */}
+							{/* 	onClick={handleGetCodeReview} */}
+							{/* 	disabled={isReviewing} */}
+							{/* > */}
+							{/* 	{isReviewing ? "Reviewing..." : "Get AI Review"} */}
+							{/* </Button> */}
 
 							<Select onValueChange={(e) => setSnippetTheme(e)}>
 								<SelectTrigger className="w-[200px]">
@@ -179,7 +179,11 @@ export default function CodeEditor({
 					<div>
 						{codeViewStyle && (
 							<>
-								<SyntaxHighlighter showLineNumbers={true} language="javascript" style={codeViewStyle}>
+								<SyntaxHighlighter
+									showLineNumbers={true}
+									language="javascript"
+									style={codeViewStyle}
+								>
 									{code}
 								</SyntaxHighlighter>
 								{codeReview && (

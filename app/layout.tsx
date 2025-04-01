@@ -9,6 +9,8 @@ import localFont from "next/font/local"
 import NextTopLoader from "nextjs-toploader"
 import { Suspense } from "react"
 import { stackServerApp } from "../stack"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const geistSans = localFont({
 	src: "../assets/fonts/GeistVF.woff",
@@ -57,8 +59,8 @@ export default function RootLayout({
 							zIndex={1600}
 							showAtBottom={false}
 						/>
-						{/* <Analytics /> */}
-						{/* <SpeedInsights /> */}
+						<Analytics />
+						<SpeedInsights />
 						<QueryProvider>
 							<ThemeProvider
 								attribute="class"
