@@ -2,16 +2,16 @@ import { AppLayout } from "@components/layout"
 import QueryProvider from "@providers/QueryProvider"
 import { StackProvider, StackTheme } from "@stackframe/stack"
 import "@styles/globals.css"
-import "jotai-devtools/styles.css"
+// import "jotai-devtools/styles.css"
 import { Toaster } from "@components/ui/Sonner"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 import { ThemeProvider } from "next-themes"
 import localFont from "next/font/local"
 import NextTopLoader from "nextjs-toploader"
+// import "normalize.css"
 import { Suspense } from "react"
 import { stackServerApp } from "../stack"
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/react"
-import 'normalize.css'
 
 const geistSans = localFont({
 	src: "../assets/fonts/GeistVF.woff",

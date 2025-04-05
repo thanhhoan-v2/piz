@@ -1,4 +1,4 @@
-import { atomWithStorage } from "jotai/utils"
+// import { atomWithStorage } from "jotai/utils"
 
 type ICustomTheme = {
 	group: "light" | "dark"
@@ -39,7 +39,7 @@ export const customThemes: ICustomTheme[] = [
 	},
 ]
 
-export const customThemeAtom = atomWithStorage<ICustomTheme>(
-	"piz_custom_theme",
-	customThemes[5],
-)
+// export const customThemeAtom = atomWithStorage<ICustomTheme>(
+// 	"piz_custom_theme",
+// 	customThemes[5],
+// )

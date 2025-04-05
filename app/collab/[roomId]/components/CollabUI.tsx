@@ -1,6 +1,7 @@
 "use client"
 import { ChatBox } from "@components/chat/ChatBox"
 import { Badge } from "@components/ui/Badge"
+import { RealtimeCursors } from "@components/ui/supabase-ui/realtime-cursor"
 import { Editor } from "@monaco-editor/react"
 import { CheckCircle, Clock, MessageSquare, UserIcon } from "lucide-react"
 import { useState } from "react"
@@ -125,7 +126,10 @@ export function CollabUI({
 						</div>
 
 						{/* Editor */}
-						<div className="flex-grow">
+						<div className="flex-grow relative">
+							<div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+								<RealtimeCursors roomName={roomId} username={userName} />
+							</div>
 							<Editor
 								height="100%"
 								defaultLanguage="typescript"

@@ -58,7 +58,7 @@ export default function HeaderBar({ className }: { className: string }) {
 				{/* righty */}
 				<div className="ml-auto flex items-center gap-3 sm:gap-6">
 					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
-						<HeaderBarCustomTheme />
+						{/* <HeaderBarCustomTheme /> */}
 					</div>
 					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
 						<HeaderDropdownMenu />
