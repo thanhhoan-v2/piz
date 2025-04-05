@@ -1,8 +1,7 @@
 "use client"
-// import { customThemeAtom } from "@atoms/theme"
-import { AuroraBackground } from "@components/background/aurora-background"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
+import { FlickeringGrid } from "@components/ui/background/flickering-grid"
 import { useQueryCreateUser } from "@queries/client/appUser"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
@@ -101,45 +100,57 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<>
-			<AuroraBackground>
-				<div className="relative flex h-screen-auto w-full flex-col text-foreground transition-colors duration-300">
-					{/* {customTheme.value === "light_small_squares" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#8080800a_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
-					{/* {customTheme.value === "light_big_squares" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#f0f0f0_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
-					{/* {customTheme.value === "light_gradient_violet" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#63e3_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
-					{/* {customTheme.value === "dark_gradient_violet" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#63e3_1px,#000000_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
-					{/* {customTheme.value === "dark_small_squares" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#4f4f4f2e_1px,#000000_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
-					{/* {customTheme.value === "dark_dots" && ( */}
-					{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" /> */}
-					{/* )} */}
+			<div className="relative flex h-screen-auto w-full flex-col text-foreground transition-colors duration-300">
+				{/* {customTheme.value === "light_small_squares" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#8080800a_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
+				{/* {customTheme.value === "light_big_squares" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#f0f0f0_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
+				{/* {customTheme.value === "light_gradient_violet" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-white bg-[radial-gradient(#63e3_1px,#ffffff_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
+				{/* {customTheme.value === "dark_gradient_violet" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#63e3_1px,#000000_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
+				{/* {customTheme.value === "dark_small_squares" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#4f4f4f2e_1px,#000000_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
+				{/* {customTheme.value === "dark_dots" && ( */}
+				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" /> */}
+				{/* )} */}
 
-					<HeaderBar
-						className={cn(
-							"fixed top-0 right-0 left-0 z-50 flex-between bg-background px-3 py-2 shadow-md transition-transform duration-300 ease-in-out",
-							headerBarIsVisible,
-						)}
+				<div className="absolute top-0 z-[-2] h-full w-full">
+					<FlickeringGrid
+						className="z-0 absolute inset-0 size-full"
+						squareSize={40}
+						gridGap={2}
+						color="#6B7280"
+						// color="#8cd867"
+						maxOpacity={0.5}
+						flickerChance={0.5}
+						// height={1600}
+						// width={1600}
 					/>
-
-					<SideBar
-						mobileSideBarClassName={cn(
-							"fixed shadow-md transition-transform duration-300 ease-in-out",
-							sideBarIsVisible,
-						)}
-					/>
-					<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
-						{children}
-					</main>
 				</div>
-			</AuroraBackground>
+
+				<HeaderBar
+					className={cn(
+						"fixed top-0 right-0 left-0 z-50 flex-between bg-background px-3 py-2 shadow-md transition-transform duration-300 ease-in-out",
+						headerBarIsVisible,
+					)}
+				/>
+
+				<SideBar
+					mobileSideBarClassName={cn(
+						"fixed shadow-md transition-transform duration-300 ease-in-out",
+						sideBarIsVisible,
+					)}
+				/>
+				<main className="mobile_s:mx-1 ml-[100px] mobile_s:ml-0 h-auto mobile_s:w-full flex-center">
+					{children}
+				</main>
+			</div>
 		</>
 	)
 }
