@@ -120,7 +120,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" /> */}
 				{/* )} */}
 
-				<div className="absolute top-0 z-[-2] h-full w-full">
+				<div className="absolute top-0 ml-[10px] z-[-2] h-full w-full">
 					<FlickeringGrid
 						className="z-0 absolute inset-0 size-full"
 						squareSize={40}

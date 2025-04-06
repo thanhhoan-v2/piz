@@ -25,13 +25,9 @@ export default function PostFormDesktop() {
 		<>
 			<div className={cn("flex-column gap-[10px]", postWidths)}>
 				<PostForm>
-					<Button className="gap-2 bg-gray-800 text-white hover:bg-background shadow-lg py-[33px] rounded-lg w-full text-black dark:text-white text-xl">
+					<Button className="gap-2 bg-cynical-black text-left text-white hover:bg-background shadow-lg py-[20px] rounded-full w-full text-black dark:text-white">
 						{/* <Sparkle className="text-pink-400" /> */}
-						<p>
-							{user?.displayName
-								? `What are you thinking, ${user.displayName}? 🤔`
-								: "Sign in to create a post"}
-						</p>
+						<p>{user?.displayName ? "Create a post" : "Sign in to create a post"}</p>
 						{/* <Sparkle className="text-pink-400" /> */}
 					</Button>
 				</PostForm>

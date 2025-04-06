@@ -215,7 +215,7 @@ export default function Post({
 						onClick={handlePostClick}
 						onKeyUp={handlePostKeyUp}
 						className={cn(
-							"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-gray-700 px-5 py-3 transition-transform hover:scale-103",
+							"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-cynical-black px-5 py-3 transition-transform hover:scale-103",
 							postWidths,
 						)}
 					>
@@ -253,40 +253,42 @@ export default function Post({
 					{isPostCountsQuerySuccess && isSignedIn ? (
 						<div
 							className={cn(
-								"mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6",
+								"mt-0 flex h-[30px] gap-5 rounded-b-lg bg-cynical-black px-2 py-6",
 								postWidths,
 							)}
 						>
-							<>
-								{isPostReactionQuerySuccess ? (
-									<PostReactButton
+							<div className="flex w-full justify-between">
+								<div className="flex gap-2">
+									{isPostReactionQuerySuccess ? (
+										<PostReactButton
+											className={postButtonClassName}
+											wrapperClassName={postButtonWrapperClassName}
+											userId={appUserId ?? undefined}
+											postId={id}
+											initialReactionCount={noReactions ?? 0}
+											isReacted={!!queriedPostReactionByAppUser}
+										/>
+									) : (
+										<div className={postButtonWrapperClassName}>
+											<Skeleton className={postButtonSkeletonClassName} />
+										</div>
+									)}
+
+									<PostCommentButton
 										className={postButtonClassName}
 										wrapperClassName={postButtonWrapperClassName}
-										userId={appUserId ?? undefined}
+										initialCommentCount={noComments ?? 0}
+										// User related props
+										userId={userId}
+										userName={posterInfo?.userName ?? null}
+										userAvatarUrl={posterInfo?.userAvatarUrl ?? null}
+										// Post related props
 										postId={id}
-										initialReactionCount={noReactions ?? 0}
-										isReacted={!!queriedPostReactionByAppUser}
+										postContent={content}
+										postCreatedAt={createdAt}
+										postUpdatedAt={updatedAt}
 									/>
-								) : (
-									<div className={postButtonWrapperClassName}>
-										<Skeleton className={postButtonSkeletonClassName} />
-									</div>
-								)}
-
-								<PostCommentButton
-									className={postButtonClassName}
-									wrapperClassName={postButtonWrapperClassName}
-									initialCommentCount={noComments ?? 0}
-									// User related props
-									userId={userId}
-									userName={posterInfo?.userName ?? null}
-									userAvatarUrl={posterInfo?.userAvatarUrl ?? null}
-									// Post related props
-									postId={id}
-									postContent={content}
-									postCreatedAt={createdAt}
-									postUpdatedAt={updatedAt}
-								/>
+								</div>
 
 								<PostShareButton
 									className={postButtonClassName}
@@ -295,7 +297,7 @@ export default function Post({
 									postId={id}
 									// initialShareCount={noShares ?? 0}
 								/>
-							</>
+							</div>
 						</div>
 					) : (
 						<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
