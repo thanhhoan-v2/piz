@@ -1,6 +1,4 @@
 "use client"
-
-import { HeaderBarCustomTheme } from "@components/layout/headerBar/HeaderBarCustomTheme"
 import { Logo } from "@components/ui/Logo"
 import HeaderDropdownMenu from "./HeaderBarDropdownMenu"
 import HeaderBarLogo from "./HeaderBarLogo"
@@ -39,7 +37,9 @@ export default function HeaderBar({ className }: { className: string }) {
 					}
 				}
 			`}</style>
-			<header className={`${className} header-animate glass-effect fixed top-0 left-0 right-0 z-50 border-b border-border/40 shadow-sm transition-all duration-300 hover:shadow-md px-4 sm:px-6 py-2 sm:py-3`}>
+			<header
+				className={`${className} header-animate glass-effect fixed top-0 left-0 right-0 z-50 border-b border-border/40 shadow-sm transition-all duration-300 hover:shadow-md px-4 sm:px-6 py-2 sm:py-3`}
+			>
 				{/* lefty - desktop view */}
 				<div className="desktop-only gap-4 transition-all duration-300 hover:scale-105 hover:brightness-110">
 					<Logo />

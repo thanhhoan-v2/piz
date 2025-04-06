@@ -74,7 +74,7 @@ export default function PostContent({
 	return (
 		<>
 			<div className="flex flex-col gap-4">
-				<div className="text-wrap-pretty">
+				<div>
 					<p className="text-white">{content}</p>
 
 					<div className="my-2" />

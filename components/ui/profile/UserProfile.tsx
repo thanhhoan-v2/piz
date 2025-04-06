@@ -2,9 +2,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
 import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
-import Post from "@components/ui/post"
+import Post, { postWidths } from "@components/ui/post"
 import type { Post as IPost } from "@prisma/client"
 import { useQueryAllUserPosts } from "@queries/client/post"
+import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { Sparkles } from "lucide-react"
@@ -31,7 +32,7 @@ export default function UserProfile({ initialUser }: { initialUser: SerializedUs
 	}, [postsQuery.data])
 
 	return (
-		<div className="min-h-screen mt-[100px]">
+		<div className={cn("min-h-screen mt-[100px]", postWidths)}>
 			{/* Hero Section */}
 			<div className="relative overflow-hidden">
 				<div className="absolute inset-0" />

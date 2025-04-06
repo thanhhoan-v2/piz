@@ -1,5 +1,5 @@
 "use client"
-import GlibberishText from "@components/animation/GlibberishText"
+import { GooeyText } from "@components/animation/text-morphing"
 import { Backdrop } from "@components/ui/Backdrop"
 import { isPageReload } from "@utils/page.helpers"
 import React from "react"
@@ -35,10 +35,16 @@ const LoadingScreen = ({ duration = 2000 }: { duration?: number }) => {
 			{/* </div> */}
 
 			<Backdrop open={show} variant="dim">
-				<GlibberishText
-					text='"&nbsp;piz&nbsp;"'
-					className="font-black text-[3rem] tracking-widest"
-					colors={["text-pink-500", "text-cyan-400", "text-yellow-500"]}
+				{/* <GlibberishText */}
+				{/* 	text='"&nbsp;piz&nbsp;"' */}
+				{/* 	className="font-black text-[3rem] tracking-widest" */}
+				{/* 	colors={["text-pink-500", "text-cyan-400", "text-yellow-500"]} */}
+				{/* /> */}
+				<GooeyText
+					texts={["0%", "3%", "9%", "25%", "32%", "39%", "45%", "90%"]}
+					morphTime={1}
+					cooldownTime={0.1}
+					className="font-bold"
 				/>
 			</Backdrop>
 		</>
