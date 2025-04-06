@@ -93,18 +93,12 @@ export const createPost = async ({
 				),
 			)
 		} catch (error) {
-			console.error(
-				"[POST] Error creating notifications:",
-				JSON.stringify(error, null, 2),
-			)
+			console.error("[POST] Error creating notifications:", JSON.stringify(error, null, 2))
 		}
 
 		return newPost
 	} catch (error) {
-		console.error(
-			"[POST] Error when creating: ",
-			JSON.stringify(error, null, 2),
-		)
+		console.error("[POST] Error when creating: ", JSON.stringify(error, null, 2))
 	}
 }
 
@@ -163,5 +157,52 @@ export const getAllUserPosts = async (userId: string) => {
 		return posts
 	} catch (error) {
 		console.error(`<< Post >> Error getting posts of user ${userId}:\n`, error)
+	}
+}
+
+// Delete a post by ID (only if the user is the author)
+export const deletePost = async (postId: string, userId: string) => {
+	try {
+		// First verify that the user is the post author
+		// const post = await prisma.post.findUnique({
+		// 	where: { id: postId },
+		// })
+
+		// if (!postId) {
+		// 	console.error(`<< Post >> Post ${postId} not found`)
+		// 	return { success: false, message: "Post not found" }
+		// }
+
+		// Check if user is the author
+		// if (post.userId !== userId) {
+		// 	console.error(`<< Post >> User ${userId} is not the author of post ${postId}`)
+		// 	return { success: false, message: "You are not authorized to delete this post" }
+		// }
+
+		// Delete related data (reactions, comments, etc.) if needed
+		// await prisma.$transaction([
+		// 	// Delete post reactions
+		// 	prisma.postReaction.deleteMany({
+		// 		where: { postId },
+		// 	}),
+		// 	// Delete comments
+		// 	prisma.comment.deleteMany({
+		// 		where: { postId },
+		// 	}),
+		// 	// Delete notifications related to the post
+		// 	prisma.notification.deleteMany({
+		// 		where: { postId },
+		// 	}),
+		// 	// Finally delete the post
+		await prisma.post.delete({
+			where: { id: postId },
+		})
+		// ])
+
+		console.log(`<< Post >> Successfully deleted post ${postId}`)
+		return { success: true, message: "Post deleted successfully" }
+	} catch (error) {
+		console.error(`<< Post >> Error deleting post ${postId}:`, error)
+		return { success: false, message: "Error deleting post" }
 	}
 }

@@ -2,6 +2,18 @@
 
 import { getUserById } from "@app/actions/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
+import { Button } from "@components/ui/Button"
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@components/ui/Dialog"
+import { useDeletePostMutation } from "@queries/client/post"
 import { getFollow } from "@queries/server/follow"
 import { useUser } from "@stackframe/stack"
 import { useQuery } from "@tanstack/react-query"
@@ -9,6 +21,7 @@ import { avatarPlaceholder } from "@utils/image.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { formatDistanceToNow } from "date-fns"
+import { Trash2 } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -27,6 +40,62 @@ type PostUserInfoProps = {
 	postImageUrl: string | null
 	postVideoUrl: string | null
 	snippetId: string | null
+	id: string // Post ID needed for delete functionality
+}
+
+type DeletePostButtonProps = {
+	postId: string
+	userId: string
+}
+
+function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
+	const [open, setOpen] = useState(false)
+	const deletePostMutation = useDeletePostMutation()
+	const [isDeleting, setIsDeleting] = useState(false)
+
+	const handleDeletePost = () => {
+		setIsDeleting(true)
+		console.log(postId, userId)
+		deletePostMutation.mutate(
+			{ postId, userId },
+			{
+				onSettled: () => {
+					setIsDeleting(false)
+					setOpen(false) // Close dialog after completion
+				},
+			},
+		)
+	}
+
+	return (
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="text-muted-foreground hover:text-destructive hover:bg-transparent"
+				>
+					<Trash2 size={16} />
+				</Button>
+			</DialogTrigger>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Delete Post</DialogTitle>
+					<DialogDescription>
+						Are you sure you want to delete this post? This action cannot be undone.
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<DialogClose asChild>
+						<Button variant="outline">Cancel</Button>
+					</DialogClose>
+					<Button variant="destructive" onClick={handleDeletePost} disabled={isDeleting}>
+						{isDeleting ? "Deleting..." : "Delete"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	)
 }
 
 export default function PostUserInfo({
@@ -37,6 +106,7 @@ export default function PostUserInfo({
 	postImageUrl,
 	postVideoUrl,
 	snippetId,
+	id, // Make sure to include id in destructuring
 }: PostUserInfoProps) {
 	const user = useUser()
 
@@ -146,7 +216,8 @@ export default function PostUserInfo({
 					</div>
 					{/* Right side */}
 					<div>
-						{userId === user?.id && <span className="text-muted-foreground text-sm">You</span>}
+						{/* Delete post button - only show if current user is the author */}
+						{userId && userId === user?.id && <DeletePostButton postId={id} userId={user.id} />}
 					</div>
 				</div>
 

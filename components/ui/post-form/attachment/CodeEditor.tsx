@@ -199,7 +199,7 @@ export default function CodeEditor({
 			) : (
 				<div className="flex w-[600px] flex-col">
 					<div className="">
-						<div className="w-full max-w-[1000px] flex-col gap-2 rounded-lg border p-4">
+						<div className="w-full flex-col gap-2 rounded-lg border p-4">
 							<div className="flex-between">
 								<Select onValueChange={(e) => setSnippetLang(e)}>
 									<SelectTrigger className="w-[130px] self-end">
@@ -221,7 +221,7 @@ export default function CodeEditor({
 								</Button>
 							</div>
 
-							<form onSubmit={() => setIsSaved(true)}>
+							<form className="w-full" onSubmit={() => setIsSaved(true)}>
 								<div className="">
 									<label htmlFor="comment" className="sr-only">
 										Add your code
@@ -229,7 +229,7 @@ export default function CodeEditor({
 
 									<Editor
 										height="300px"
-										width="500px"
+										// width=""
 										value={code || ""}
 										onChange={(value) => setCode(value || "")}
 										theme="vs-dark"

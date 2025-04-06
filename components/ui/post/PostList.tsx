@@ -14,8 +14,6 @@ export default function PostList() {
 		isFetching,
 	} = useQueryAllPosts()
 
-	console.log(posts)
-
 	if (isError) {
 		console.log("Error loading posts : ", error)
 		return <div>Error loading posts 😢</div>

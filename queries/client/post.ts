@@ -1,13 +1,15 @@
 import type { Post } from "@prisma/client"
 import {
+	deletePost,
 	getAllPosts,
 	getAllUserPosts,
 	getPost,
 	getPostCounts,
 } from "@queries/server/post"
 import { getPostReaction } from "@queries/server/postReaction"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
+import { toast } from "sonner"
 
 export const useQueryPostCounts = ({ postId }: { postId: string }) =>
 	useQuery({
@@ -16,10 +18,7 @@ export const useQueryPostCounts = ({ postId }: { postId: string }) =>
 		enabled: !!postId,
 	})
 
-export const useQueryPostReaction = ({
-	userId,
-	postId,
-}: { userId?: string; postId: string }) =>
+export const useQueryPostReaction = ({ userId, postId }: { userId?: string; postId: string }) =>
 	useQuery({
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		queryKey: queryKey.post.selectReactionByUser({ userId: userId!, postId }),
@@ -28,20 +27,20 @@ export const useQueryPostReaction = ({
 	})
 
 interface UseQueryPostParams {
-	postId: string;
-	enabled?: boolean;
+	postId: string
+	enabled?: boolean
 }
 
 export const useQueryPost = ({ postId, enabled = true }: UseQueryPostParams) =>
 	useQuery({
 		queryKey: queryKey.post.selectId(postId),
 		queryFn: async () => getPost(postId),
-		enabled: !!postId && enabled
+		enabled: !!postId && enabled,
 	})
 
 interface UseQueryAllUserPostsParams {
-	userId: string;
-	enabled?: boolean;
+	userId: string
+	enabled?: boolean
 }
 
 export const useQueryAllUserPosts = ({ userId, enabled }: UseQueryAllUserPostsParams) =>
@@ -55,5 +54,56 @@ export const useQueryAllPosts = () =>
 	useQuery<Post[]>({
 		queryKey: queryKey.post.all,
 		queryFn: async () => getAllPosts(),
-		staleTime: Number.POSITIVE_INFINITY,
+		staleTime: 30000, // 30 seconds stale time instead of infinity
+		refetchInterval: 60000, // Check for new posts every minute
 	})
+
+interface DeletePostParams {
+	postId: string
+	userId: string
+}
+
+export const useDeletePostMutation = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async ({ postId, userId }: DeletePostParams) => {
+			return deletePost(postId, userId)
+		},
+		onMutate: async ({ postId }) => {
+			// Cancel any outgoing refetches to prevent overwriting optimistic update
+			await queryClient.cancelQueries({ queryKey: queryKey.post.all })
+			await queryClient.cancelQueries({ queryKey: queryKey.post.selectId(postId) })
+
+			// Snapshot the previous values
+			const previousPosts = queryClient.getQueryData(queryKey.post.all)
+
+			// Optimistically remove the post from the cache
+			queryClient.setQueryData(queryKey.post.all, (old: Post[] | undefined) => {
+				if (!old) return []
+				return old.filter((post) => post.id !== postId)
+			})
+
+			// Return the snapshots so we can rollback if something goes wrong
+			return { previousPosts }
+		},
+		onSuccess: (result) => {
+			if (result.success) {
+				toast.success("Post deleted successfully")
+				// Invalidate all related queries to refetch the latest data
+				queryClient.invalidateQueries({ queryKey: queryKey.post.all })
+			} else {
+				toast.error(result.message || "Failed to delete post")
+			}
+		},
+		onError: (error, variables, context) => {
+			toast.error("Failed to delete post")
+			console.error("Error deleting post:", error)
+
+			// Rollback to the previous state
+			if (context?.previousPosts) {
+				queryClient.setQueryData(queryKey.post.all, context.previousPosts)
+			}
+		},
+	})
+}

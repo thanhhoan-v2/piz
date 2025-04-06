@@ -1,7 +1,6 @@
 "use client"
 import HeaderBar from "@components/layout/headerBar"
 import SideBar from "@components/layout/sideBar"
-import { FlickeringGrid } from "@components/ui/background/flickering-grid"
 import { useQueryCreateUser } from "@queries/client/appUser"
 import { useUser } from "@stackframe/stack"
 import { cn } from "@utils/cn"
@@ -117,22 +116,22 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#4f4f4f2e_1px,#000000_1px)] bg-[size:20px_20px]" /> */}
 				{/* )} */}
 				{/* {customTheme.value === "dark_dots" && ( */}
-				{/* 	<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" /> */}
+				<div className="absolute top-0 z-[-2] h-full w-full bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00000d_1px)] bg-[size:20px_20px]" />
 				{/* )} */}
 
-				<div className="absolute top-0 ml-[10px] z-[-2] h-full w-full">
-					<FlickeringGrid
-						className="z-0 absolute inset-0 size-full"
-						squareSize={40}
-						gridGap={2}
-						color="#6B7280"
-						// color="#8cd867"
-						maxOpacity={0.5}
-						flickerChance={0.5}
-						// height={1600}
-						// width={1600}
-					/>
-				</div>
+				{/* <div className="absolute top-0 ml-[10px] z-[-2] h-full w-full"> */}
+				{/* 	<FlickeringGrid */}
+				{/* 		className="z-0 absolute inset-0 size-full" */}
+				{/* 		squareSize={10} */}
+				{/* 		gridGap={1} */}
+				{/* 		color="#6B7280" */}
+				{/* 		// color="#8cd867" */}
+				{/* 		maxOpacity={0.5} */}
+				{/* 		flickerChance={0.1} */}
+				{/* 		// height={1600} */}
+				{/* 		// width={1600} */}
+				{/* 	/> */}
+				{/* </div> */}
 
 				<HeaderBar
 					className={cn(

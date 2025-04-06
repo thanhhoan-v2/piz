@@ -1,9 +1,11 @@
 "use client"
 
+import { Button } from "@components/ui/Button"
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { getSnippetById } from "@queries/server/snippet"
+import { Check, Copy } from "lucide-react"
 import Image from "next/image"
 import { Suspense, useEffect, useState } from "react"
-import SyntaxHighlighter from "react-syntax-highlighter"
 import VideoPlayer from "../post-form/attachment/VideoPlayer"
 
 export type PostContentProps = {
@@ -26,6 +28,16 @@ export default function PostContent({
 }: PostContentProps) {
 	const [snippet, setSnippet] = useState<SnippetViewProps>()
 	const [snippetThemeImport, setSnippetThemeImport] = useState()
+
+	const [copied, setCopied] = useState(false)
+
+	const handleCopy = () => {
+		if (snippet?.value) {
+			navigator.clipboard.writeText(snippet.value)
+		}
+		setCopied(true)
+		setTimeout(() => setCopied(false), 2000)
+	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -69,7 +81,15 @@ export default function PostContent({
 
 					{postImageUrl && (
 						<Suspense fallback={<p>Loading...</p>}>
-							<Image width={300} height={300} src={postImageUrl} alt="Uploaded Image" />
+							<div className="flex-center">
+								<Image
+									className="rounded-lg"
+									width={300}
+									height={300}
+									src={postImageUrl}
+									alt="Uploaded Image"
+								/>
+							</div>
 						</Suspense>
 					)}
 
@@ -79,15 +99,35 @@ export default function PostContent({
 						</Suspense>
 					)}
 
-					{snippetId && snippet && snippet?.value && (
+					{snippetId && snippet && snippet?.value && snippet?.lang && (
 						<>
-							<SyntaxHighlighter
-								showLineNumbers={true}
-								language="javascript"
-								style={snippetThemeImport}
-							>
-								{snippet?.value}
-							</SyntaxHighlighter>
+							<div className="w-full">
+								<CodeBlock>
+									<CodeBlockGroup className="border-border border-b px-4 py-2">
+										<div className="flex items-center gap-2">
+											<div className="bg-primary/10 text-primary rounded px-2 py-1 text-xs font-medium">
+												JavaScript
+											</div>
+											{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
+										</div>
+										<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
+											{copied ? (
+												<Check className="h-4 w-4 text-green-500" />
+											) : (
+												<Copy className="h-4 w-4" />
+											)}
+										</Button>
+									</CodeBlockGroup>
+									<CodeBlockCode code={snippet.value} language={snippet.lang} theme="github-dark" />
+								</CodeBlock>
+							</div>
+							{/* <SyntaxHighlighter */}
+							{/* 	showLineNumbers={true} */}
+							{/* 	language="javascript" */}
+							{/* 	style={snippetThemeImport} */}
+							{/* > */}
+							{/* 	{snippet?.value} */}
+							{/* </SyntaxHighlighter> */}
 							{/* {getCodeReview(snippet?.value, snippet?.lang)} */}
 						</>
 					)}

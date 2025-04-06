@@ -221,6 +221,7 @@ export default function Post({
 					>
 						<div className="flex justify-between">
 							<PostUserInfo
+								id={id}
 								userId={userId}
 								userName={posterInfo?.userName}
 								userAvatarUrl={posterInfo?.userAvatarUrl}

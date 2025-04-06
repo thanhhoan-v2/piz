@@ -1,14 +1,14 @@
 "use client"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
+import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import Post from "@components/ui/post"
 import type { Post as IPost } from "@prisma/client"
 import { useQueryAllUserPosts } from "@queries/client/post"
 import { avatarPlaceholder } from "@utils/image.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
-import React from "react"
 import { Sparkles } from "lucide-react"
-import { Separator } from "@components/ui/Separator"
+import React from "react"
 import FollowButton from "./FollowButton"
 
 interface SerializedUser {
@@ -17,9 +17,7 @@ interface SerializedUser {
 	avatarUrl?: string | null
 }
 
-export default function UserProfile({
-	initialUser,
-}: { initialUser: SerializedUser }) {
+export default function UserProfile({ initialUser }: { initialUser: SerializedUser }) {
 	const [posts, setPosts] = React.useState<IPost[]>([])
 	const postsQuery = useQueryAllUserPosts({
 		userId: initialUser?.id ?? "",
@@ -33,30 +31,14 @@ export default function UserProfile({
 	}, [postsQuery.data])
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b mt-[100px] from-background/50 to-background pb-20">
+		<div className="min-h-screen mt-[100px]">
 			{/* Hero Section */}
 			<div className="relative overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl animate-gradient" />
+				<div className="absolute inset-0" />
 				<div className="relative px-4 py-12 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl">
 						{/* Profile Header */}
 						<div className="flex flex-col items-center space-y-6 text-center animate-fade-in">
-							<style jsx>{`
-								@keyframes gradient {
-									0% { transform: translateX(-50%); }
-									100% { transform: translateX(50%); }
-								}
-								.animate-gradient {
-									animation: gradient 15s linear infinite alternate;
-								}
-								@keyframes fadeIn {
-									from { opacity: 0; transform: translateY(10px); }
-									to { opacity: 1; transform: translateY(0); }
-								}
-								.animate-fade-in {
-									animation: fadeIn 0.6s ease-out forwards;
-								}
-							`}</style>
 							<Avatar className="h-32 w-32 ring-4 ring-background shadow-xl transition-all duration-300 hover:scale-105 hover:ring-primary/20 hover:shadow-2xl">
 								<AvatarImage src={initialUser?.avatarUrl ?? avatarPlaceholder} />
 								<AvatarFallback>Piz</AvatarFallback>
@@ -121,9 +103,7 @@ export default function UserProfile({
 										))}
 										{posts.length === 0 && (
 											<div className="text-center py-12 rounded-lg bg-primary/5">
-												<p className="text-lg text-muted-foreground">
-													No posts yet
-												</p>
+												<p className="text-lg text-muted-foreground">No posts yet</p>
 												<p className="text-sm text-muted-foreground mt-1">
 													Share your thoughts with the world!
 												</p>
