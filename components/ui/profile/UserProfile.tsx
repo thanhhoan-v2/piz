@@ -4,6 +4,7 @@ import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import Post, { postWidths } from "@components/ui/post"
 import type { Post as IPost } from "@prisma/client"
+import { useQueryFollowersCount, useQueryFollowingCount } from "@queries/client/follow"
 import { useQueryAllUserPosts } from "@queries/client/post"
 import { cn } from "@utils/cn"
 import { avatarPlaceholder } from "@utils/image.helpers"
@@ -11,6 +12,8 @@ import { firstLetterToUpper } from "@utils/string.helpers"
 import { Sparkles } from "lucide-react"
 import React from "react"
 import FollowButton from "./FollowButton"
+import FollowersDialog from "./FollowersDialog"
+import FollowingDialog from "./FollowingDialog"
 
 interface SerializedUser {
 	id: string
@@ -23,6 +26,9 @@ export default function UserProfile({ initialUser }: { initialUser: SerializedUs
 	const postsQuery = useQueryAllUserPosts({
 		userId: initialUser?.id ?? "",
 	})
+	// Get followers and following counts
+	const followersQuery = useQueryFollowersCount(initialUser?.id ?? "")
+	const followingQuery = useQueryFollowingCount(initialUser?.id ?? "")
 	const isLoading = postsQuery.isLoading
 
 	React.useEffect(() => {
@@ -64,18 +70,18 @@ export default function UserProfile({ initialUser }: { initialUser: SerializedUs
 									</span>
 									<span className="text-sm text-muted-foreground">Posts</span>
 								</div>
-								<div className="flex flex-col p-4 rounded-lg transition-colors hover:bg-primary/5 cursor-pointer">
-									<span className="text-2xl font-bold">
-										{isLoading ? <Skeleton className="h-8 w-8" /> : "0"}
-									</span>
-									<span className="text-sm text-muted-foreground">Followers</span>
-								</div>
-								<div className="flex flex-col p-4 rounded-lg transition-colors hover:bg-primary/5 cursor-pointer">
-									<span className="text-2xl font-bold">
-										{isLoading ? <Skeleton className="h-8 w-8" /> : "0"}
-									</span>
-									<span className="text-sm text-muted-foreground">Following</span>
-								</div>
+								{/* Followers Dialog */}
+								<FollowersDialog
+									userId={initialUser.id}
+									followersCount={followersQuery.count}
+									isLoading={followersQuery.isLoading}
+								/>
+								{/* Following Dialog */}
+								<FollowingDialog
+									userId={initialUser.id}
+									followingCount={followingQuery.count}
+									isLoading={followingQuery.isLoading}
+								/>
 							</div>
 						</div>
 
@@ -90,15 +96,15 @@ export default function UserProfile({ initialUser }: { initialUser: SerializedUs
 								<Sparkles className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
 								<Separator className="w-24 transition-all duration-300 group-hover:w-32" />
 							</div>
-							<div className="space-y-6">
+							<div className="">
 								{isLoading ? (
-									<div className="space-y-4">
+									<div className="">
 										<Skeleton className="h-32 w-full rounded-lg" />
 										<Skeleton className="h-32 w-full rounded-lg" />
 										<Skeleton className="h-32 w-full rounded-lg" />
 									</div>
 								) : (
-									<>
+									<div>
 										{posts.map((post) => (
 											<Post key={post.id} {...post} />
 										))}
@@ -110,7 +116,7 @@ export default function UserProfile({ initialUser }: { initialUser: SerializedUs
 												</p>
 											</div>
 										)}
-									</>
+									</div>
 								)}
 							</div>
 						</div>

@@ -126,13 +126,28 @@ export const getPostCounts = async ({ postId }: { postId: string }) => {
 	}
 }
 
-export const getAllPosts = async () => {
+export const getAllPosts = async (limit?: number, cursor?: string) => {
 	const posts = await prisma.post.findMany({
+		take: limit || undefined,
+		...(cursor
+			? {
+				skip: 1, // Skip the cursor
+				cursor: {
+					id: cursor,
+				},
+			}
+			: {}),
 		orderBy: {
 			createdAt: "desc",
 		},
 	})
-	return posts
+
+	// Return both the posts and the last item's ID for pagination
+	return {
+		posts,
+		nextCursor: posts.length > 0 ? posts[posts.length - 1].id : undefined,
+		hasMore: posts.length === limit,
+	}
 }
 
 export const getPost = async (postId: string) => {

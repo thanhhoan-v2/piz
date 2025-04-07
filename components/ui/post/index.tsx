@@ -109,6 +109,7 @@ export default function Post({
 						>
 							<div className="flex justify-between">
 								<PostUserInfo
+									postId={id}
 									userId={userId}
 									userName={posterInfo?.userName}
 									userAvatarUrl={posterInfo?.userAvatarUrl}
@@ -141,7 +142,7 @@ export default function Post({
 						{isPostCountsQuerySuccess && isSignedIn ? (
 							<div
 								className={cn(
-									"mt-0 flex h-[30px] gap-5 rounded-b-lg bg-background-item px-2 py-6",
+									"mt-0 flex h-[30px] gap-5 rounded-lg bg-background-item px-2 py-6",
 									postWidths,
 								)}
 							>
@@ -186,7 +187,7 @@ export default function Post({
 								</>
 							</div>
 						) : (
-							<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
+							<div className={cn("h-4 rounded-lg bg-background-item", postWidths)} />
 						)}
 
 						{postIndex! < postsLength! - 1 && (
@@ -215,13 +216,13 @@ export default function Post({
 						onClick={handlePostClick}
 						onKeyUp={handlePostKeyUp}
 						className={cn(
-							"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-cynical-black px-5 py-3 transition-transform hover:scale-103",
+							"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
 							postWidths,
 						)}
 					>
 						<div className="flex justify-between">
 							<PostUserInfo
-								id={id}
+								postId={id}
 								userId={userId}
 								userName={posterInfo?.userName}
 								userAvatarUrl={posterInfo?.userAvatarUrl}
@@ -244,20 +245,15 @@ export default function Post({
 							{/* )} */}
 						</div>
 					</div>
-					{isPostCountsQueryLoading && (
-						<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
-							<Skeleton className={postButtonSkeletonClassName} />
-							<Skeleton className={postButtonSkeletonClassName} />
-							<Skeleton className={postButtonSkeletonClassName} />
-						</div>
-					)}
+					{/* {isPostCountsQueryLoading && ( */}
+					{/* 	<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4"> */}
+					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
+					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
+					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
+					{/* 	</div> */}
+					{/* )} */}
 					{isPostCountsQuerySuccess && isSignedIn ? (
-						<div
-							className={cn(
-								"mt-0 flex h-[30px] gap-5 rounded-b-lg bg-cynical-black px-2 py-6",
-								postWidths,
-							)}
-						>
+						<div className={cn("mt-0 flex h-[30px] gap-5 bg-cynical-black px-2 py-6", postWidths)}>
 							<div className="flex w-full justify-between">
 								<div className="flex gap-2">
 									{isPostReactionQuerySuccess ? (
@@ -301,7 +297,7 @@ export default function Post({
 							</div>
 						</div>
 					) : (
-						<div className={cn("h-4 rounded-b-lg bg-background-item", postWidths)} />
+						<div className={cn("h-4 rounded-lg bg-background-item", postWidths)} />
 					)}
 
 					{postIndex! < postsLength! - 1 && (
@@ -312,15 +308,8 @@ export default function Post({
 						</div>
 					)}
 
-					{postIndex === postsLength! - 1 ? (
-						<div className="mb-[100px]">
-							<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">
-								No more posts for you
-							</div>
-						</div>
-					) : (
-						<div className="mb-2" />
-					)}
+					{/* Add space at the bottom of the post */}
+					<div className="mb-2" />
 				</>
 			)}
 		</div>

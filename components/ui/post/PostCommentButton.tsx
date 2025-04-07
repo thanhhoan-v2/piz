@@ -182,6 +182,7 @@ export default function PostCommentButton({
 					onPointerDownOutside={handleOpenDiscardAlert}
 				>
 					<PostUserInfo
+						postId={postId}
 						userName={userName}
 						userAvatarUrl={userAvatarUrl}
 						content={postContent}

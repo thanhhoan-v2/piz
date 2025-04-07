@@ -50,13 +50,32 @@ export const useQueryAllUserPosts = ({ userId, enabled }: UseQueryAllUserPostsPa
 		// staleTime: Number.POSITIVE_INFINITY,
 	})
 
-export const useQueryAllPosts = () =>
-	useQuery<Post[]>({
-		queryKey: queryKey.post.all,
-		queryFn: async () => getAllPosts(),
-		staleTime: 30000, // 30 seconds stale time instead of infinity
+// Define return type for the paginated posts query
+export interface PaginatedPosts {
+	posts: Post[]
+	nextCursor?: string
+	hasMore: boolean
+}
+
+export interface UseQueryAllPostsParams {
+	limit?: number
+	cursor?: string
+	enabled?: boolean
+}
+
+export const useQueryAllPosts = ({
+	limit = 5, // Default to 5 posts per page
+	cursor,
+	enabled = true
+}: UseQueryAllPostsParams = {}) => {
+	return useQuery<PaginatedPosts>({
+		queryKey: [...queryKey.post.all, { limit, cursor }],
+		queryFn: async () => getAllPosts(limit, cursor),
+		staleTime: 30000, // 30 seconds stale time
 		refetchInterval: 60000, // Check for new posts every minute
+		enabled,
 	})
+}
 
 interface DeletePostParams {
 	postId: string

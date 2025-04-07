@@ -21,7 +21,7 @@ import { avatarPlaceholder } from "@utils/image.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { formatDistanceToNow } from "date-fns"
-import { Trash2 } from "lucide-react"
+import { XIcon } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -40,7 +40,7 @@ type PostUserInfoProps = {
 	postImageUrl: string | null
 	postVideoUrl: string | null
 	snippetId: string | null
-	id: string // Post ID needed for delete functionality
+	postId: string
 }
 
 type DeletePostButtonProps = {
@@ -75,7 +75,7 @@ function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
 					size="sm"
 					className="text-muted-foreground hover:text-destructive hover:bg-transparent"
 				>
-					<Trash2 size={16} />
+					<XIcon size={16} />
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
@@ -106,7 +106,7 @@ export default function PostUserInfo({
 	postImageUrl,
 	postVideoUrl,
 	snippetId,
-	id, // Make sure to include id in destructuring
+	postId,
 }: PostUserInfoProps) {
 	const user = useUser()
 
@@ -217,7 +217,7 @@ export default function PostUserInfo({
 					{/* Right side */}
 					<div>
 						{/* Delete post button - only show if current user is the author */}
-						{userId && userId === user?.id && <DeletePostButton postId={id} userId={user.id} />}
+						{userId && userId === user?.id && <DeletePostButton postId={postId} userId={user.id} />}
 					</div>
 				</div>
 
