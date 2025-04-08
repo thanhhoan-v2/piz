@@ -2,7 +2,7 @@ import { withNextVideo } from "next-video/process"
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	transpilePackages: ["lucide-react", "jotai-devtools"],
+	transpilePackages: ["lucide-react"],
 	experimental: {
 		typedRoutes: true,
 	},

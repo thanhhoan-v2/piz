@@ -15,7 +15,6 @@
 		"db:studio": "npx prisma studio"
 	},
 	"dependencies": {
-		"@ai-sdk/deepseek": "^0.1.12",
 		"@ai-sdk/react": "^1.1.19",
 		"@hookform/resolvers": "^3.10.0",
 		"@monaco-editor/react": "^4.7.0",

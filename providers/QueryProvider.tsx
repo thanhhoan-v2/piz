@@ -13,9 +13,7 @@ import type React from "react"
  * Besides being bad for performance, this also leaks any sensitive data.
  */
 
-export default function QueryProvider({
-	children,
-}: { children: React.ReactNode }) {
+export default function QueryProvider({ children }: { children: React.ReactNode }) {
 	// const { toast } = useToast()
 	// // -> Instead do this, which ensures each request has its own cache:
 	// const [queryClient] = React.useState(
@@ -51,14 +49,7 @@ export default function QueryProvider({
 	// 		}),
 	// )
 
-	/*
-	 * Reference the same queryClient in both atomWithQuery and other parts of the app.
-	 * Without this, our useQueryClient hook will return a different QueryClient object.
-	 */
-	// const HydrateAtoms = ({ children }: { children: React.ReactNode }) => {
-	// 	useHydrateAtoms([[queryClientAtom, queryClient]])
-	// 	return children
-	// }
+	// QueryClient is now managed without jotai
 
 	const queryClient = getQueryClient()
 

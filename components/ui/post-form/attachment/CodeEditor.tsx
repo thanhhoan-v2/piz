@@ -11,7 +11,6 @@ import {
 } from "@components/ui/Select"
 import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
-import { getCodeReview } from "@services/deepseek"
 import {
 	STORAGE_KEY_SNIPPET_CODE,
 	STORAGE_KEY_SNIPPET_ID,
@@ -61,27 +60,11 @@ export default function CodeEditor({
 
 	const [codeViewStyle, setCodeViewStyle] = useState(null)
 
-	const [codeReview, setCodeReview] = useState<string>("")
-	const [isReviewing, setIsReviewing] = useState(false)
-
+	// Code review functionality has been removed
 	const defaultCodeEditorValue = ""
 
 	const handlePreviewSnippet = () => {
 		onSnippetPreviewAction(true)
-	}
-
-	const handleGetCodeReview = async () => {
-		if (!code) return
-
-		try {
-			setIsReviewing(true)
-			const review = await getCodeReview(code, snippetLang)
-			setCodeReview(review)
-		} catch (error) {
-			console.error("Failed to get code review:", error)
-		} finally {
-			setIsReviewing(false)
-		}
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -135,8 +118,8 @@ export default function CodeEditor({
 	return (
 		<>
 			{isSaved ? (
-				<div className="w-[80vw] flex-col gap-2">
-					<div className="flex w-full items-center justify-between gap-2">
+				<div className="flex-col gap-2 w-[80vw]">
+					<div className="flex justify-between items-center gap-2 w-full">
 						<div>
 							<Badge className="italic">{snippetLang}</Badge>
 						</div>
@@ -152,14 +135,7 @@ export default function CodeEditor({
 								Edit
 							</Button>
 
-							{/* <Button */}
-							{/* 	variant="outline" */}
-							{/* 	className="p-5" */}
-							{/* 	onClick={handleGetCodeReview} */}
-							{/* 	disabled={isReviewing} */}
-							{/* > */}
-							{/* 	{isReviewing ? "Reviewing..." : "Get AI Review"} */}
-							{/* </Button> */}
+							{/* Code review button removed */}
 
 							<Select onValueChange={(e) => setSnippetTheme(e)}>
 								<SelectTrigger className="w-[200px]">
@@ -186,23 +162,17 @@ export default function CodeEditor({
 								>
 									{code}
 								</SyntaxHighlighter>
-								{codeReview && (
-									<div className="mt-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-										<h3 className="mb-2 text-lg font-semibold">AI Code Review</h3>
-										<p className="whitespace-pre-wrap text-sm">{codeReview}</p>
-									</div>
-								)}
 							</>
 						)}
 					</div>
 				</div>
 			) : (
-				<div className="flex w-[600px] flex-col">
+				<div className="flex flex-col w-[600px]">
 					<div className="">
-						<div className="w-full flex-col gap-2 rounded-lg border p-4">
+						<div className="flex-col gap-2 p-4 border rounded-lg w-full">
 							<div className="flex-between">
 								<Select onValueChange={(e) => setSnippetLang(e)}>
-									<SelectTrigger className="w-[130px] self-end">
+									<SelectTrigger className="self-end w-[130px]">
 										<SelectValue placeholder={snippetLang} />
 									</SelectTrigger>
 									<SelectContent>
@@ -257,7 +227,7 @@ export default function CodeEditor({
 									<div className="flex-shrink-0">
 										<Button
 											onClick={handlePreviewSnippet}
-											className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white hover:bg-indigo-500"
+											className="inline-flex items-center bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-md font-semibold text-white text-sm"
 										>
 											Save
 										</Button>
