@@ -4,7 +4,6 @@ import { getUserById } from "@app/actions/user"
 import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import PostCommentButton from "@components/ui/post/PostCommentButton"
-import PostDropdownMenu from "@components/ui/post/PostDropdownMenu"
 import PostReactButton from "@components/ui/post/PostReactButton"
 import PostShareButton from "@components/ui/post/PostShareButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
@@ -101,9 +100,10 @@ export default function Post({
 					<div>
 						<div
 							key={id}
+							onClick={handlePostClick}
 							onKeyUp={handlePostKeyUp}
 							className={cn(
-								"mb-0 flex min-h-[100px] w-full transform cursor-pointer flex-col justify-between rounded-t-lg bg-gray-800 px-5 py-3 transition-transform hover:scale-103",
+								"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
 								postWidths,
 							)}
 						>
@@ -121,74 +121,8 @@ export default function Post({
 									postVideoUrl={postVideoUrl}
 									snippetId={snippetId}
 								/>
-
-								{isSignedIn && (
-									<PostDropdownMenu
-										userId={userId}
-										postId={id}
-										userName={posterInfo?.userName ?? null}
-										content={content}
-									/>
-								)}
 							</div>
 						</div>
-						{isPostCountsQueryLoading && (
-							<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4">
-								<Skeleton className={postButtonSkeletonClassName} />
-								<Skeleton className={postButtonSkeletonClassName} />
-								<Skeleton className={postButtonSkeletonClassName} />
-							</div>
-						)}
-						{isPostCountsQuerySuccess && isSignedIn ? (
-							<div
-								className={cn(
-									"mt-0 flex h-[30px] gap-5 rounded-lg bg-background-item px-2 py-6",
-									postWidths,
-								)}
-							>
-								<>
-									{isPostReactionQuerySuccess ? (
-										<PostReactButton
-											className={postButtonClassName}
-											wrapperClassName={postButtonWrapperClassName}
-											userId={appUserId ?? undefined}
-											postId={id}
-											initialReactionCount={noReactions ?? 0}
-											isReacted={!!queriedPostReactionByAppUser}
-										/>
-									) : (
-										<div className={postButtonWrapperClassName}>
-											<Skeleton className={postButtonSkeletonClassName} />
-										</div>
-									)}
-
-									<PostCommentButton
-										className={postButtonClassName}
-										wrapperClassName={postButtonWrapperClassName}
-										initialCommentCount={noComments ?? 0}
-										// User related props
-										userId={userId}
-										userName={posterInfo?.userName ?? null}
-										userAvatarUrl={posterInfo?.userAvatarUrl ?? null}
-										// Post related props
-										postId={id}
-										postContent={content}
-										postCreatedAt={createdAt}
-										postUpdatedAt={updatedAt}
-									/>
-
-									<PostShareButton
-										className={postButtonClassName}
-										wrapperClassName={postButtonWrapperClassName}
-										userId={userId}
-										postId={id}
-										// initialShareCount={noShares ?? 0}
-									/>
-								</>
-							</div>
-						) : (
-							<div className={cn("h-4 rounded-lg bg-background-item", postWidths)} />
-						)}
 
 						{postIndex! < postsLength! - 1 && (
 							<div className="my-4 flex-center gap-3">
@@ -198,15 +132,8 @@ export default function Post({
 							</div>
 						)}
 
-						{postIndex === postsLength! - 1 ? (
-							<div className="mb-[100px]">
-								<div className="mt-[100px] h-full w-full flex-center font-bold text-lg">
-									No more posts for you
-								</div>
-							</div>
-						) : (
-							<div className="mb-2" />
-						)}
+						{/* Add space at the bottom of the post */}
+						<div className="mb-2" />
 					</div>
 				</WelcomeModal>
 			) : (

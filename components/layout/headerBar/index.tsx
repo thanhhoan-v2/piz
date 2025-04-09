@@ -1,5 +1,6 @@
 "use client"
 import { Logo } from "@components/ui/Logo"
+import { SelectedTeamSwitcher } from "@stackframe/stack"
 import HeaderDropdownMenu from "./HeaderBarDropdownMenu"
 import HeaderBarLogo from "./HeaderBarLogo"
 import HeaderBarNavigation from "./HeaderBarNavigation"
@@ -59,6 +60,7 @@ export default function HeaderBar({ className }: { className: string }) {
 				<div className="ml-auto flex items-center gap-3 sm:gap-6">
 					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
 						{/* <HeaderBarCustomTheme /> */}
+						<SelectedTeamSwitcher />
 					</div>
 					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
 						<HeaderDropdownMenu />

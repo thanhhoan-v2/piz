@@ -2,6 +2,7 @@
 
 import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import {
 	Select,
 	SelectContent,
@@ -20,7 +21,7 @@ import {
 } from "@utils/local-storage.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { X } from "lucide-react"
+import { Check, Copy, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import SyntaxHighlighter from "react-syntax-highlighter"
 
@@ -118,7 +119,7 @@ export default function CodeEditor({
 	return (
 		<>
 			{isSaved ? (
-				<div className="flex-col gap-2 w-[80vw]">
+				<div className="flex-col gap-2 min-w-[80vw]">
 					<div className="flex justify-between items-center gap-2 w-full">
 						<div>
 							<Badge className="italic">{snippetLang}</Badge>
@@ -154,20 +155,22 @@ export default function CodeEditor({
 
 					<div>
 						{codeViewStyle && (
-							<>
-								<SyntaxHighlighter
-									showLineNumbers={true}
-									language="javascript"
-									style={codeViewStyle}
-								>
-									{code}
-								</SyntaxHighlighter>
-							</>
+							<CodeBlock>
+								<CodeBlockGroup className="border-border border-b px-4 py-2">
+									<div className="flex items-center gap-2">
+										<div className="bg-primary/10 text-primary rounded px-2 py-1 text-xs font-medium">
+											{snippetLang}
+										</div>
+										{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
+									</div>
+								</CodeBlockGroup>
+								<CodeBlockCode code={code} language={snippetLang} theme={snippetTheme} />
+							</CodeBlock>
 						)}
 					</div>
 				</div>
 			) : (
-				<div className="flex flex-col w-[600px]">
+				<div className="flex flex-col w-[82vw]">
 					<div className="">
 						<div className="flex-col gap-2 p-4 border rounded-lg w-full">
 							<div className="flex-between">
@@ -199,7 +202,7 @@ export default function CodeEditor({
 
 									<Editor
 										height="300px"
-										// width=""
+										width="80vw"
 										value={code || ""}
 										onChange={(value) => setCode(value || "")}
 										theme="vs-dark"
