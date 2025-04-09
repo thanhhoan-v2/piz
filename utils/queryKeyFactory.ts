@@ -67,4 +67,13 @@ export const queryKey = {
 		selects: () => [...queryKey.snippet.all, "select"] as const,
 		selectId: (id: string | null) => [...queryKey.snippet.selects(), id] as const,
 	},
+	teamJoinRequests: {
+		all: ["teamJoinRequests"] as const,
+		// teamJoinRequests - select
+		selects: () => [...queryKey.teamJoinRequests.all, "select"] as const,
+		// teamJoinRequests - select - { teamId }
+		byTeam: (teamId: string) => [...queryKey.teamJoinRequests.selects(), "team", teamId] as const,
+		// teamJoinRequests - select - { userId }
+		byUser: (userId: string) => [...queryKey.teamJoinRequests.selects(), "user", userId] as const,
+	},
 } as const

@@ -16,6 +16,8 @@ export const getNotificationMessage = (notification: Noti, senderInfo?: SenderIn
 			return `${senderInfo.userName} created a new post`
 		case "POST_REACTION":
 			return `${senderInfo.userName} reacted on your post`
+		case "TEAM_JOIN_REQUEST":
+			return `${senderInfo.userName} wants to join your team`
 		default:
 			return "New notification"
 	}
@@ -25,6 +27,7 @@ export const getNotificationLink = (notification: Noti): Route => {
 	const senderIdRoute = `/${notification.senderId}` as Route
 	const postIdRoute = `${senderIdRoute}/post/${notification.postId}` as Route
 	const commentIdRoute = `${postIdRoute}/comment/${notification.commentId}` as Route
+	const teamRoute = `/team` as Route
 
 	switch (notification.notificationType) {
 		case "FOLLOW":
@@ -37,6 +40,8 @@ export const getNotificationLink = (notification: Noti): Route => {
 			return postIdRoute
 		case "POST_REACTION":
 			return postIdRoute
+		case "TEAM_JOIN_REQUEST":
+			return teamRoute
 		default:
 			return "/" as Route
 	}

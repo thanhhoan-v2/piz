@@ -8,6 +8,7 @@ export type RouteProps = {
 	NOTIFICATION: Route
 	SAVED_POSTS: Route
 	SETTINGS: Route
+	TEAMS: Route
 }
 
 export const ROUTE: RouteProps = {
@@ -18,4 +19,5 @@ export const ROUTE: RouteProps = {
 	NOTIFICATION: "/notification" as Route,
 	SAVED_POSTS: "/saved_posts" as Route,
 	SETTINGS: "/settings" as Route,
+	TEAMS: "/team" as Route,
 }
