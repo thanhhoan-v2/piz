@@ -23,38 +23,71 @@ export default function SearchBar() {
 	const [searchResults, setSearchResults] = React.useState<SearchResultFromAPI[]>([])
 	const [isSearching, setIsSearching] = React.useState(false)
 
-	const handleSearch = React.useCallback(async () => {
-		if (!searchValue.trim()) {
-			setSearchResults([])
-			return
-		}
-		setIsSearching(true)
-		try {
-			const results = await searchUsers(searchValue)
-			setSearchResults(results)
-		} catch (error) {
-			setSearchResults([])
-		} finally {
-			setIsSearching(false)
-		}
-	}, [searchValue])
+	const [debouncedSearchValue, setDebouncedSearchValue] = React.useState(searchValue)
 
-	const handleKeyPress = React.useCallback(
-		(e: React.KeyboardEvent) => {
-			if (e.key === "Enter") {
-				handleSearch()
-			}
-		},
-		[handleSearch],
-	)
-
+	// Debounce the search value
 	React.useEffect(() => {
-		const timeoutId = setTimeout(handleSearch, 300)
+		const timeoutId = setTimeout(() => {
+			setDebouncedSearchValue(searchValue)
+		}, 300)
 
 		return () => {
 			clearTimeout(timeoutId)
 		}
-	}, [handleSearch])
+	}, [searchValue])
+
+	// Minimum characters required for search
+	const MIN_SEARCH_LENGTH = 2
+
+	// Perform the search when the debounced value changes
+	React.useEffect(() => {
+		const performSearch = async () => {
+			const trimmedSearch = debouncedSearchValue.trim()
+			if (!trimmedSearch) {
+				setSearchResults([])
+				return
+			}
+
+			// Only search if the query is at least MIN_SEARCH_LENGTH characters
+			if (trimmedSearch.length < MIN_SEARCH_LENGTH) {
+				setSearchResults([])
+				return
+			}
+
+			setIsSearching(true)
+			try {
+				const results = await searchUsers(debouncedSearchValue)
+
+				// Additional client-side filtering to ensure results contain the search term
+				const filteredResults = results.filter((result) => {
+					const userName = (result.userName || "").toLowerCase()
+					const email = (result.email || "").toLowerCase()
+					const searchTerm = debouncedSearchValue.toLowerCase()
+
+					return userName.includes(searchTerm) || email.includes(searchTerm)
+				})
+
+				setSearchResults(filteredResults)
+			} catch (error) {
+				console.error("Search error:", error)
+				setSearchResults([])
+			} finally {
+				setIsSearching(false)
+			}
+		}
+
+		performSearch()
+	}, [debouncedSearchValue])
+
+	const handleKeyPress = React.useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === "Enter") {
+				// Immediately update the debounced value to trigger a search
+				setDebouncedSearchValue(searchValue)
+			}
+		},
+		[searchValue],
+	)
 
 	const [isFocused, setIsFocused] = React.useState(false)
 
@@ -106,7 +139,11 @@ export default function SearchBar() {
 				</div>
 				{searchValue.trim() && (
 					<div className="mt-2 search-results">
-						{isSearching ? (
+						{searchValue.trim().length < MIN_SEARCH_LENGTH ? (
+							<div className="p-4 text-muted-foreground text-center">
+								Please enter at least {MIN_SEARCH_LENGTH} characters to search
+							</div>
+						) : isSearching ? (
 							<div className="p-4 text-muted-foreground text-center">
 								<Loader2 className="inline-block mr-2 animate-spin" size={16} />
 								Searching...
