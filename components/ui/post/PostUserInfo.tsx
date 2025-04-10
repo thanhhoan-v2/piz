@@ -21,10 +21,12 @@ import { avatarPlaceholder } from "@utils/image.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { formatDistanceToNow } from "date-fns"
-import { XIcon } from "lucide-react"
+import { Loader2, Users, XIcon } from "lucide-react"
 import type { Route } from "next"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { Badge } from "../Badge"
 import PostContent from "./PostContent"
 
 type PostUserInfoProps = {
@@ -41,6 +43,7 @@ type PostUserInfoProps = {
 	postVideoUrl: string | null
 	snippetId: string | null
 	postId: string
+	teamId?: string | null
 }
 
 type DeletePostButtonProps = {
@@ -73,7 +76,7 @@ function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
 				<Button
 					variant="ghost"
 					size="sm"
-					className="text-muted-foreground hover:text-destructive hover:bg-transparent"
+					className="hover:bg-transparent text-muted-foreground hover:text-destructive"
 				>
 					<XIcon size={16} />
 				</Button>
@@ -107,8 +110,129 @@ export default function PostUserInfo({
 	postVideoUrl,
 	snippetId,
 	postId,
+	teamId,
 }: PostUserInfoProps) {
 	const user = useUser()
+
+	// State to store team information
+	const [teamName, setTeamName] = useState<string | null>(null)
+	const [isTeamMember, setIsTeamMember] = useState<boolean>(false)
+	const [isTeamPublic, setIsTeamPublic] = useState<boolean>(false)
+	const [isJoiningTeam, setIsJoiningTeam] = useState<boolean>(false)
+
+	// Fetch team information if this is a team post
+	useEffect(() => {
+		const fetchTeamInfo = async () => {
+			if (teamId) {
+				try {
+					// Fetch team information from the API
+					const response = await fetch(`/api/team/${teamId}/info`)
+					if (response.ok) {
+						const teamData = await response.json()
+						console.log(teamData)
+						setTeamName(teamData.displayName)
+						setIsTeamMember(teamData.isMember)
+						setIsTeamPublic(teamData.isPublic)
+						console.log("Fetched team info:", teamData)
+					} else {
+						console.log("Failed to fetch team info")
+					}
+				} catch (error) {
+					console.error("Error fetching team info:", error)
+				}
+			}
+		}
+
+		fetchTeamInfo()
+	}, [teamId])
+
+	// Function to fetch team information
+	const fetchTeamInfo = async () => {
+		if (teamId) {
+			try {
+				// Add cache busting to ensure we get fresh data
+				const response = await fetch(`/api/team/${teamId}/info?t=${Date.now()}`, {
+					headers: {
+						"Cache-Control": "no-cache, no-store, must-revalidate",
+						Pragma: "no-cache",
+						Expires: "0",
+					},
+				})
+				if (response.ok) {
+					const teamData = await response.json()
+					setTeamName(teamData.displayName)
+					setIsTeamMember(teamData.isMember)
+					setIsTeamPublic(teamData.isPublic)
+					console.log("Fetched team info:", teamData)
+				} else {
+					console.log("Failed to fetch team info")
+				}
+			} catch (error) {
+				console.error("Error fetching team info:", error)
+			}
+		}
+	}
+
+	// Fetch team information if this is a team post
+	useEffect(() => {
+		fetchTeamInfo()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [teamId])
+
+	// Function to join a team
+	const joinTeam = async () => {
+		if (!teamId || !user || isJoiningTeam) return
+
+		try {
+			setIsJoiningTeam(true)
+			console.log("Joining team:", teamId, "User:", user.id)
+
+			// Call the API to join the team
+			const response = await fetch("/api/team/join", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					teamId: teamId,
+					userId: user.id,
+				}),
+			})
+
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.error || "Failed to join team")
+			}
+
+			// Show success message
+			toast.success(`You have joined ${teamName || "the team"}`)
+			console.log("Successfully joined team")
+
+			// Update state to reflect membership
+			setIsTeamMember(true)
+
+			// Refresh team information to ensure UI is updated
+			setTimeout(() => {
+				fetchTeamInfo()
+
+				// Show a toast with navigation option
+				toast.success("Go to team page", {
+					action: {
+						label: "View Team",
+						onClick: () => {
+							// Navigate to team page with refresh parameter
+							window.location.href = `/team/${teamId}?refresh=true&t=${Date.now()}`
+						},
+					},
+				})
+			}, 500)
+		} catch (error) {
+			console.error("Error joining team:", error)
+			toast.error(error instanceof Error ? error.message : "Failed to join team")
+		} finally {
+			setIsJoiningTeam(false)
+		}
+	}
 
 	const [posterInfo, setPosterInfo] = useState<{
 		userName: string
@@ -178,8 +302,8 @@ export default function PostUserInfo({
 
 	return (
 		<>
-			<div className="w-full flex-col gap-4">
-				<div className="w-full flex-between text-white">
+			<div className="flex-col gap-4 w-full">
+				<div className="flex-between w-full text-white">
 					{/* Left side */}
 					<div className="flex-y-center gap-3">
 						{/* Avatar */}
@@ -203,6 +327,50 @@ export default function PostUserInfo({
 										{firstLetterToUpper(posterInfo?.userName ?? "")}
 									</p>
 								</Link>
+
+								{/* Show team badge if it's a team post */}
+								{teamId && (
+									<div className="flex items-center gap-2">
+										<Link
+											href={
+												isTeamMember
+													? `/team/${teamId}`
+													: (`/team/${teamId}?refresh=true&t=${Date.now()}` as Route)
+											}
+											className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-full text-blue-600 text-sm"
+											onClick={() => toast.info(`Navigating to ${teamName || "team"}...`)}
+										>
+											{teamName && (
+												<Badge>
+													<Users size={12} />
+													&nbsp;
+													{teamName}
+												</Badge>
+											)}
+										</Link>
+
+										{/* Show Join button if user is not a member and team is public */}
+										{user && !isTeamMember && isTeamPublic && (
+											<Button
+												size="sm"
+												variant="outline"
+												className="py-0 h-6 text-xs"
+												onClick={joinTeam}
+												disabled={isJoiningTeam}
+											>
+												{isJoiningTeam ? (
+													<>
+														<Loader2 size={12} className="mr-1 animate-spin" />
+														Joining...
+													</>
+												) : (
+													"Join"
+												)}
+											</Button>
+										)}
+									</div>
+								)}
+
 								{/* (Posted) Time diff */}
 								<p className="text-muted-foreground">
 									{formatDistanceToNow(new Date(createdAt), {

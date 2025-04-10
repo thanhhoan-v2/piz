@@ -82,6 +82,7 @@ model Post {
   postImageUrl             String?
   postVideoUrl             String?
   snippetId                String?
+  teamId                   String?
   Comment                  Comment[]
   Notification             Notification[]
   Snippet                  Snippet?       @relation(fields: [snippetId], references: [id], onDelete: NoAction, onUpdate: NoAction)

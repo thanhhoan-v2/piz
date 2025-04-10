@@ -1,6 +1,5 @@
 "use client"
 import { Logo } from "@components/ui/Logo"
-import { SelectedTeamSwitcher } from "@stackframe/stack"
 import HeaderDropdownMenu from "./HeaderBarDropdownMenu"
 import HeaderBarLogo from "./HeaderBarLogo"
 import HeaderBarNavigation from "./HeaderBarNavigation"
@@ -42,27 +41,27 @@ export default function HeaderBar({ className }: { className: string }) {
 				className={`${className} header-animate glass-effect fixed top-0 left-0 right-0 z-50 border-b border-border/40 shadow-sm transition-all duration-300 hover:shadow-md px-4 sm:px-6 py-2 sm:py-3`}
 			>
 				{/* lefty - desktop view */}
-				<div className="desktop-only gap-4 transition-all duration-300 hover:scale-105 hover:brightness-110">
+				<div className="gap-4 hover:brightness-110 hover:scale-105 transition-all duration-300 desktop-only">
 					<Logo />
 				</div>
 
 				{/* lefty - mobile view */}
-				<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+				<div className="hover:brightness-110 hover:scale-105 transition-all duration-300">
 					<HeaderBarNavigation />
 				</div>
 
 				{/* center */}
-				<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+				<div className="hover:brightness-110 hover:scale-105 transition-all duration-300">
 					<HeaderBarLogo />
 				</div>
 
 				{/* righty */}
-				<div className="ml-auto flex items-center gap-3 sm:gap-6">
-					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+				<div className="flex items-center gap-3 sm:gap-6 ml-auto">
+					<div className="hover:brightness-110 hover:scale-105 transition-all duration-300">
 						{/* <HeaderBarCustomTheme /> */}
-						<SelectedTeamSwitcher />
+						{/* <SelectedTeamSwitcher /> */}
 					</div>
-					<div className="transition-all duration-300 hover:scale-105 hover:brightness-110">
+					<div className="hover:brightness-110 hover:scale-105 transition-all duration-300">
 						<HeaderDropdownMenu />
 					</div>
 				</div>

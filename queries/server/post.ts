@@ -12,6 +12,7 @@ export type CreatePostProps = {
 	postImageUrl: string | null
 	postVideoUrl: string | null
 	snippetId: string | null
+	teamId?: string | null // Added teamId for team-specific posts
 }
 
 // export const createPost = async ({
@@ -51,17 +52,30 @@ export const createPost = async ({
 	postImageUrl,
 	postVideoUrl,
 	snippetId,
+	teamId,
+	createdAt,
 }: CreatePostProps) => {
 	try {
+		console.log("[POST] Creating post with data:", {
+			id,
+			userId,
+			userName,
+			content: content ? `${content.substring(0, 20)}...` : "No content",
+			teamId,
+			hasImage: !!postImageUrl,
+			hasVideo: !!postVideoUrl,
+			hasSnippet: !!snippetId,
+		})
+
 		if (!userId) {
 			console.log("[POST] Missing userId when creating post")
 			return
 		}
 
-		// if (!id || !userId || !userName || !content) {
-		// 	console.log("[POST] Missing required fields when creating post")
-		// 	return
-		// }
+		if (!id || !content) {
+			console.log("[POST] Missing required fields (id or content) when creating post")
+			return
+		}
 
 		const newPost = await prisma.post.create({
 			data: {
@@ -73,6 +87,8 @@ export const createPost = async ({
 				postImageUrl: postImageUrl,
 				postVideoUrl: postVideoUrl,
 				snippetId: snippetId,
+				teamId: teamId,
+				createdAt: createdAt || new Date(),
 			},
 		})
 
@@ -96,9 +112,12 @@ export const createPost = async ({
 			console.error("[POST] Error creating notifications:", JSON.stringify(error, null, 2))
 		}
 
+		console.log("[POST] Successfully created post:", newPost.id)
 		return newPost
 	} catch (error) {
-		console.error("[POST] Error when creating: ", JSON.stringify(error, null, 2))
+		console.error("[POST] Error when creating: ", error)
+		console.error("[POST] Error details: ", JSON.stringify(error, null, 2))
+		throw error
 	}
 }
 
@@ -131,11 +150,11 @@ export const getAllPosts = async (limit?: number, cursor?: string) => {
 		take: limit || undefined,
 		...(cursor
 			? {
-				skip: 1, // Skip the cursor
-				cursor: {
-					id: cursor,
-				},
-			}
+					skip: 1, // Skip the cursor
+					cursor: {
+						id: cursor,
+					},
+				}
 			: {}),
 		orderBy: {
 			createdAt: "desc",
@@ -172,6 +191,42 @@ export const getAllUserPosts = async (userId: string) => {
 		return posts
 	} catch (error) {
 		console.error(`<< Post >> Error getting posts of user ${userId}:\n`, error)
+	}
+}
+
+// Get all posts for a specific team
+export const getTeamPosts = async (teamId: string, limit?: number, cursor?: string) => {
+	try {
+		const posts = await prisma.post.findMany({
+			where: {
+				teamId: teamId,
+				isDeleted: false,
+			},
+			take: limit || undefined,
+			...(cursor
+				? {
+						skip: 1, // Skip the cursor
+						cursor: {
+							id: cursor,
+						},
+					}
+				: {}),
+			orderBy: {
+				createdAt: "desc",
+			},
+		})
+
+		console.log(`<< Post >> Got ${posts.length} posts for team ${teamId}`)
+
+		// Return both the posts and the last item's ID for pagination
+		return {
+			posts,
+			nextCursor: posts.length > 0 ? posts[posts.length - 1].id : undefined,
+			hasMore: posts.length === limit,
+		}
+	} catch (error) {
+		console.error(`<< Post >> Error getting posts for team ${teamId}:\n`, error)
+		return { posts: [], nextCursor: undefined, hasMore: false }
 	}
 }
 

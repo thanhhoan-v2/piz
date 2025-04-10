@@ -12,6 +12,8 @@ type PublicTeam = {
 	displayName: string
 	profileImageUrl: string | null
 	createdAt: string
+	isUserMember: boolean
+	memberCount: number
 }
 
 type TabType = "my-teams" | "public-teams"
@@ -176,7 +178,10 @@ export default function TeamsPage() {
 							<div
 								key={team.id}
 								className="hover:shadow-md p-4 border rounded-lg transition-shadow cursor-pointer"
-								onClick={() => router.push(`/team/${team.id}`)}
+								onClick={() => {
+									toast.info(`Navigating to ${team.displayName}...`)
+									router.push(`/team/${team.id}`)
+								}}
 							>
 								<div className="flex items-center mb-2">
 									{team.profileImageUrl ? (
@@ -221,7 +226,10 @@ export default function TeamsPage() {
 							<div
 								key={team.id}
 								className="hover:shadow-md p-4 border rounded-lg transition-shadow cursor-pointer"
-								onClick={() => router.push(`/team/${team.id}`)}
+								onClick={() => {
+									toast.info(`Navigating to ${team.displayName}...`)
+									router.push(`/team/${team.id}`)
+								}}
 							>
 								<div className="flex items-center mb-2">
 									{team.profileImageUrl ? (
@@ -238,21 +246,42 @@ export default function TeamsPage() {
 									<h2 className="font-semibold text-lg">{team.displayName}</h2>
 								</div>
 
-								<div className="mb-2 text-gray-500 text-sm">Team Members</div>
+								<div className="mb-2 text-gray-500 text-sm">
+									{team.memberCount} {team.memberCount === 1 ? "Member" : "Members"}
+								</div>
 
 								<div className="flex justify-between items-center mt-2">
 									<div className="inline-block bg-green-100 px-2 py-1 rounded text-green-800 text-xs">
 										Public
 									</div>
 
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={(e) => joinTeam(team.id, e)}
-										disabled={joiningTeamId === team.id}
-									>
-										{joiningTeamId === team.id ? "Joining..." : "Join"}
-									</Button>
+									{team.isUserMember ? (
+										<div className="inline-flex items-center gap-1 bg-blue-50 px-2 py-1 rounded text-blue-600 text-xs">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="12"
+												height="12"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<path d="M20 6 9 17l-5-5" />
+											</svg>
+											Joined
+										</div>
+									) : (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={(e) => joinTeam(team.id, e)}
+											disabled={joiningTeamId === team.id}
+										>
+											{joiningTeamId === team.id ? "Joining..." : "Join"}
+										</Button>
+									)}
 								</div>
 							</div>
 						))}

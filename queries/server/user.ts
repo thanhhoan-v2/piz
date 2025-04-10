@@ -34,14 +34,10 @@ export const createUser = async ({
 					userAvatarUrl: userAvatarUrl,
 				},
 			})
-			console.log("<< User >> Created user: \n", upsertedUser)
 			return upsertedUser
 		}
 	} catch (error) {
-		console.error(
-			"[USER] Error when creating: ",
-			JSON.stringify(error, null, 2),
-		)
+		console.error("[USER] Error when creating: ", JSON.stringify(error, null, 2))
 	}
 }
 

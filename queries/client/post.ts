@@ -5,6 +5,7 @@ import {
 	getAllUserPosts,
 	getPost,
 	getPostCounts,
+	getTeamPosts,
 } from "@queries/server/post"
 import { getPostReaction } from "@queries/server/postReaction"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -66,14 +67,39 @@ export interface UseQueryAllPostsParams {
 export const useQueryAllPosts = ({
 	limit = 5, // Default to 5 posts per page
 	cursor,
-	enabled = true
+	enabled = true,
 }: UseQueryAllPostsParams = {}) => {
 	return useQuery<PaginatedPosts>({
 		queryKey: [...queryKey.post.all, { limit, cursor }],
 		queryFn: async () => getAllPosts(limit, cursor),
-		staleTime: 30000, // 30 seconds stale time
-		refetchInterval: 60000, // Check for new posts every minute
+		staleTime: 5000, // Reduce stale time to 5 seconds for faster updates
+		refetchInterval: 10000, // Check for new posts more frequently (every 10 seconds)
+		refetchOnMount: true, // Always refetch when component mounts
+		refetchOnWindowFocus: true, // Refetch when window regains focus
 		enabled,
+	})
+}
+
+// Hook to fetch team-specific posts
+export const useQueryTeamPosts = ({
+	teamId,
+	limit = 5,
+	cursor,
+	enabled = true,
+}: {
+	teamId: string
+	limit?: number
+	cursor?: string
+	enabled?: boolean
+}) => {
+	return useQuery<PaginatedPosts>({
+		queryKey: [...queryKey.post.byTeam(teamId), { limit, cursor }],
+		queryFn: async () => getTeamPosts(teamId, limit, cursor),
+		staleTime: 5000, // Reduce stale time to 5 seconds for faster updates
+		refetchInterval: 10000, // Check for new posts more frequently (every 10 seconds)
+		refetchOnMount: true, // Always refetch when component mounts
+		refetchOnWindowFocus: true, // Refetch when window regains focus
+		enabled: !!teamId && enabled,
 	})
 }
 

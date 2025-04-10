@@ -4,6 +4,7 @@ import { getUserById } from "@app/actions/user"
 import { Separator } from "@components/ui/Separator"
 import { Skeleton } from "@components/ui/Skeleton"
 import PostCommentButton from "@components/ui/post/PostCommentButton"
+import PostContent from "@components/ui/post/PostContent"
 import PostReactButton from "@components/ui/post/PostReactButton"
 import PostShareButton from "@components/ui/post/PostShareButton"
 import PostUserInfo from "@components/ui/post/PostUserInfo"
@@ -39,6 +40,7 @@ export default function Post({
 	postImageUrl,
 	postVideoUrl,
 	snippetId,
+	teamId,
 }: IPost & PostProps) {
 	const router = useRouter()
 	const [posterInfo, setPosterInfo] = React.useState<{
@@ -78,18 +80,7 @@ export default function Post({
 			postId: id,
 		})
 
-	/*
-	 ** Avoid click on not-content part of the post
-	 */
-	const handlePostClick = (event: React.MouseEvent<HTMLDivElement>) => {
-		const targetTag = (event.target as HTMLElement).tagName.toLowerCase()
-		console.log(targetTag)
-		if (targetTag === "div") {
-			router.push(`/${posterInfo?.userId}/post/${id}`)
-		}
-	}
-
-	const handlePostKeyUp = () => {}
+	// These functions have been moved to PostContent.tsx
 
 	if (isDeleted) return null
 
@@ -100,8 +91,6 @@ export default function Post({
 					<div>
 						<div
 							key={id}
-							onClick={handlePostClick}
-							onKeyUp={handlePostKeyUp}
 							className={cn(
 								"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
 								postWidths,
@@ -120,12 +109,21 @@ export default function Post({
 									postImageUrl={postImageUrl}
 									postVideoUrl={postVideoUrl}
 									snippetId={snippetId}
+									teamId={teamId}
 								/>
 							</div>
+							<PostContent
+								content={content}
+								postImageUrl={postImageUrl}
+								postVideoUrl={postVideoUrl}
+								snippetId={snippetId}
+								postId={id}
+								userId={posterInfo?.userId}
+							/>
 						</div>
 
 						{postIndex! < postsLength! - 1 && (
-							<div className="my-4 flex-center gap-3">
+							<div className="flex-center gap-3 my-4">
 								<Separator className="w-1/3" />
 								<Sparkles color="#272727" size={15} />
 								<Separator className="w-1/3" />
@@ -140,8 +138,6 @@ export default function Post({
 				<>
 					<div
 						key={id}
-						onClick={handlePostClick}
-						onKeyUp={handlePostKeyUp}
 						className={cn(
 							"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
 							postWidths,
@@ -160,6 +156,7 @@ export default function Post({
 								postImageUrl={postImageUrl}
 								postVideoUrl={postVideoUrl}
 								snippetId={snippetId}
+								teamId={teamId}
 							/>
 
 							{/* {isSignedIn && ( */}
@@ -171,9 +168,17 @@ export default function Post({
 							{/* 	/> */}
 							{/* )} */}
 						</div>
+						{/* <PostContent
+							content={content}
+							postImageUrl={postImageUrl}
+							postVideoUrl={postVideoUrl}
+							snippetId={snippetId}
+							postId={id}
+							userId={posterInfo?.userId}
+						/> */}
 					</div>
 					{/* {isPostCountsQueryLoading && ( */}
-					{/* 	<div className="flex gap-5 rounded-b-lg bg-background-item px-2 py-3 pl-4"> */}
+					{/* 	<div className="flex gap-5 bg-background-item px-2 py-3 pl-4 rounded-b-lg"> */}
 					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
 					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
 					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
@@ -181,7 +186,7 @@ export default function Post({
 					{/* )} */}
 					{isPostCountsQuerySuccess && isSignedIn ? (
 						<div className={cn("mt-0 flex h-[30px] gap-5 bg-cynical-black px-2 py-6", postWidths)}>
-							<div className="flex w-full justify-between">
+							<div className="flex justify-between w-full">
 								<div className="flex gap-2">
 									{isPostReactionQuerySuccess ? (
 										<PostReactButton
@@ -228,7 +233,7 @@ export default function Post({
 					)}
 
 					{postIndex! < postsLength! - 1 && (
-						<div className="my-4 flex-center gap-3">
+						<div className="flex-center gap-3 my-4">
 							<Separator className="w-1/3" />
 							<Sparkles color="#272727" size={15} />
 							<Separator className="w-1/3" />

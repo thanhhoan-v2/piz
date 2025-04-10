@@ -20,6 +20,8 @@ export const queryKey = {
 		selectId: (id: string) => [...queryKey.post.selects(), id] as const,
 		// posts - select - { userId }
 		selectUser: (userId: string) => [...queryKey.post.selects(), userId] as const,
+		// posts - select - { teamId }
+		byTeam: (teamId: string) => [...queryKey.post.selects(), "team", teamId] as const,
 		// posts - select - { id } - counts
 		selectCount: (id: string) => [...queryKey.post.selectId(id), "count"] as const,
 		// posts - select - { id } - reactions - { userId }

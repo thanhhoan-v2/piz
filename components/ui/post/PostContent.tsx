@@ -5,6 +5,7 @@ import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/
 import { getSnippetById } from "@queries/server/snippet"
 import { Check, Copy } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
 import VideoPlayer from "../post-form/attachment/VideoPlayer"
 
@@ -13,6 +14,8 @@ export type PostContentProps = {
 	postImageUrl: string | null
 	postVideoUrl: string | null
 	snippetId: string | null
+	postId?: string
+	userId?: string
 }
 export type SnippetViewProps = {
 	value?: string | null
@@ -25,7 +28,10 @@ export default function PostContent({
 	postImageUrl,
 	postVideoUrl,
 	snippetId,
+	postId,
+	userId,
 }: PostContentProps) {
+	const router = useRouter()
 	const [snippet, setSnippet] = useState<SnippetViewProps>()
 	const [snippetThemeImport, setSnippetThemeImport] = useState()
 
@@ -56,24 +62,47 @@ export default function PostContent({
 			})
 	}
 
-	useEffect(() => {
-		const loadCodeViewStyle = async () => {
-			try {
-				const style = await import(
-					`react-syntax-highlighter/dist/esm/styles/hljs/${snippet?.theme ?? "dark"}`
-				).then((module) => module.default)
-				setSnippetThemeImport(style)
-			} catch (error) {
-				console.error("Error loading style:", error)
-			}
+	/*
+	 ** Avoid click on not-content part of the post
+	 */
+	const handlePostClick = (event: React.MouseEvent<HTMLDivElement>) => {
+		const targetTag = (event.target as HTMLElement).tagName.toLowerCase()
+		console.log(targetTag)
+		if (targetTag === "div" && userId && postId) {
+			router.push(`/${userId}/post/${postId}`)
 		}
+	}
 
-		loadCodeViewStyle()
-	}, [snippet])
+	const handlePostKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		if (event.key === "Enter" && userId && postId) {
+			router.push(`/${userId}/post/${postId}`)
+		}
+	}
+
+	// useEffect(() => {
+	// 	const loadCodeViewStyle = async () => {
+	// 		try {
+	// 			const style = await import(
+	// 				`react-syntax-highlighter/dist/esm/styles/hljs/${snippet?.theme ?? "dark"}`
+	// 			).then((module) => module.default)
+	// 			setSnippetThemeImport(style)
+	// 		} catch (error) {
+	// 			console.error("Error loading style:", error)
+	// 		}
+	// 	}
+
+	// 	loadCodeViewStyle()
+	// }, [snippet])
 
 	return (
 		<>
-			<div className="flex flex-col gap-4">
+			<div
+				className="flex flex-col gap-4"
+				onClick={handlePostClick}
+				onKeyUp={handlePostKeyUp}
+				tabIndex={0}
+				role="button"
+			>
 				<div>
 					<p className="text-white">{content}</p>
 
@@ -103,18 +132,18 @@ export default function PostContent({
 						<>
 							<div className="w-full">
 								<CodeBlock>
-									<CodeBlockGroup className="border-border border-b px-4 py-2">
+									<CodeBlockGroup className="px-4 py-2 border-b border-border">
 										<div className="flex items-center gap-2">
-											<div className="bg-primary/10 text-primary rounded px-2 py-1 text-xs font-medium">
+											<div className="bg-primary/10 px-2 py-1 rounded font-medium text-primary text-xs">
 												JavaScript
 											</div>
 											{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
 										</div>
-										<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
+										<Button variant="ghost" size="icon" className="w-8 h-8" onClick={handleCopy}>
 											{copied ? (
-												<Check className="h-4 w-4 text-green-500" />
+												<Check className="w-4 h-4 text-green-500" />
 											) : (
-												<Copy className="h-4 w-4" />
+												<Copy className="w-4 h-4" />
 											)}
 										</Button>
 									</CodeBlockGroup>

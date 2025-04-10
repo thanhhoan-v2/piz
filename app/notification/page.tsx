@@ -18,7 +18,9 @@ export type Noti = {
 	receiverId: string
 	postId: string | null
 	commentId: string | null
-	notificationType: ("FOLLOW" | "POST" | "POST_REACTION" | "COMMENT" | "COMMENT_REACTION") | null
+	notificationType:
+		| ("FOLLOW" | "POST" | "POST_REACTION" | "COMMENT" | "COMMENT_REACTION" | "TEAM_JOIN_REQUEST")
+		| null
 	isRead: boolean
 	isDeleted: boolean
 	createdAt: Date
@@ -34,16 +36,13 @@ export default function NotificationPage() {
 
 	useEffect(() => {
 		if (isSuccess && notifications) {
-			const newNotifications = notifications.filter(
-				(notification) =>
-					!previousNotifications.current.find((prev) => prev.id === notification.id),
-			)
+			// Store the current notifications for comparison in the next update
 			previousNotifications.current = notifications
 		}
 	}, [notifications, isSuccess])
 
 	return (
-		<div className="mt-[100px] flex-col gap-4">
+		<div className="flex-col gap-4 mt-[100px]">
 			{notifications ? (
 				notifications?.map((notification) => (
 					<NotificationItem key={notification.id} notification={notification} />

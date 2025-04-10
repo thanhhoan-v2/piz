@@ -1,4 +1,5 @@
 "use client"
+import { usePostCreation } from "@/context/PostCreationContext"
 import {
 	type IMentionedResult,
 	PostVisibilityEnumArray,
@@ -28,7 +29,24 @@ import { getUserById } from "../../../app/actions/user"
 import { PostFormContent } from "./PostFormContent"
 import { PostFormFooter } from "./PostFormFooter"
 
-export default function PostForm({ children }: { children: React.ReactNode }) {
+// Define types for the query data structures
+type PostsData = {
+	posts: Post[]
+	nextCursor?: string
+	hasMore: boolean
+}
+
+type TeamPostsData = PostsData
+
+export default function PostForm({
+	children,
+	teamId,
+	onSuccess,
+}: {
+	children: React.ReactNode
+	teamId?: string
+	onSuccess?: () => void
+}) {
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
 	const [postDiscardAlert, setAlertPostDiscard] = React.useState<boolean>(false)
 	const [snippetDiscardAlert, setAlertSnippetDiscard] = React.useState<boolean>(false)
@@ -63,6 +81,9 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 
 	const user = useUser()
 	const userId = user?.id
+
+	// Get post creation context
+	const { addCreatingPost, removeCreatingPost } = usePostCreation()
 
 	// Fetch user info when userId changes
 	React.useEffect(() => {
@@ -219,8 +240,6 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 	const addPostMutation = useMutation({
 		mutationKey: queryKey.post.insert(),
 		mutationFn: async (newPost: CreatePostProps) => {
-			console.log(snippetId, isAddingSnippet)
-
 			// Handle snippet creation first if needed
 			if (isAddingSnippet == true && snippetId) {
 				try {
@@ -231,7 +250,6 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 						lang: snippetLang,
 						theme: snippetTheme,
 					}
-					console.log(newSnippet)
 					await createSnippet(newSnippet)
 				} catch (error) {
 					throw new Error("Failed to save code snippet")
@@ -244,10 +262,52 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			// Cancel any outgoing refetches to not overwrite our optimistic updates
 			await queryClient.cancelQueries({ queryKey: queryKey.post.all })
 
-			// Snapshot the previous value
-			const previousPosts = queryClient.getQueryData(queryKey.post.all)
+			// If this is a team post, also cancel team posts queries
+			if (teamId) {
+				await queryClient.cancelQueries({ queryKey: queryKey.post.byTeam(teamId) })
+			}
 
-			queryClient.setQueryData(queryKey.post.all, (old: Post[]) => [newPost, ...old])
+			// Snapshot the previous values
+			const previousPosts = queryClient.getQueryData(queryKey.post.all) || []
+			// Also snapshot team posts if this is a team post
+			const previousTeamPosts = teamId
+				? queryClient.getQueryData(queryKey.post.byTeam(teamId))
+				: null
+
+			// Create an optimistic post with all the necessary fields
+			const optimisticPost = {
+				...newPost,
+				// Add any fields that might be expected by the UI but aren't in newPost
+				updatedAt: new Date().toISOString(),
+				isDeleted: false,
+				_optimistic: true, // Mark as optimistic for potential special handling
+			}
+
+			// Update the global posts cache with optimistic data
+			queryClient.setQueryData(
+				[...queryKey.post.all, { limit: 5, cursor: undefined }],
+				(old: PostsData | undefined) => {
+					if (!old) return { posts: [optimisticPost], hasMore: false, nextCursor: undefined }
+					return {
+						...old,
+						posts: [optimisticPost, ...(old.posts || [])],
+					}
+				},
+			)
+
+			// If this is a team post, also update the team posts cache
+			if (teamId) {
+				queryClient.setQueryData(
+					[...queryKey.post.byTeam(teamId), { limit: 5, cursor: undefined }],
+					(old: TeamPostsData | undefined) => {
+						if (!old) return { posts: [optimisticPost], hasMore: false, nextCursor: undefined }
+						return {
+							...old,
+							posts: [optimisticPost, ...(old.posts || [])],
+						}
+					},
+				)
+			}
 			queryClient.setQueryData(queryKey.post.selectCount(newPost.id), {
 				noReactions: 0,
 				noShares: 0,
@@ -258,11 +318,54 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 				null,
 			)
 
-			// Return a context object with the snapshotted value
-			return { previousPosts }
+			// Return a context object with the snapshotted values
+			return { previousPosts, previousTeamPosts }
 		},
-		onSuccess: () => {
-			toast("Your post has been created.")
+		onSuccess: (data) => {
+			// Success toast is now handled in the handleSubmitPost function
+			// No need to show a toast here
+
+			// Immediately update the cache with the real data
+			const realPost = data
+			if (realPost) {
+				// Update the main posts feed with the real post data
+				queryClient.setQueryData(
+					[...queryKey.post.all, { limit: 5, cursor: undefined }],
+					(old: PostsData | undefined) => {
+						if (!old || !old.posts) return old
+
+						// Replace the optimistic post with the real one
+						const updatedPosts = old.posts.map((post: Post) =>
+							post.id === realPost.id ? { ...realPost } : post,
+						)
+
+						return {
+							...old,
+							posts: updatedPosts,
+						}
+					},
+				)
+
+				// Also update team posts if applicable
+				if (teamId) {
+					queryClient.setQueryData(
+						[...queryKey.post.byTeam(teamId), { limit: 5, cursor: undefined }],
+						(old: TeamPostsData | undefined) => {
+							if (!old || !old.posts) return old
+
+							// Replace the optimistic post with the real one
+							const updatedPosts = old.posts.map((post: Post) =>
+								post.id === realPost.id ? { ...realPost } : post,
+							)
+
+							return {
+								...old,
+								posts: updatedPosts,
+							}
+						},
+					)
+				}
+			}
 
 			// Clean up
 			setOpenDrawer(false)
@@ -278,9 +381,38 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			setPostVideoUrl(null)
 			setPostImageUrl(null)
 			storageRemovePostMediaFiles()
+
+			// Call the onSuccess callback if provided
+			if (onSuccess) {
+				onSuccess()
+			}
+
+			// Remove from creating posts list after a short delay to ensure UI is updated
+			if (realPost?.id) {
+				setTimeout(() => {
+					removeCreatingPost(realPost.id)
+				}, 500)
+			}
 		},
-		onError: (error) => {
-			toast("Failed to create post. Please try again.")
+		onError: (error, _newPost, context) => {
+			console.error("Error creating post:", error)
+			toast.error("Failed to create post. Please try again.")
+
+			// Restore the previous states if available
+			if (context) {
+				// Restore global posts
+				if (context.previousPosts) {
+					queryClient.setQueryData(queryKey.post.all, context.previousPosts)
+				}
+
+				// Restore team posts if this was a team post
+				if (teamId && context.previousTeamPosts) {
+					queryClient.setQueryData(queryKey.post.byTeam(teamId), context.previousTeamPosts)
+				}
+			}
+
+			// Re-open the drawer so the user can try again
+			setOpenDrawer(true)
 		},
 	})
 
@@ -294,7 +426,12 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 
 	const handleSubmitPost = () => {
 		if (!user?.id) {
-			toast("You must be logged in to create a post")
+			toast.error("You must be logged in to create a post")
+			return
+		}
+
+		if (!postContent || postContent.trim() === "") {
+			toast.error("Post content cannot be empty")
 			return
 		}
 
@@ -311,9 +448,37 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			postImageUrl: postImageUrl,
 			postVideoUrl: postVideoUrl,
 			snippetId: snippetId,
+			teamId: teamId || null, // Add teamId if provided
 		}
 
-		addPostMutation.mutate(newPost)
+		// Show toast notification while creating the post
+		// const toastId = toast.loading("Start to create your post...")
+
+		// Add to creating posts list to show banner
+		addCreatingPost(newPost.id)
+
+		// Mutate and update toast based on result
+		addPostMutation.mutate(newPost, {
+			// onSuccess: () => {
+			// 	// Dismiss the loading toast and show success message
+			// 	const successMessage = teamId
+			// 		? "Your team post has been created."
+			// 		: "Your post has been created."
+			// 	toast.success(successMessage, {
+			// 		id: toastId, // Replace the loading toast with success
+			// 	})
+
+			// 	// We'll keep the banner until the post appears in the list
+			// 	// The PostList component will handle removing it
+			// },
+			onError: () => {
+				// Dismiss the loading toast
+				// toast.dismiss(toastId)
+
+				// Remove from creating posts list
+				removeCreatingPost(newPost.id)
+			},
+		})
 	}
 
 	// Textarea auto increases its height on value length
@@ -332,7 +497,7 @@ export default function PostForm({ children }: { children: React.ReactNode }) {
 			<Drawer open={isDrawerOpen} onOpenChange={setOpenDrawer}>
 				<DrawerTrigger asChild>{children}</DrawerTrigger>
 				<DrawerContent
-					className="max-h-[90vh] min-h-[90vh] dark:bg-background-item"
+					className="dark:bg-background-item min-h-[90vh] max-h-[90vh]"
 					onPointerDownOutside={handleTouchOutsideModal}
 				>
 					<PostFormHeader />

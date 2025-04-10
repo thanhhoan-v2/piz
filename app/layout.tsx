@@ -1,3 +1,4 @@
+import { PostCreationProvider } from "@/context/PostCreationContext"
 import { AppLayout } from "@components/layout"
 import { Toaster } from "@components/ui/Sonner"
 import QueryProvider from "@providers/QueryProvider"
@@ -69,9 +70,11 @@ export default function RootLayout({
 								disableTransitionOnChange
 							>
 								<Toaster />
-								<Suspense>
-									<AppLayout>{children}</AppLayout>
-								</Suspense>
+								<PostCreationProvider>
+									<Suspense>
+										<AppLayout>{children}</AppLayout>
+									</Suspense>
+								</PostCreationProvider>
 							</ThemeProvider>
 						</QueryProvider>
 					</StackTheme>

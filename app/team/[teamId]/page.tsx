@@ -1,7 +1,9 @@
 "use client"
 
 import { Button } from "@components/ui/Button"
+import { Dialog, DialogContent } from "@components/ui/Dialog"
 import { TeamJoinRequests } from "@components/ui/team/TeamJoinRequests"
+import { TeamPosts } from "@components/ui/team/TeamPosts"
 import { ROUTE } from "@constants/route"
 import { useCreateTeamJoinRequest } from "@queries/client/teamJoinRequest"
 import { SelectedTeamSwitcher, useUser } from "@stackframe/stack"
@@ -24,8 +26,9 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 	// State for public status and joining
 	const [isPublic, setIsPublic] = useState<boolean>(false)
 	const [updating, setUpdating] = useState<boolean>(false)
-	const [isMember, setIsMember] = useState<boolean>(true) // Default to true until we check
+	const [isMember, setIsMember] = useState<boolean>(false) // Default to false until we check
 	const [hasRequestedToJoin, setHasRequestedToJoin] = useState<boolean>(false)
+	const [isJoining, setIsJoining] = useState<boolean>(false)
 	const [isLeaving, setIsLeaving] = useState<boolean>(false)
 	const [showLeaveConfirmation, setShowLeaveConfirmation] = useState<boolean>(false)
 
@@ -38,12 +41,48 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 	// Effect to initialize isPublic state from team metadata and check membership
 	useEffect(() => {
 		if (team) {
+			// Set public status
 			setIsPublic(team.clientMetadata?.isPublic === true)
 
 			// Check if the user is a member of the team
-			// If team.useUsers() returns users, the user is a member
-			// If it returns null, the user is not a member
-			setIsMember(users !== null)
+			// This is the most reliable way to check membership
+			const checkMembership = async () => {
+				try {
+					// First check: If users is not null, the user is definitely a member
+					if (users !== null) {
+						console.log("User is a member (users check)")
+						setIsMember(true)
+						return
+					}
+
+					// Second check: Use a direct API call to check membership
+					const response = await fetch(`/api/team/${team.id}/check-membership?t=${Date.now()}`, {
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							// Add cache busting headers
+							"Cache-Control": "no-cache, no-store, must-revalidate",
+							Pragma: "no-cache",
+							Expires: "0",
+						},
+					})
+
+					if (response.ok) {
+						const data = await response.json()
+						setIsMember(data.isMember)
+					} else {
+						console.error("Failed to check membership")
+						// Default to false if we can't check
+						setIsMember(false)
+					}
+				} catch (error) {
+					console.error("Error checking membership:", error)
+					// Default to false if we can't check
+					setIsMember(false)
+				}
+			}
+
+			checkMembership()
 		}
 	}, [team, users])
 
@@ -87,9 +126,60 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 			{
 				onSuccess: () => {
 					setHasRequestedToJoin(true)
+					toast.success("Join request sent successfully")
+				},
+				onError: (error) => {
+					console.error("Error requesting to join team:", error)
+					toast.error("Failed to send join request")
 				},
 			},
 		)
+	}
+
+	// Function to join the team directly (for public teams)
+	async function joinTeam() {
+		if (!team || !user || isJoining) return
+
+		try {
+			setIsJoining(true)
+			console.log("Joining team:", team.id, "User:", user.id)
+
+			// Call the API to join the team
+			const response = await fetch("/api/team/join", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					teamId: team.id,
+					userId: user.id,
+				}),
+			})
+
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.error || "Failed to join team")
+			}
+
+			// Show success message
+			toast.success("You have joined the team")
+			console.log("Successfully joined team")
+
+			// Set isMember to true to update the UI immediately
+			setIsMember(true)
+
+			// Refresh the page to update the UI
+			// Use a timeout to ensure the state is updated before refreshing
+			setTimeout(() => {
+				// Force a hard reload with cache busting
+				window.location.href = `/team/${team.id}?t=${Date.now()}`
+			}, 1000)
+		} catch (error) {
+			console.error("Error joining team:", error)
+			toast.error(error instanceof Error ? error.message : "Failed to join team")
+		} finally {
+			setIsJoining(false)
+		}
 	}
 
 	// Function to leave the team
@@ -167,8 +257,9 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 			<div className="flex flex-col justify-center items-center h-screen">
 				<div className="mb-4 font-semibold text-xl">Team not found</div>
 				<p className="mb-6 text-gray-500">
-					The team you're looking for doesn't exist or you don't have access to it.
+					The team you're looking for doesn't exist or you don't have access to it
 				</p>
+				<Button onClick={requestToJoinTeam}>Request to Join</Button>{" "}
 				<Link href={ROUTE.TEAMS}>
 					<Button>Go to Teams</Button>
 				</Link>
@@ -192,8 +283,15 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 						<Button variant="outline">Back to Teams</Button>
 					</Link>
 
-					{/* Show Request to Join button for non-members if the team is public */}
+					{/* Show Join Team button for non-members if the team is public */}
 					{!isMember && isPublic && (
+						<Button onClick={joinTeam} disabled={isJoining || hasRequestedToJoin} variant="default">
+							{isJoining ? "Joining..." : "Join Team"}
+						</Button>
+					)}
+
+					{/* Show Request to Join button for non-members if the team is private */}
+					{!isMember && !isPublic && (
 						<Button
 							onClick={requestToJoinTeam}
 							disabled={createJoinRequest.isPending || hasRequestedToJoin}
@@ -248,7 +346,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 						? "This team is public and visible to everyone."
 						: hasRequestedToJoin
 							? "Your request to join this team is pending approval."
-							: "This is a public team. You can request to join this team to participate."}
+							: "This is a public team. You can join this team immediately."}
 				</div>
 			)}
 
@@ -291,9 +389,12 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 				</div>
 			</div>
 
+			{/* Show team posts for members */}
+			{isMember && <TeamPosts teamId={team.id} />}
+
 			{/* Leave Team Confirmation Dialog */}
-			{showLeaveConfirmation && (
-				<div className="z-50 fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+			<Dialog open={showLeaveConfirmation} onOpenChange={setShowLeaveConfirmation}>
+				<DialogContent className="rounded-md">
 					<div className="bg-white shadow-lg p-6 rounded-lg w-full max-w-md">
 						<h3 className="mb-4 font-bold text-xl">Leave Team</h3>
 						<p className="mb-6">
@@ -313,8 +414,8 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 							</Button>
 						</div>
 					</div>
-				</div>
-			)}
+				</DialogContent>
+			</Dialog>
 		</div>
 	)
 }

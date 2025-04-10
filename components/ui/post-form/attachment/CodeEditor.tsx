@@ -2,7 +2,6 @@
 
 import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
-import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import {
 	Select,
 	SelectContent,
@@ -10,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@components/ui/Select"
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
 import {
@@ -21,9 +21,9 @@ import {
 } from "@utils/local-storage.helpers"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { Check, Copy, X } from "lucide-react"
+import { X } from "lucide-react"
 import { useEffect, useState } from "react"
-import SyntaxHighlighter from "react-syntax-highlighter"
+// import SyntaxHighlighter from "react-syntax-highlighter"
 
 export type CodeEditorProps = {
 	setIsAddingSnippetAction: (isAddingSnippet: boolean) => void
@@ -91,20 +91,20 @@ export default function CodeEditor({
 	}, [snippetLang, snippetTheme])
 
 	// Dynamically import react-syntax-highlighter's style
-	useEffect(() => {
-		const loadCodeViewStyle = async () => {
-			try {
-				const style = await import(
-					`react-syntax-highlighter/dist/esm/styles/hljs/${snippetTheme}`
-				).then((module) => module.default)
-				setCodeViewStyle(style)
-			} catch (error) {
-				console.error("Error loading style:", error)
-			}
-		}
+	// useEffect(() => {
+	// 	const loadCodeViewStyle = async () => {
+	// 		try {
+	// 			const style = await import(
+	// 				`react-syntax-highlighter/dist/esm/styles/hljs/${snippetTheme}`
+	// 			).then((module) => module.default)
+	// 			setCodeViewStyle(style)
+	// 		} catch (error) {
+	// 			console.error("Error loading style:", error)
+	// 		}
+	// 	}
 
-		loadCodeViewStyle()
-	}, [snippetTheme])
+	// 	loadCodeViewStyle()
+	// }, [snippetTheme])
 
 	const handleDiscardSnippet = () => {
 		setCode("")
@@ -156,9 +156,9 @@ export default function CodeEditor({
 					<div>
 						{codeViewStyle && (
 							<CodeBlock>
-								<CodeBlockGroup className="border-border border-b px-4 py-2">
+								<CodeBlockGroup className="px-4 py-2 border-b border-border">
 									<div className="flex items-center gap-2">
-										<div className="bg-primary/10 text-primary rounded px-2 py-1 text-xs font-medium">
+										<div className="bg-primary/10 px-2 py-1 rounded font-medium text-primary text-xs">
 											{snippetLang}
 										</div>
 										{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
@@ -179,11 +179,11 @@ export default function CodeEditor({
 										<SelectValue placeholder={snippetLang} />
 									</SelectTrigger>
 									<SelectContent>
-										{SyntaxHighlighter.supportedLanguages.map((language: string) => (
+										{/* {SyntaxHighlighter.supportedLanguages.map((language: string) => (
 											<SelectItem key={language} value={language}>
 												{firstLetterToUpper(language)}
 											</SelectItem>
-										))}
+										))} */}
 									</SelectContent>
 								</Select>
 
