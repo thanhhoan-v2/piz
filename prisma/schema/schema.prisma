@@ -61,11 +61,14 @@ model Notification {
   receiverId       String
   postId           String?
   commentId        String?
+  teamId           String?
+  roomId           String?
   notificationType NotificationType?
   isRead           Boolean           @default(false)
   isDeleted        Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime?
+  metadata         Json? // Additional data specific to notification type
   Comment          Comment?          @relation(fields: [commentId], references: [id], onDelete: Cascade)
   Post             Post?             @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
@@ -181,6 +184,12 @@ enum NotificationType {
   POST
   POST_REACTION
   TEAM_JOIN_REQUEST
+  TEAM_JOINED
+  TEAM_CREATED
+  TEAM_INVITED
+  COLLAB_ROOM_JOINED
+  COLLAB_ROOM_CREATED
+  COLLAB_ROOM_INVITED
 }
 
 enum Privacy {

@@ -17,13 +17,29 @@ export type Noti = {
 	receiverId: string
 	postId: string | null
 	commentId: string | null
+	teamId?: string | null
+	roomId?: string | null
 	notificationType:
-		| ("FOLLOW" | "POST" | "POST_REACTION" | "COMMENT" | "COMMENT_REACTION" | "TEAM_JOIN_REQUEST")
+		| (
+				| "FOLLOW"
+				| "POST"
+				| "POST_REACTION"
+				| "COMMENT"
+				| "COMMENT_REACTION"
+				| "TEAM_JOIN_REQUEST"
+				| "TEAM_JOINED"
+				| "TEAM_CREATED"
+				| "TEAM_INVITED"
+				| "COLLAB_ROOM_JOINED"
+				| "COLLAB_ROOM_CREATED"
+				| "COLLAB_ROOM_INVITED"
+		  )
 		| null
 	isRead: boolean
 	isDeleted: boolean
 	createdAt: Date
 	updatedAt: Date | null
+	metadata?: Record<string, unknown> // Additional data specific to notification type
 }
 
 export default function NotificationPage() {
@@ -124,10 +140,34 @@ export default function NotificationPage() {
 					</Button>
 				</div>
 			) : notifications && notifications.length > 0 ? (
-				<div className="space-y-2">
-					{notifications.map((notification) => (
-						<NotificationItem key={notification.id} notification={notification} />
-					))}
+				<div className="space-y-6">
+					{/* Group notifications by read status */}
+					{hasUnreadNotifications && (
+						<div>
+							<h2 className="mb-2 px-2 font-medium text-muted-foreground text-sm">New</h2>
+							<div className="space-y-2 bg-background-item/20 p-2 rounded-lg">
+								{notifications
+									.filter((notification) => !notification.isRead)
+									.map((notification) => (
+										<NotificationItem key={notification.id} notification={notification} />
+									))}
+							</div>
+						</div>
+					)}
+
+					{/* Read notifications */}
+					{notifications.some((notification) => notification.isRead) && (
+						<div>
+							<h2 className="mb-2 px-2 font-medium text-muted-foreground text-sm">Earlier</h2>
+							<div className="space-y-2">
+								{notifications
+									.filter((notification) => notification.isRead)
+									.map((notification) => (
+										<NotificationItem key={notification.id} notification={notification} />
+									))}
+							</div>
+						</div>
+					)}
 				</div>
 			) : (
 				<div className="py-12 border border-border rounded-lg text-center">

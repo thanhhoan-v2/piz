@@ -17,32 +17,52 @@ export async function getAllNotifications({ receiverId }: { receiverId: string }
 	}
 }
 
+/**
+ * Create a notification
+ * @param receiverId - The ID of the user receiving the notification
+ * @param senderId - The ID of the user sending the notification
+ * @param type - The type of notification
+ * @param options - Additional options for the notification
+ * @returns The created notification or null if there was an error
+ */
 export async function createNotification({
 	receiverId,
 	senderId,
 	type,
-	postId,
-	commentId,
+	options = {},
 }: {
 	receiverId: string
 	senderId: string
 	type: NotificationType
-	postId?: string | null
-	commentId?: string | null
+	options?: {
+		postId?: string | null
+		commentId?: string | null
+		teamId?: string | null
+		roomId?: string | null
+		metadata?: Record<string, any>
+	}
 }) {
 	// Don't create notification if sender is the same as receiver
 	if (senderId === receiverId) return null
 
 	try {
+		const { postId, commentId, teamId, roomId, metadata } = options
+
 		const notification = await prisma.notification.create({
 			data: {
-				receiverId: receiverId,
-				senderId: senderId,
+				receiverId,
+				senderId,
 				notificationType: type,
-				postId: postId,
-				commentId: commentId,
+				postId,
+				commentId,
+				teamId,
+				roomId,
+				metadata: metadata ? metadata : undefined,
 			},
 		})
+
+		// Revalidate the notification page to show the new notification
+		revalidatePath("/notification")
 		return notification
 	} catch (error) {
 		console.error("Error creating notification:", JSON.stringify(error, null, 2))
