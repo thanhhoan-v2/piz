@@ -58,7 +58,7 @@ export default function PostCommentButton({
 				>
 					<MessageSquare />
 				</Button>
-				<span>{initialCommentCount}</span>
+				<span className="ml-1">{initialCommentCount}</span>
 			</div>
 
 			{/* Comments Dialog */}

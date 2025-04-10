@@ -2,7 +2,7 @@
 import { searchUsers } from "@/app/actions/search"
 import { Input } from "@components/ui/Input"
 import SearchList from "@components/ui/search/SearchList"
-import { Search } from "lucide-react"
+import { Loader2, Search, X } from "lucide-react"
 import React from "react"
 
 interface SearchResultFromAPI {
@@ -52,7 +52,6 @@ export default function SearchBar() {
 		const timeoutId = setTimeout(handleSearch, 300)
 
 		return () => {
-			console.log("[SearchBar] Clearing timeout")
 			clearTimeout(timeoutId)
 		}
 	}, [handleSearch])
@@ -61,74 +60,70 @@ export default function SearchBar() {
 
 	return (
 		<>
-			<style jsx>{`
-				@keyframes fadeIn {
-					from { opacity: 0; transform: translateY(-10px); }
-					to { opacity: 1; transform: translateY(0); }
-				}
-				@keyframes iconPop {
-					0% { transform: scale(1) translateX(0); }
-					50% { transform: scale(1.2) translateX(-2px); }
-					100% { transform: scale(1) translateX(0); }
-				}
-				.search-container {
-					animation: fadeIn 0.3s ease-out;
-				}
-				.search-results {
-					animation: fadeIn 0.2s ease-out;
-				}
-				.icon-pop {
-					animation: iconPop 0.3s ease-out;
-				}
-			`}</style>
 			<div className="flex-col gap-4 search-container">
 				<div className="relative flex gap-2">
-					<div className="relative flex-1 group">
-						<div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg blur-xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
-						<Search
-							className={`
-								absolute top-3 left-3 h-4 w-4
-								pointer-events-none
-								transition-all duration-300
-								${isFocused ? "text-primary icon-pop" : searchValue ? "text-primary/80" : "text-muted-foreground"}
-								group-hover:text-primary/90
-								group-hover:scale-110
-								transform-gpu
-							`}
-						/>
-						<Input
-							placeholder="Type to search"
-							value={searchValue}
-							onChange={(e) => {
-								console.log("[SearchBar] Input changed:", e.target.value)
-								setSearchValue(e.target.value)
-							}}
-							onFocus={() => setIsFocused(true)}
-							onBlur={() => setIsFocused(false)}
-							onKeyUp={handleKeyPress}
-							className="
-								relative z-10
-								pl-10 pr-4 py-5 text-base
-								border-2 rounded-lg
-								transition-all duration-300
-								group-hover:border-primary/50
-								focus:scale-[1.01] focus:border-primary
-								placeholder:text-muted-foreground/70
-							"
-						/>
+					<div className="group relative flex-1">
+						<div className="top-1/2 left-3 z-20 absolute -translate-y-1/2 transform">
+							<Search
+								size={18}
+								className={`
+									pointer-events-none
+									transition-all duration-300
+									${isFocused ? "text-primary icon-pop" : searchValue ? "text-primary/80" : "text-muted-foreground"}
+									group-hover:text-primary/90
+									group-hover:scale-110
+									transform-gpu
+								`}
+							/>
+						</div>
+						<div className="relative w-full">
+							<Input
+								placeholder="Type to search"
+								value={searchValue}
+								onChange={(e) => {
+									setSearchValue(e.target.value)
+								}}
+								onFocus={() => setIsFocused(true)}
+								onBlur={() => setIsFocused(false)}
+								onKeyUp={handleKeyPress}
+								className="z-10 relative py-5 pr-10 pl-10 border-2 focus:border-primary group-hover:border-primary/50 rounded-lg w-full placeholder:text-muted-foreground/70 text-base focus:scale-[1.01] transition-all duration-300"
+							/>
+							{searchValue && (
+								<div className="top-1/2 right-3 z-20 absolute -translate-y-1/2 transform">
+									{isSearching ? (
+										<Loader2 size={18} className="text-muted-foreground animate-spin" />
+									) : (
+										<X
+											size={18}
+											className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+											onClick={() => setSearchValue("")}
+										/>
+									)}
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
-				{searchValue.trim() && searchResults.length > 0 && (
-					<div className="search-results mt-2">
-						<SearchList
-							searchResults={searchResults.map(
-								(result): SearchResultProps => ({
-									id: result.id,
-									userName: result.userName || "Unknown User",
-									avatarUrl: result.userAvatarUrl,
-								}),
-							)}
-						/>
+				{searchValue.trim() && (
+					<div className="mt-2 search-results">
+						{isSearching ? (
+							<div className="p-4 text-muted-foreground text-center">
+								<Loader2 className="inline-block mr-2 animate-spin" size={16} />
+								Searching...
+							</div>
+						) : searchResults.length > 0 ? (
+							<SearchList
+								searchResults={searchResults.map(
+									(result): SearchResultProps => ({
+										id: result.id,
+										userName: result.userName || "Unknown User",
+										avatarUrl: result.userAvatarUrl,
+									}),
+								)}
+							/>
+						) : (
+							<div className="p-4 text-muted-foreground text-center">No results found</div>
+						)}
 					</div>
 				)}
 			</div>
