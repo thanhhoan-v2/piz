@@ -13,6 +13,7 @@ const config = {
 	theme: {
 		colors: {
 			"cynical-black": "#171717",
+			"abyssal-black": "#070A0C",
 		},
 		screens: {
 			mobile_s: "320px",

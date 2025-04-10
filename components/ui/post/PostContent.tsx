@@ -2,8 +2,9 @@
 
 import { Button } from "@components/ui/Button"
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
+import { Skeleton } from "@components/ui/Skeleton"
 import { getSnippetById } from "@queries/server/snippet"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
@@ -34,6 +35,9 @@ export default function PostContent({
 	const router = useRouter()
 	const [snippet, setSnippet] = useState<SnippetViewProps>()
 	const [snippetThemeImport, setSnippetThemeImport] = useState()
+	const [isSnippetLoading, setIsSnippetLoading] = useState(!!snippetId)
+	const [isImageLoading, setIsImageLoading] = useState(!!postImageUrl)
+	const [isVideoLoading, setIsVideoLoading] = useState(!!postVideoUrl)
 
 	const [copied, setCopied] = useState(false)
 
@@ -48,18 +52,25 @@ export default function PostContent({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (snippetId) {
+			setIsSnippetLoading(true)
 			clientGetSnippetById()
 		}
 	}, [])
 
 	const clientGetSnippetById = async () => {
-		const data = await getSnippetById(snippetId)
-		if (data)
-			setSnippet({
-				value: data.value,
-				theme: data.theme,
-				lang: data.lang,
-			})
+		try {
+			const data = await getSnippetById(snippetId)
+			if (data)
+				setSnippet({
+					value: data.value,
+					theme: data.theme,
+					lang: data.lang,
+				})
+		} catch (error) {
+			console.error("Error fetching snippet:", error)
+		} finally {
+			setIsSnippetLoading(false)
+		}
 	}
 
 	/*
@@ -79,65 +90,67 @@ export default function PostContent({
 		}
 	}
 
-	// useEffect(() => {
-	// 	const loadCodeViewStyle = async () => {
-	// 		try {
-	// 			const style = await import(
-	// 				`react-syntax-highlighter/dist/esm/styles/hljs/${snippet?.theme ?? "dark"}`
-	// 			).then((module) => module.default)
-	// 			setSnippetThemeImport(style)
-	// 		} catch (error) {
-	// 			console.error("Error loading style:", error)
-	// 		}
-	// 	}
-
-	// 	loadCodeViewStyle()
-	// }, [snippet])
-
 	return (
 		<>
-			<div
-				className="flex flex-col gap-4"
-				onClick={handlePostClick}
-				onKeyUp={handlePostKeyUp}
-				tabIndex={0}
-				role="button"
-			>
+			<div className="flex flex-col gap-4" onClick={handlePostClick} onKeyUp={handlePostKeyUp}>
 				<div>
 					<p className="text-white">{content}</p>
 
 					<div className="my-2" />
 
+					{/* Post image with skeleton */}
 					{postImageUrl && (
-						<Suspense fallback={<p>Loading...</p>}>
-							<div className="flex-center">
+						<div className="relative">
+							{isImageLoading && (
+								<div className="flex-center">
+									<Skeleton className="rounded-lg w-[300px] h-[300px]" />
+								</div>
+							)}
+							<div className="flex-center" style={{ display: isImageLoading ? 'none' : 'flex' }}>
 								<Image
 									className="rounded-lg"
 									width={300}
 									height={300}
 									src={postImageUrl}
 									alt="Uploaded Image"
+									onLoad={() => setIsImageLoading(false)}
 								/>
 							</div>
-						</Suspense>
+						</div>
 					)}
 
+					{/* Post video with skeleton */}
 					{postVideoUrl && (
-						<Suspense fallback={<p>Loading...</p>}>
-							<VideoPlayer src={postVideoUrl} />
-						</Suspense>
+						<div className="relative">
+							{isVideoLoading && (
+								<div className="flex items-center justify-center rounded-lg bg-muted h-[300px] w-full">
+									<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+								</div>
+							)}
+							<div style={{ display: isVideoLoading ? 'none' : 'block' }}>
+								<VideoPlayer 
+									src={postVideoUrl} 
+									onLoad={() => setIsVideoLoading(false)}
+								/>
+							</div>
+						</div>
 					)}
 
-					{snippetId && snippet && snippet?.value && snippet?.lang && (
-						<>
-							<div className="w-full">
+					{/* Code snippet with skeleton */}
+					{snippetId && (
+						<div className="w-full">
+							{isSnippetLoading ? (
+								<div className="space-y-2">
+									<Skeleton className="h-10 w-full rounded-b-none" />
+									<Skeleton className="h-[200px] w-full rounded-t-none" />
+								</div>
+							) : snippet && snippet?.value && snippet?.lang ? (
 								<CodeBlock>
 									<CodeBlockGroup className="px-4 py-2 border-b border-border">
 										<div className="flex items-center gap-2">
 											<div className="bg-primary/10 px-2 py-1 rounded font-medium text-primary text-xs">
-												JavaScript
+												{snippet.lang}
 											</div>
-											{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
 										</div>
 										<Button variant="ghost" size="icon" className="w-8 h-8" onClick={handleCopy}>
 											{copied ? (
@@ -149,16 +162,12 @@ export default function PostContent({
 									</CodeBlockGroup>
 									<CodeBlockCode code={snippet.value} language={snippet.lang} theme="github-dark" />
 								</CodeBlock>
-							</div>
-							{/* <SyntaxHighlighter */}
-							{/* 	showLineNumbers={true} */}
-							{/* 	language="javascript" */}
-							{/* 	style={snippetThemeImport} */}
-							{/* > */}
-							{/* 	{snippet?.value} */}
-							{/* </SyntaxHighlighter> */}
-							{/* {getCodeReview(snippet?.value, snippet?.lang)} */}
-						</>
+							) : (
+								<div className="p-4 border border-red-300 bg-red-50 text-red-800 rounded-md">
+									Failed to load code snippet
+								</div>
+							)}
+						</div>
 					)}
 				</div>
 			</div>

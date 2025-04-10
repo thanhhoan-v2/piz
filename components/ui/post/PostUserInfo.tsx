@@ -14,11 +14,8 @@ import {
 	DialogTrigger,
 } from "@components/ui/Dialog"
 import { useDeletePostMutation } from "@queries/client/post"
-import { getFollow } from "@queries/server/follow"
 import { useUser } from "@stackframe/stack"
-import { useQuery } from "@tanstack/react-query"
 import { avatarPlaceholder } from "@utils/image.helpers"
-import { queryKey } from "@utils/queryKeyFactory"
 import { firstLetterToUpper } from "@utils/string.helpers"
 import { formatDistanceToNow } from "date-fns"
 import { Loader2, Users, XIcon } from "lucide-react"
@@ -27,7 +24,6 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "../Badge"
-import PostContent from "./PostContent"
 
 type PostUserInfoProps = {
 	userName?: string | null
@@ -81,14 +77,14 @@ function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
 					<XIcon size={16} />
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="rounded-lg">
 				<DialogHeader>
 					<DialogTitle>Delete Post</DialogTitle>
 					<DialogDescription>
 						Are you sure you want to delete this post? This action cannot be undone.
 					</DialogDescription>
 				</DialogHeader>
-				<DialogFooter>
+				<DialogFooter className="flex-row flex-between gap-2">
 					<DialogClose asChild>
 						<Button variant="outline">Cancel</Button>
 					</DialogClose>
@@ -103,6 +99,8 @@ function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
 
 export default function PostUserInfo({
 	userId,
+	userName,
+	userAvatarUrl,
 	visibility,
 	createdAt,
 	content,
@@ -174,9 +172,11 @@ export default function PostUserInfo({
 	}
 
 	// Fetch team information if this is a team post
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
-		fetchTeamInfo()
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		if (teamId) {
+			fetchTeamInfo()
+		}
 	}, [teamId])
 
 	// Function to join a team
@@ -238,37 +238,46 @@ export default function PostUserInfo({
 		userName: string
 		userAvatarUrl: string
 		userId: string
-	}>()
+	}>({
+		userName: userName || "",
+		userAvatarUrl: userAvatarUrl || "",
+		userId: userId || "",
+	})
 
 	useEffect(() => {
-		const fetchUserInfo = async () => {
-			const userInfo = await getUserById(userId)
-			setPosterInfo(userInfo)
+		// Only fetch user info if userName or userAvatarUrl is not provided
+		if ((!userName || !userAvatarUrl) && userId) {
+			const fetchUserInfo = async () => {
+				const userInfo = await getUserById(userId)
+				if (userInfo) {
+					setPosterInfo(userInfo)
+				}
+			}
+			fetchUserInfo()
 		}
-		fetchUserInfo()
-	}, [userId])
+	}, [userId, userName, userAvatarUrl])
 
-	// Get if I'm following them
-	const { data: followData } = useQuery({
-		queryKey: queryKey.follow.selectFollower(user?.id ?? ""),
-		queryFn: () =>
-			getFollow({
-				followerId: user?.id ?? "",
-				followeeId: userId ?? "",
-			}),
-		enabled: !!user?.id && !!userId && user?.id !== userId,
-	})
+	// Get if I'm following them - commented out for now as it's not being used
+	// const { data: followData } = useQuery({
+	// 	queryKey: queryKey.follow.selectFollower(user?.id ?? ""),
+	// 	queryFn: () =>
+	// 		getFollow({
+	// 			followerId: user?.id ?? "",
+	// 			followeeId: userId ?? "",
+	// 		}),
+	// 	enabled: !!user?.id && !!userId && user?.id !== userId,
+	// })
 
-	// Get if they're following me
-	const { data: followsMe } = useQuery({
-		queryKey: queryKey.follow.selectFollower(userId ?? ""),
-		queryFn: () =>
-			getFollow({
-				followerId: userId ?? "",
-				followeeId: user?.id ?? "",
-			}),
-		enabled: !!user?.id && !!userId && user?.id !== userId,
-	})
+	// Get if they're following me - commented out for now as it's not being used
+	// const { data: followsMe } = useQuery({
+	// 	queryKey: queryKey.follow.selectFollower(userId ?? ""),
+	// 	queryFn: () =>
+	// 		getFollow({
+	// 			followerId: userId ?? "",
+	// 			followeeId: user?.id ?? "",
+	// 		}),
+	// 	enabled: !!user?.id && !!userId && user?.id !== userId,
+	// })
 
 	const getFollowStatus = () => {
 		// Don't show status if it's the user's own post
@@ -389,12 +398,12 @@ export default function PostUserInfo({
 					</div>
 				</div>
 
-				<PostContent
+				{/* <PostContent
 					content={content}
 					postImageUrl={postImageUrl}
 					postVideoUrl={postVideoUrl}
 					snippetId={snippetId}
-				/>
+				/> */}
 			</div>
 		</>
 	)

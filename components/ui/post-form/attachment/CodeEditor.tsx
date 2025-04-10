@@ -2,15 +2,8 @@
 
 import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@components/ui/Select"
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@components/ui/Select"
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
-import { codeViewThemes } from "@components/ui/post-form/attachment/CodeViewThemes"
 import { Editor } from "@monaco-editor/react"
 import {
 	STORAGE_KEY_SNIPPET_CODE,
@@ -19,7 +12,6 @@ import {
 	STORAGE_KEY_SNIPPET_THEME,
 	storageRemoveSnippet,
 } from "@utils/local-storage.helpers"
-import { firstLetterToUpper } from "@utils/string.helpers"
 import { generateBase64uuid } from "@utils/uuid.helpers"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -136,9 +128,7 @@ export default function CodeEditor({
 								Edit
 							</Button>
 
-							{/* Code review button removed */}
-
-							<Select onValueChange={(e) => setSnippetTheme(e)}>
+							{/* <Select onValueChange={(e) => setSnippetTheme(e)}>
 								<SelectTrigger className="w-[200px]">
 									<SelectValue placeholder={snippetTheme} />
 								</SelectTrigger>
@@ -149,7 +139,7 @@ export default function CodeEditor({
 										</SelectItem>
 									))}
 								</SelectContent>
-							</Select>
+							</Select> */}
 						</div>
 					</div>
 

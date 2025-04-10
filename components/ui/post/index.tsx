@@ -7,7 +7,7 @@ import PostCommentButton from "@components/ui/post/PostCommentButton"
 import PostContent from "@components/ui/post/PostContent"
 import PostReactButton from "@components/ui/post/PostReactButton"
 import PostShareButton from "@components/ui/post/PostShareButton"
-import PostUserInfo from "@components/ui/post/PostUserInfo"
+import PostHeader from "@components/ui/post/PostUserInfo"
 import type { Post as IPost } from "@prisma/client"
 import { useQueryPostCounts, useQueryPostReaction } from "@queries/client/post"
 import { useUser } from "@stackframe/stack"
@@ -18,7 +18,7 @@ import React from "react"
 import WelcomeModal from "../modal/WelcomeModal"
 
 export const postButtonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
-export const postButtonSkeletonClassName = "flex flex-none h-[30px] w-[70px] gap-2"
+export const postButtonSkeletonClassName = "flex flex-none h-[30px] w-[50px] gap-2"
 export const postButtonWrapperClassName = "flex-y-center gap-2 bg-background-item"
 export const postWidths =
 	"mobile_s:w-[300px] mobile_m:w-[350px] mobile_l:w-[400px] tablet:w-[550px] laptop:w-[650px]"
@@ -97,7 +97,7 @@ export default function Post({
 							)}
 						>
 							<div className="flex justify-between">
-								<PostUserInfo
+								<PostHeader
 									postId={id}
 									userId={userId}
 									userName={posterInfo?.userName}
@@ -143,47 +143,33 @@ export default function Post({
 							postWidths,
 						)}
 					>
-						<div className="flex justify-between">
-							<PostUserInfo
-								postId={id}
-								userId={userId}
-								userName={posterInfo?.userName}
-								userAvatarUrl={posterInfo?.userAvatarUrl}
-								createdAt={createdAt}
-								updatedAt={updatedAt}
-								appUserName={appUserName}
-								content={content}
-								postImageUrl={postImageUrl}
-								postVideoUrl={postVideoUrl}
-								snippetId={snippetId}
-								teamId={teamId}
-							/>
-
-							{/* {isSignedIn && ( */}
-							{/* 	<PostDropdownMenu */}
-							{/* 		userId={userId} */}
-							{/* 		postId={id} */}
-							{/* 		userName={posterInfo?.userName ?? null} */}
-							{/* 		content={content} */}
-							{/* 	/> */}
-							{/* )} */}
-						</div>
-						{/* <PostContent
+						<PostHeader
+							postId={id}
+							userId={userId}
+							userName={posterInfo?.userName}
+							userAvatarUrl={posterInfo?.userAvatarUrl}
+							createdAt={createdAt}
+							updatedAt={updatedAt}
+							appUserName={appUserName}
 							content={content}
 							postImageUrl={postImageUrl}
 							postVideoUrl={postVideoUrl}
 							snippetId={snippetId}
+							teamId={teamId}
+						/>
+
+						<Separator className="my-4" />
+
+						<PostContent
+							content={content}
+							postImageUrl={postImageUrl || null}
+							postVideoUrl={postVideoUrl || null}
+							snippetId={snippetId || null}
 							postId={id}
-							userId={posterInfo?.userId}
-						/> */}
+							userId={userId}
+						/>
 					</div>
-					{/* {isPostCountsQueryLoading && ( */}
-					{/* 	<div className="flex gap-5 bg-background-item px-2 py-3 pl-4 rounded-b-lg"> */}
-					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
-					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
-					{/* 		<Skeleton className={postButtonSkeletonClassName} /> */}
-					{/* 	</div> */}
-					{/* )} */}
+
 					{isPostCountsQuerySuccess && isSignedIn ? (
 						<div className={cn("mt-0 flex h-[30px] gap-5 bg-cynical-black px-2 py-6", postWidths)}>
 							<div className="flex justify-between w-full">
@@ -200,6 +186,7 @@ export default function Post({
 									) : (
 										<div className={postButtonWrapperClassName}>
 											<Skeleton className={postButtonSkeletonClassName} />
+											<Skeleton className="w-4 h-4" />
 										</div>
 									)}
 
@@ -216,6 +203,10 @@ export default function Post({
 										postContent={content}
 										postCreatedAt={createdAt}
 										postUpdatedAt={updatedAt}
+										postImageUrl={postImageUrl}
+										postVideoUrl={postVideoUrl}
+										snippetId={snippetId}
+										teamId={teamId}
 									/>
 								</div>
 
@@ -229,7 +220,23 @@ export default function Post({
 							</div>
 						</div>
 					) : (
-						<div className={cn("h-4 rounded-lg bg-background-item", postWidths)} />
+						<div className={cn("mt-0 flex h-[30px] gap-5 bg-cynical-black px-2 py-6", postWidths)}>
+							<div className="flex justify-between w-full">
+								<div className="flex gap-2">
+									<div className={postButtonWrapperClassName}>
+										<Skeleton className={postButtonSkeletonClassName} />
+										<Skeleton className="w-4 h-4" />
+									</div>
+									<div className={postButtonWrapperClassName}>
+										<Skeleton className={postButtonSkeletonClassName} />
+										<Skeleton className="w-4 h-4" />
+									</div>
+								</div>
+								<div className={postButtonWrapperClassName}>
+									<Skeleton className={postButtonSkeletonClassName} />
+								</div>
+							</div>
+						</div>
 					)}
 
 					{postIndex! < postsLength! - 1 && (

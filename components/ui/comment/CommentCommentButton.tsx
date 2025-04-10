@@ -15,7 +15,7 @@ import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent, DialogTitle } from "@components/ui/Dialog"
 import { Textarea } from "@components/ui/Textarea"
 import type { PostCounts } from "@components/ui/post/PostReactButton"
-import PostUserInfo from "@components/ui/post/PostUserInfo"
+import PostHeader from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
 import { type CreateCommentProps, createComment } from "@queries/server/comment"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
@@ -23,7 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@utils/cn"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
-import { HashIcon, ImageIcon, MenuIcon, MessageSquare } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import React from "react"
 
 type CommentCommentButtonProps = {
@@ -175,10 +175,11 @@ export default function CommentCommentButton({
 					<DialogTitle />
 				</VisuallyHidden.Root>
 				<DialogContent
-					className="flex-col border-0 rounded-lg"
+					className="flex-col bg-cynical-black border-0 rounded-lg"
 					onPointerDownOutside={handleOpenDiscardAlert}
 				>
-					<PostUserInfo
+					<PostHeader
+						postId={postId}
 						userName={userName}
 						userAvatarUrl={userAvatarUrl}
 						content={postContent}
@@ -189,6 +190,7 @@ export default function CommentCommentButton({
 						postImageUrl={null}
 						postVideoUrl={null}
 						snippetId={null}
+						teamId={null}
 					/>
 
 					{/* form */}
@@ -198,13 +200,8 @@ export default function CommentCommentButton({
 							value={userInput}
 							onChange={handleInputChange}
 							placeholder={cn("Reply to ", userName)}
-							className="p-0 border-none focus-visible:ring-0 min-h-[10px] resize-none"
+							className="bg-cynical-black p-0 border-none focus-visible:ring-0 min-h-[10px] resize-none"
 						/>
-						<div className="flex space-x-4">
-							<ImageIcon />
-							<HashIcon />
-							<MenuIcon />
-						</div>
 					</div>
 
 					{/* post button */}

@@ -9,7 +9,7 @@ import {
 	postButtonSkeletonClassName,
 	postButtonWrapperClassName,
 } from "@components/ui/post"
-import PostUserInfo from "@components/ui/post/PostUserInfo"
+import PostHeader from "@components/ui/post/PostUserInfo"
 import type { Comment } from "@prisma/client"
 import { useQueryCommentCounts, useQueryCommentReaction } from "@queries/client/comment"
 import { useUser } from "@stackframe/stack"
@@ -77,17 +77,16 @@ export default function PostComment({
 							"flex min-h-[100px] w-full cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3",
 						)}
 					>
-						<PostUserInfo
+						<PostHeader
 							userId={userId}
-							// userName={userName}
-							// userAvatarUrl={userAvatarUrl}
-							// appUserName={userName}
+							postId={postId}
 							createdAt={new Date()}
 							updatedAt={null}
 							content={content}
 							postImageUrl={null}
 							postVideoUrl={null}
 							snippetId={null}
+							teamId={null}
 						/>
 					</div>
 					{isCommentCountsQueryLoading && (
@@ -130,14 +129,6 @@ export default function PostComment({
 									parentId={id}
 									degree={degree}
 								/>
-
-								{/* <CommentShareButton */}
-								{/* 	className={postButtonClassName} */}
-								{/* 	wrapperClassName={postButtonWrapperClassName} */}
-								{/* 	userId={userId} */}
-								{/* 	commentId={id} */}
-								{/* 	// initialShareCount={noShares ?? 0} */}
-								{/* /> */}
 							</>
 						</div>
 					)}
@@ -146,7 +137,6 @@ export default function PostComment({
 				{/* Recursive child comments */}
 				{degree < 2 && childrenComment ? (
 					<div key={userId + id} className="flex gap-4 ml-[10px]">
-						{/* biome-ignore lint/style/noNonNullAssertion: <explanation> */}
 						{childrenComment!.children!.length > 0 && (
 							<div>
 								<Image src={DownRightArrowSVG} width={35} height={35} alt=" Comment arrow" />

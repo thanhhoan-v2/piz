@@ -248,7 +248,7 @@ export default function PostForm({
 						userId: userId,
 						value: snippetCode,
 						lang: snippetLang,
-						theme: snippetTheme,
+						theme: "github-dark",
 					}
 					await createSnippet(newSnippet)
 				} catch (error) {
