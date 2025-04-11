@@ -34,7 +34,6 @@ export default function PostContent({
 }: PostContentProps) {
 	const router = useRouter()
 	const [snippet, setSnippet] = useState<SnippetViewProps>()
-	const [snippetThemeImport, setSnippetThemeImport] = useState()
 	const [isSnippetLoading, setIsSnippetLoading] = useState(!!snippetId)
 	const [isImageLoading, setIsImageLoading] = useState(!!postImageUrl)
 	const [isVideoLoading, setIsVideoLoading] = useState(!!postVideoUrl)
@@ -123,8 +122,8 @@ export default function PostContent({
 					{postVideoUrl && (
 						<div className="relative">
 							{isVideoLoading && (
-								<div className="flex items-center justify-center rounded-lg bg-muted h-[300px] w-full">
-									<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+								<div className="flex justify-center items-center bg-muted rounded-lg w-full h-[300px]">
+									<Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
 								</div>
 							)}
 							<div style={{ display: isVideoLoading ? 'none' : 'block' }}>
@@ -141,8 +140,8 @@ export default function PostContent({
 						<div className="w-full">
 							{isSnippetLoading ? (
 								<div className="space-y-2">
-									<Skeleton className="h-10 w-full rounded-b-none" />
-									<Skeleton className="h-[200px] w-full rounded-t-none" />
+									<Skeleton className="rounded-b-none w-full h-10" />
+									<Skeleton className="rounded-t-none w-full h-[200px]" />
 								</div>
 							) : snippet && snippet?.value && snippet?.lang ? (
 								<CodeBlock>
@@ -163,7 +162,7 @@ export default function PostContent({
 									<CodeBlockCode code={snippet.value} language={snippet.lang} theme="github-dark" />
 								</CodeBlock>
 							) : (
-								<div className="p-4 border border-red-300 bg-red-50 text-red-800 rounded-md">
+								<div className="bg-red-50 p-4 border border-red-300 rounded-md text-red-800">
 									Failed to load code snippet
 								</div>
 							)}

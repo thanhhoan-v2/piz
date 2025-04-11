@@ -21,7 +21,6 @@ export const useQueryPostCounts = ({ postId }: { postId: string }) =>
 
 export const useQueryPostReaction = ({ userId, postId }: { userId?: string; postId: string }) =>
 	useQuery({
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		queryKey: queryKey.post.selectReactionByUser({ userId: userId!, postId }),
 		queryFn: async () => getPostReaction({ userId, postId }),
 		enabled: !!userId && !!postId,

@@ -5,11 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@comp
 import { Input } from "@components/ui/Input"
 import { createSupabaseBrowserClient } from "@utils/supabase/client"
 import { SUPABASE_STORAGE_PREFIX_URL } from "@utils/supabase/storage"
-import { X } from "lucide-react"
+import { Camera, Check, Image as ImageIcon, Loader2, Upload, X } from "lucide-react"
 import Image from "next/image"
 import type { ChangeEvent } from "react"
 import { Suspense, useEffect, useState } from "react"
-import LoadingSpinnerUploadForm from "./LoadingSpinnerUploadForm"
 
 export default function ImageUploadForm({
 	setIsAddingImageAction,
@@ -82,26 +81,74 @@ export default function ImageUploadForm({
 	}
 
 	return (
-		<Card className="w-full max-w-lg">
-			<CardHeader>
-				<CardTitle className="flex-between">
-					<p>Upload image</p>
-					<Button variant="ghost" onClick={handleRemoveImage}>
-						<X />
+		<Card className="shadow-md border-border w-full max-w-lg">
+			<CardHeader className="pb-3">
+				<CardTitle className="flex justify-between items-center">
+					<div className="flex items-center gap-2">
+						<div className="bg-primary/10 p-2 rounded-md">
+							<ImageIcon className="w-5 h-5 text-primary" />
+						</div>
+						<p>Image Upload</p>
+					</div>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="hover:bg-destructive/10 rounded-full hover:text-destructive"
+						onClick={handleRemoveImage}
+					>
+						<X className="w-5 h-5" />
 					</Button>
 				</CardTitle>
-				<CardDescription>Drop an image or click to select a file.</CardDescription>
+				<CardDescription className="flex items-center gap-1 text-muted-foreground">
+					<Camera className="w-3 h-3" />
+					Share your moments with high-quality images
+				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4">
+			<CardContent className="space-y-4 pt-0">
 				{uploadedImagePath ? (
-					<div className="space-y-2">
-						<Suspense fallback={<p>Loading...</p>}>
-							<Image width={300} height={300} src={uploadedImagePath} alt="Uploaded Image" />
-						</Suspense>
+					<div className="space-y-4">
+						<div className="relative shadow-sm border border-border rounded-lg overflow-hidden">
+							<div className="top-2 right-2 absolute flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md text-white text-xs">
+								<Check className="w-3 h-3" /> Uploaded
+							</div>
+							<Suspense
+								fallback={
+									<div className="flex justify-center items-center bg-gray-100 dark:bg-gray-800 h-[300px] animate-pulse">
+										<Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
+									</div>
+								}
+							>
+								<div className="relative bg-muted w-full aspect-video overflow-hidden">
+									<Image
+										fill
+										src={uploadedImagePath}
+										alt="Uploaded Image"
+										className="object-cover hover:scale-105 transition-all"
+									/>
+								</div>
+							</Suspense>
+						</div>
+						<div className="flex justify-end">
+							<Button
+								variant="outline"
+								size="sm"
+								className="hover:bg-destructive/10 border-destructive/30 text-destructive"
+								onClick={handleRemoveImage}
+							>
+								<X className="mr-1 w-4 h-4" /> Remove Image
+							</Button>
+						</div>
 					</div>
 				) : (
-					<div className="flex h-48 items-center justify-center rounded-md border-2 border-muted-foreground border-dashed p-6 text-center">
-						<div className="space-y-2">
+					<div className="flex flex-col justify-center items-center bg-primary/5 hover:bg-primary/10 p-8 border-2 border-primary/20 border-dashed rounded-lg h-60 text-center transition-colors">
+						<div className="flex flex-col items-center space-y-4">
+							<div className="bg-background p-4 border border-border rounded-full">
+								<Upload className="w-8 h-8 text-primary" />
+							</div>
+							<div className="space-y-2">
+								<h3 className="font-medium">Drag & drop or click to upload</h3>
+								<p className="text-muted-foreground text-sm">Supports JPG, PNG, GIF up to 10MB</p>
+							</div>
 							<Input
 								accept="image/*"
 								type="file"
@@ -112,9 +159,19 @@ export default function ImageUploadForm({
 							/>
 							<label
 								htmlFor="file-input"
-								className="inline-flex h-full cursor-pointer items-center justify-center self-center rounded-md border border-gray-200 bg-white px-4 py-2 font-medium text-sm shadow-sm transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:focus-visible:ring-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50"
+								className="inline-flex justify-center items-center gap-2 bg-primary hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-primary-foreground text-sm transition-colors cursor-pointer disabled:pointer-events-none"
 							>
-								{uploading ? <LoadingSpinnerUploadForm /> : "Select an image"}
+								{uploading ? (
+									<>
+										<Loader2 className="w-4 h-4 animate-spin" />
+										Uploading...
+									</>
+								) : (
+									<>
+										<Camera className="w-4 h-4" />
+										Select Image
+									</>
+								)}
 							</label>
 						</div>
 					</div>

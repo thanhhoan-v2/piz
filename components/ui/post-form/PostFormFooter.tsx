@@ -46,7 +46,7 @@ export function PostFormFooter({
 			<div className="flex-between">
 				<div className="flex-center gap-2">
 					<Select onValueChange={(value: PostVisibilityEnumType) => setPostVisibility(value)}>
-						<SelectTrigger className="w-fit gap-2">
+						<SelectTrigger className="gap-2 w-fit">
 							<SelectValue placeholder="Anyone can see" />
 						</SelectTrigger>
 						<SelectContent>
@@ -105,7 +105,7 @@ export function PostFormFooter({
 						</Tooltip>
 					</TooltipProvider>
 
-					<div className="h-[10px] w-[100px]" onClick={handleFakePost} />
+					<div className="w-[100px] h-[10px]" onClick={handleFakePost} />
 				</div>
 
 				<div className="flex gap-4">

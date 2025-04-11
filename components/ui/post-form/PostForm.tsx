@@ -16,11 +16,7 @@ import { type CreatePostProps, createPost } from "@queries/server/post"
 import { type CreateSnippetProps, createSnippet } from "@queries/server/snippet"
 import { useUser } from "@stackframe/stack"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import {
-	STORAGE_KEY_SNIPPET_ID,
-	storageRemovePostMediaFiles,
-	storageRemoveSnippet,
-} from "@utils/local-storage.helpers"
+import { storageRemovePostMediaFiles } from "@utils/local-storage.helpers"
 import { queryKey } from "@utils/queryKeyFactory"
 import { generateBase64uuid } from "@utils/uuid.helpers"
 import React, { useState } from "react"
@@ -49,7 +45,6 @@ export default function PostForm({
 }) {
 	const [isDrawerOpen, setOpenDrawer] = React.useState<boolean>(false)
 	const [postDiscardAlert, setAlertPostDiscard] = React.useState<boolean>(false)
-	const [snippetDiscardAlert, setAlertSnippetDiscard] = React.useState<boolean>(false)
 	const [postContent, setPostContent] = React.useState("")
 	const [postVisibility, setPostVisibility] = React.useState<PostVisibilityEnumType>("PUBLIC")
 
@@ -206,6 +201,8 @@ export default function PostForm({
 
 	const handlePostDiscard = () => {
 		setIsAddingSnippet(false)
+		setIsAddingImage(false)
+		setIsAddingVideo(false)
 		setOpenDrawer(false)
 		setPostContent("")
 		setPostVisibility("PUBLIC")
@@ -214,11 +211,34 @@ export default function PostForm({
 		setShowMentionSuggestions(false)
 		setStartMentionIndex(-1)
 		setLastMentionIndexes([])
+
+		// Clear media URLs and remove from local storage
+		setPostVideoUrl(null)
+		setPostImageUrl(null)
+		storageRemovePostMediaFiles()
+	}
+
+	const hasUnsavedContent = () => {
+		// Check if there's any content in the post or if user is adding a snippet, image, or video
+		return (
+			postContent.trim().length > 0 ||
+			isAddingSnippet ||
+			isAddingImage ||
+			isAddingVideo ||
+			(snippetCode && snippetCode.trim().length > 0) ||
+			postImageUrl !== null ||
+			postVideoUrl !== null
+		)
 	}
 
 	const handleTouchOutsideModal = () => {
-		if (postContent.length > 0) setAlertPostDiscard(true)
-		if (isAddingSnippet) setAlertSnippetDiscard(true)
+		// If there's any content, show the confirmation dialog
+		if (hasUnsavedContent()) {
+			setAlertPostDiscard(true)
+		} else {
+			// If no content, just close the drawer
+			setOpenDrawer(false)
+		}
 
 		setSearchResults([])
 		setMentionedUsers([])
@@ -376,11 +396,11 @@ export default function PostForm({
 			setIsAddingVideo(false)
 
 			setSnippetId(null)
-			storageRemoveSnippet()
+			// Snippet storage removal removed
 
 			setPostVideoUrl(null)
 			setPostImageUrl(null)
-			storageRemovePostMediaFiles()
+			storageRemovePostMediaFiles() // Keep media files storage removal
 
 			// Call the onSuccess callback if provided
 			if (onSuccess) {
@@ -416,13 +436,7 @@ export default function PostForm({
 		},
 	})
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	React.useEffect(() => {
-		const storedSnippetId = localStorage.getItem(STORAGE_KEY_SNIPPET_ID)
-		if (storedSnippetId) {
-			setSnippetId(storedSnippetId)
-		}
-	}, [snippetCode])
+	// Local storage effect removed
 
 	const handleSubmitPost = () => {
 		if (!user?.id) {
@@ -538,7 +552,7 @@ export default function PostForm({
 						setIsAddingImage={setIsAddingImage}
 						setIsAddingVideo={setIsAddingVideo}
 						setIsAddingSnippet={setIsAddingSnippet}
-						setAlertSnippetDiscard={setAlertSnippetDiscard}
+						// Removed setAlertSnippetDiscard prop
 						handleSubmitPost={handleSubmitPost}
 						handleFakePost={handleFakePost}
 						isAddingImage={isAddingImage}
@@ -554,6 +568,7 @@ export default function PostForm({
 				setAlertPostDiscard={setAlertPostDiscard}
 				setOpenDrawer={setOpenDrawer}
 				handlePostDiscard={handlePostDiscard}
+				hasContent={hasUnsavedContent()}
 			/>
 		</>
 	)

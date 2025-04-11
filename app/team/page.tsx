@@ -1,8 +1,10 @@
 "use client"
 
 import { Button } from "@components/ui/Button"
+import { postWidths } from "@components/ui/post"
 import { ROUTE } from "@constants/route"
 import { useUser } from "@stackframe/stack"
+import { cn } from "@utils/cn"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -129,7 +131,7 @@ export default function TeamsPage() {
 	)
 
 	return (
-		<div className="mx-auto mt-[100px] p-4 container">
+		<div className={cn("mx-auto mt-[100px] p-4 container", postWidths)}>
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="font-bold text-2xl">Teams</h1>
 				<div className="flex gap-2">
@@ -177,9 +179,9 @@ export default function TeamsPage() {
 						{teams.map((team) => (
 							<div
 								key={team.id}
-								className="hover:shadow-md p-4 border rounded-lg transition-shadow cursor-pointer"
+								className="bg-cynical-black hover:shadow-md p-4 rounded-lg transition-shadow cursor-pointer"
 								onClick={() => {
-									toast.info(`Navigating to ${team.displayName}...`)
+									toast.info(`Entering ${team.displayName} team...`)
 									router.push(`/team/${team.id}`)
 								}}
 							>
@@ -198,13 +200,7 @@ export default function TeamsPage() {
 									<h2 className="font-semibold text-lg">{team.displayName}</h2>
 								</div>
 
-								<div className="mb-2 text-gray-500 text-sm">Team Members</div>
-
-								{team.clientMetadata?.isPublic && (
-									<div className="inline-block bg-green-100 px-2 py-1 rounded text-green-800 text-xs">
-										Public
-									</div>
-								)}
+								{/* <div className="mb-2 text-gray-500 text-sm">{team.memberCount} Members</div> */}
 							</div>
 						))}
 					</div>

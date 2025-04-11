@@ -2,11 +2,13 @@
 
 import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent } from "@components/ui/Dialog"
+import { postWidths } from "@components/ui/post"
 import { TeamJoinRequests } from "@components/ui/team/TeamJoinRequests"
 import { TeamPosts } from "@components/ui/team/TeamPosts"
 import { ROUTE } from "@constants/route"
 import { useCreateTeamJoinRequest } from "@queries/client/teamJoinRequest"
 import { SelectedTeamSwitcher, useUser } from "@stackframe/stack"
+import { cn } from "@utils/cn"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import * as React from "react"
@@ -268,7 +270,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 	}
 
 	return (
-		<div className="mx-auto p-4 container">
+		<div className={cn("mx-auto p-4", postWidths)}>
 			{isMember ? (
 				<div className="mb-6">
 					<SelectedTeamSwitcher urlMap={(team) => `/team/${team.id}`} selectedTeam={team} />

@@ -1,29 +1,75 @@
 "use client"
 
-import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
-import { Select, SelectContent, SelectTrigger, SelectValue } from "@components/ui/Select"
-import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
-import { Editor } from "@monaco-editor/react"
+// Dialog imports removed
 import {
-	STORAGE_KEY_SNIPPET_CODE,
-	STORAGE_KEY_SNIPPET_ID,
-	STORAGE_KEY_SNIPPET_LANG,
-	STORAGE_KEY_SNIPPET_THEME,
-	storageRemoveSnippet,
-} from "@utils/local-storage.helpers"
-import { generateBase64uuid } from "@utils/uuid.helpers"
-import { X } from "lucide-react"
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@components/ui/Select"
+import { CodeBlock, CodeBlockCode } from "@components/ui/extras/code-block"
+import { Editor } from "@monaco-editor/react"
+import { Braces, Check, Code, FileCode, PenIcon, Terminal, X } from "lucide-react"
 import { useEffect, useState } from "react"
-// import SyntaxHighlighter from "react-syntax-highlighter"
 
 export type CodeEditorProps = {
 	setIsAddingSnippetAction: (isAddingSnippet: boolean) => void
 	onSnippetRemoveAction: () => void
 	onSnippetCodeChangeAction: (code: string) => void
 	onSnippetLangChangeAction: (lang: string) => void
-	onSnippetThemeChangeAction: (theme: string) => void
 	onSnippetPreviewAction: (isSnippetPreviewed: boolean) => void
+}
+
+const PROGRAMMING_LANGUAGES = [
+	"javascript",
+	"typescript",
+	"python",
+	"java",
+	"c",
+	"cpp",
+	"csharp",
+	"go",
+	"rust",
+	"ruby",
+	"php",
+	"swift",
+	"kotlin",
+	"html",
+	"css",
+	"sql",
+	"shell",
+	"json",
+	"yaml",
+	"markdown",
+	"plaintext",
+]
+
+const firstLetterToUpper = (str: string) => {
+	return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// Helper function to get language icon
+const getLanguageIcon = (language: string) => {
+	switch (language) {
+		case "javascript":
+		case "typescript":
+			return <Braces className="w-4 h-4 text-yellow-500" />
+		case "python":
+			return <Code className="w-4 h-4 text-blue-500" />
+		case "java":
+		case "kotlin":
+			return <FileCode className="w-4 h-4 text-orange-500" />
+		case "c":
+		case "cpp":
+		case "csharp":
+			return <FileCode className="w-4 h-4 text-purple-500" />
+		case "shell":
+			return <Terminal className="w-4 h-4 text-green-500" />
+		default:
+			return <Code className="w-4 h-4 text-gray-500" />
+	}
 }
 
 export default function CodeEditor({
@@ -31,29 +77,14 @@ export default function CodeEditor({
 	onSnippetRemoveAction,
 	onSnippetCodeChangeAction,
 	onSnippetLangChangeAction,
-	onSnippetThemeChangeAction,
 	onSnippetPreviewAction,
 }: CodeEditorProps) {
-	const [code, setCode] = useState<string>(() => {
-		const storedCode = localStorage.getItem(STORAGE_KEY_SNIPPET_CODE)
-		return storedCode || ""
-	})
-
-	const [snippetLang, setSnippetLang] = useState<string>(() => {
-		const storedEditorLanguage = localStorage.getItem(STORAGE_KEY_SNIPPET_LANG)
-		return storedEditorLanguage || "javascript"
-	})
-
-	const [snippetTheme, setSnippetTheme] = useState<string>(() => {
-		const storedEditorTheme = localStorage.getItem(STORAGE_KEY_SNIPPET_THEME)
-		return storedEditorTheme || "dark"
-	})
-
+	const [code, setCode] = useState<string>("")
+	const [snippetLang, setSnippetLang] = useState<string>("javascript")
 	const [isSaved, setIsSaved] = useState<boolean>(false)
 
-	const [codeViewStyle, setCodeViewStyle] = useState(null)
+	// Confirmation dialog state removed - now handled in PostForm
 
-	// Code review functionality has been removed
 	const defaultCodeEditorValue = ""
 
 	const handlePreviewSnippet = () => {
@@ -63,125 +94,138 @@ export default function CodeEditor({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (code.length > 0) {
-			const newSnippetId = generateBase64uuid()
-			localStorage.setItem(STORAGE_KEY_SNIPPET_ID, newSnippetId)
-
-			localStorage.setItem(STORAGE_KEY_SNIPPET_CODE, code)
 			onSnippetCodeChangeAction(code)
 		} else if (code.length === 0) {
-			localStorage.removeItem(STORAGE_KEY_SNIPPET_CODE)
 			onSnippetCodeChangeAction("")
 		}
 	}, [code])
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		localStorage.setItem(STORAGE_KEY_SNIPPET_LANG, snippetLang)
 		onSnippetLangChangeAction(snippetLang)
-		localStorage.setItem(STORAGE_KEY_SNIPPET_THEME, snippetTheme)
-		onSnippetThemeChangeAction(snippetTheme)
-	}, [snippetLang, snippetTheme])
+	}, [snippetLang])
 
-	// Dynamically import react-syntax-highlighter's style
-	// useEffect(() => {
-	// 	const loadCodeViewStyle = async () => {
-	// 		try {
-	// 			const style = await import(
-	// 				`react-syntax-highlighter/dist/esm/styles/hljs/${snippetTheme}`
-	// 			).then((module) => module.default)
-	// 			setCodeViewStyle(style)
-	// 		} catch (error) {
-	// 			console.error("Error loading style:", error)
-	// 		}
-	// 	}
-
-	// 	loadCodeViewStyle()
-	// }, [snippetTheme])
-
+	// Simplified discard function - confirmation now handled in PostForm
 	const handleDiscardSnippet = () => {
 		setCode("")
 		setSnippetLang("javascript")
 		setIsAddingSnippetAction(false)
 		onSnippetRemoveAction()
 		onSnippetPreviewAction(false)
-
-		storageRemoveSnippet()
 	}
 
 	return (
 		<>
+			{/* Confirmation Dialog removed - now handled in PostForm */}
+
 			{isSaved ? (
-				<div className="flex-col gap-2 min-w-[80vw]">
-					<div className="flex justify-between items-center gap-2 w-full">
-						<div>
-							<Badge className="italic">{snippetLang}</Badge>
+				<div className="flex flex-col w-[82vw]">
+					<div className="flex-col gap-4 bg-background-item/30 shadow-sm p-6 border border-border rounded-lg w-full">
+						{/* Header with gradient background */}
+						<div className="flex justify-between items-center mb-4 pb-4 border-b border-border">
+							<div className="flex items-center gap-2">
+								<div className="bg-primary/10 p-2 rounded-md">
+									<FileCode className="w-5 h-5 text-primary" />
+								</div>
+								<h3 className="font-semibold text-lg">Code Preview</h3>
+							</div>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="hover:bg-destructive/10 rounded-full hover:text-destructive"
+								onClick={handleDiscardSnippet}
+							>
+								<X className="w-5 h-5" />
+							</Button>
 						</div>
-						<div className="flex items-center gap-2">
+
+						{/* Language badge */}
+						<div className="flex items-center gap-2 mb-4">
+							<div className="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full font-medium text-sm">
+								{getLanguageIcon(snippetLang)}
+								<span>{firstLetterToUpper(snippetLang)}</span>
+							</div>
+						</div>
+
+						{/* Code preview with enhanced styling */}
+						<div className="border border-border rounded-md overflow-hidden">
+							<CodeBlock>
+								<CodeBlockCode code={code} language={snippetLang} theme="github-dark" />
+							</CodeBlock>
+						</div>
+
+						{/* Footer with info */}
+						<div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+							<div className="flex items-center gap-2 text-muted-foreground text-xs">
+								<span>{code.length} characters</span>
+								<span>•</span>
+								<span>Ready to post</span>
+							</div>
 							<Button
 								variant="outline"
-								className="p-5"
+								size="sm"
+								className="hover:bg-primary/10 border-primary/20 text-primary"
 								onClick={() => {
 									setIsSaved(false)
 									onSnippetPreviewAction(false)
 								}}
 							>
-								Edit
+								<PenIcon className="mr-1 w-4 h-4" />
+								Edit Code
 							</Button>
-
-							{/* <Select onValueChange={(e) => setSnippetTheme(e)}>
-								<SelectTrigger className="w-[200px]">
-									<SelectValue placeholder={snippetTheme} />
-								</SelectTrigger>
-								<SelectContent>
-									{codeViewThemes.map((theme) => (
-										<SelectItem key={theme} value={theme}>
-											{firstLetterToUpper(theme)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select> */}
 						</div>
-					</div>
-
-					<div>
-						{codeViewStyle && (
-							<CodeBlock>
-								<CodeBlockGroup className="px-4 py-2 border-b border-border">
-									<div className="flex items-center gap-2">
-										<div className="bg-primary/10 px-2 py-1 rounded font-medium text-primary text-xs">
-											{snippetLang}
-										</div>
-										{/* <span className="text-muted-foreground text-sm">GitHub Dark Theme</span> */}
-									</div>
-								</CodeBlockGroup>
-								<CodeBlockCode code={code} language={snippetLang} theme={snippetTheme} />
-							</CodeBlock>
-						)}
 					</div>
 				</div>
 			) : (
-				<div className="flex flex-col w-[82vw]">
+				<div className="flex flex-col w-[90vw]">
 					<div className="">
-						<div className="flex-col gap-2 p-4 border rounded-lg w-full">
-							<div className="flex-between">
-								<Select onValueChange={(e) => setSnippetLang(e)}>
-									<SelectTrigger className="self-end w-[130px]">
-										<SelectValue placeholder={snippetLang} />
-									</SelectTrigger>
-									<SelectContent>
-										{/* {SyntaxHighlighter.supportedLanguages.map((language: string) => (
-											<SelectItem key={language} value={language}>
-												{firstLetterToUpper(language)}
-											</SelectItem>
-										))} */}
-									</SelectContent>
-								</Select>
-
-								{code.length > 0 && <p className="text-red-400">Not saved</p>}
-
-								<Button variant="ghost" onClick={handleDiscardSnippet}>
-									<X />
+						<div className="flex-col gap-4 bg-background-item/30 shadow-sm p-6 border border-border rounded-lg w-full">
+							{/* Header with gradient background */}
+							<div className="flex justify-between items-center mb-4 pb-4 border-b border-border">
+								<div className="flex items-center gap-2">
+									<div className="bg-primary/10 p-2 rounded-md">
+										<Code className="w-5 h-5 text-primary" />
+									</div>
+									<h3 className="font-semibold text-lg">Code Snippet</h3>
+								</div>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="hover:bg-destructive/10 rounded-full hover:text-destructive"
+									onClick={handleDiscardSnippet}
+								>
+									<X className="w-5 h-5" />
 								</Button>
+							</div>
+
+							{/* Language selector with icon */}
+							<div className="flex justify-between items-center mb-4">
+								<div className="flex items-center gap-2">
+									<Select onValueChange={(e) => setSnippetLang(e)}>
+										<SelectTrigger className="bg-primary/5 border-primary/20 w-[180px]">
+											<div className="flex items-center gap-2">
+												{getLanguageIcon(snippetLang)}
+												<SelectValue placeholder={firstLetterToUpper(snippetLang)} />
+											</div>
+										</SelectTrigger>
+										<SelectContent>
+											{PROGRAMMING_LANGUAGES.map((language: string) => (
+												<SelectItem key={language} value={language}>
+													<div className="flex items-center gap-2">
+														{getLanguageIcon(language)}
+														{firstLetterToUpper(language)}
+													</div>
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+								{code.length > 0 && (
+									<div className="flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded-md font-medium text-amber-500 text-xs">
+										<div className="bg-amber-500 rounded-full w-2 h-2 animate-pulse" />
+										Unsaved changes
+									</div>
+								)}
 							</div>
 
 							<form className="w-full" onSubmit={() => setIsSaved(true)}>
@@ -190,39 +234,69 @@ export default function CodeEditor({
 										Add your code
 									</label>
 
-									<Editor
-										height="300px"
-										width="80vw"
-										value={code || ""}
-										onChange={(value) => setCode(value || "")}
-										theme="vs-dark"
-										language={snippetLang}
-										options={{
-											minimap: {
-												enabled: false,
-											},
-											fontSize: 16,
-											fontFamily: "Fira Code",
-											guides: {
-												indentation: true,
-												bracketPairs: true,
-												bracketPairsHorizontal: true,
-												highlightActiveBracketPair: true,
-												highlightActiveIndentation: true,
-											},
-										}}
-										className="bg-black-50 font-mono text-[2.1rem] text-white leading-6"
-										defaultValue={defaultCodeEditorValue}
-									/>
+									<div className="border border-border rounded-md overflow-hidden">
+										<Editor
+											height="300px"
+											width="100%"
+											value={code || ""}
+											onChange={(value) => setCode(value || "")}
+											theme="vs-dark"
+											language={snippetLang}
+											options={{
+												minimap: {
+													enabled: false,
+												},
+												fontSize: 16,
+												fontFamily: "Fira Code",
+												guides: {
+													indentation: true,
+													bracketPairs: true,
+													bracketPairsHorizontal: true,
+													highlightActiveBracketPair: true,
+													highlightActiveIndentation: true,
+												},
+												renderLineHighlight: "all",
+												lineNumbers: "on",
+												lineDecorationsWidth: 10,
+												lineNumbersMinChars: 3,
+												scrollBeyondLastLine: false,
+												cursorBlinking: "smooth",
+												cursorSmoothCaretAnimation: "on",
+												roundedSelection: true,
+											}}
+											className="font-mono"
+											defaultValue={defaultCodeEditorValue}
+										/>
+									</div>
 								</div>
-								<div className="flex justify-between pt-2">
-									<div className="flex items-center space-x-5" />
-									<div className="flex-shrink-0">
+								{/* Footer with action buttons */}
+								<div className="flex justify-between items-center mt-2 pt-4 border-t border-border">
+									<div className="flex items-center gap-2 text-muted-foreground text-xs">
+										<div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded">
+											{getLanguageIcon(snippetLang)}
+											<span>{firstLetterToUpper(snippetLang)}</span>
+										</div>
+										<span>•</span>
+										<span>{code.length} characters</span>
+									</div>
+									<div className="flex items-center gap-2">
 										<Button
-											onClick={handlePreviewSnippet}
-											className="inline-flex items-center bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-md font-semibold text-white text-sm"
+											variant="secondary"
+											size="sm"
+											onClick={handleDiscardSnippet}
+											className="hover:bg-destructive/10 border-destructive/30 text-destructive"
 										>
-											Save
+											<X className="mr-1 w-4 h-4" />
+											Discard
+										</Button>
+										<Button
+											variant="default"
+											size="sm"
+											onClick={handlePreviewSnippet}
+											className="bg-primary hover:bg-primary/90"
+										>
+											<Check className="mr-1 w-4 h-4" />
+											Save Snippet
 										</Button>
 									</div>
 								</div>
