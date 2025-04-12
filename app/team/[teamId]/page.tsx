@@ -1,5 +1,6 @@
 "use client"
 
+import { Badge } from "@components/ui/Badge"
 import { Button } from "@components/ui/Button"
 import { Dialog, DialogContent } from "@components/ui/Dialog"
 import { postWidths } from "@components/ui/post"
@@ -14,6 +15,7 @@ import { useRouter } from "next/navigation"
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { isTeamAdmin } from "../../../utils/team.helpers"
 
 type TeamParams = { teamId: string }
 
@@ -29,6 +31,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 	const [isPublic, setIsPublic] = useState<boolean>(false)
 	const [updating, setUpdating] = useState<boolean>(false)
 	const [isMember, setIsMember] = useState<boolean>(false) // Default to false until we check
+	const [isAdmin, setIsAdmin] = useState<boolean>(false) // Track if user is an admin
 	const [hasRequestedToJoin, setHasRequestedToJoin] = useState<boolean>(false)
 	const [isJoining, setIsJoining] = useState<boolean>(false)
 	const [isLeaving, setIsLeaving] = useState<boolean>(false)
@@ -46,13 +49,50 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 			// Set public status
 			setIsPublic(team.clientMetadata?.isPublic === true)
 
+			// Check if the user is an admin
+			if (team.clientMetadata?.admins) {
+				const adminStatus = isTeamAdmin(team, user.id)
+				console.log("Setting admin status:", adminStatus)
+				setIsAdmin(adminStatus)
+			} else if (hasUpdatePermission) {
+				// If there are no admins set and the user has update permission,
+				// they are likely the creator, so set them as admin
+				console.log("No admins set, current user has update permission. Setting as admin.")
+				setIsAdmin(true)
+
+				// Call API to set the user as admin
+				const setAdminAsync = async () => {
+					try {
+						const response = await fetch("/api/team/create", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								teamId: team.id,
+								userId: user.id,
+							}),
+						})
+
+						if (response.ok) {
+							console.log("Successfully set creator as admin")
+						} else {
+							console.error("Failed to set creator as admin")
+						}
+					} catch (error) {
+						console.error("Error setting admin:", error)
+					}
+				}
+
+				setAdminAsync()
+			}
+
 			// Check if the user is a member of the team
 			// This is the most reliable way to check membership
 			const checkMembership = async () => {
 				try {
 					// First check: If users is not null, the user is definitely a member
 					if (users !== null) {
-						console.log("User is a member (users check)")
 						setIsMember(true)
 						return
 					}
@@ -86,11 +126,11 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 
 			checkMembership()
 		}
-	}, [team, users])
+	}, [team, users, user?.id, hasUpdatePermission])
 
 	// Function to toggle public status
 	async function togglePublicStatus() {
-		if (!team || !hasUpdatePermission) return
+		if (!team || !isAdmin) return
 
 		try {
 			setUpdating(true)
@@ -278,7 +318,10 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 			) : null}
 
 			<div className="flex justify-between items-center mb-6">
-				<h1 className="font-bold text-2xl">{team.displayName}</h1>
+				<div className="flex items-center gap-2">
+					<h1 className="font-bold text-2xl">{team.displayName}</h1>
+					{isAdmin && <Badge variant="default">Admin</Badge>}
+				</div>
 
 				<div className="flex gap-2">
 					<Link href={ROUTE.TEAMS}>
@@ -308,7 +351,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 					)}
 
 					{/* Show Leave Team button for members who are not admins */}
-					{isMember && !hasUpdatePermission && (
+					{isMember && !isAdmin && (
 						<Button
 							onClick={() => setShowLeaveConfirmation(true)}
 							variant="destructive"
@@ -319,7 +362,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 					)}
 
 					{/* Show Make Public/Private button for team admins */}
-					{hasUpdatePermission && (
+					{isAdmin && (
 						<Button
 							onClick={togglePublicStatus}
 							disabled={updating}
@@ -330,7 +373,7 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 					)}
 
 					{/* Show Leave Team button for admins */}
-					{isMember && hasUpdatePermission && (
+					{isMember && isAdmin && (
 						<Button
 							onClick={() => setShowLeaveConfirmation(true)}
 							variant="destructive"
@@ -359,28 +402,36 @@ export default function TeamPage({ params }: { params: TeamParams }) {
 			)}
 
 			{/* Show join requests for team admins */}
-			{isMember && hasUpdatePermission && <TeamJoinRequests teamId={team.id} />}
+			{isMember && isAdmin && <TeamJoinRequests teamId={team.id} />}
 
+			{/* Show team members */}
 			<div className="bg-white shadow mb-6 p-6 rounded-lg">
 				<h2 className="mb-4 font-semibold text-xl">Team Members</h2>
 				<div className="space-y-2">
 					{isMember ? (
-						users?.map((user) => (
-							<div key={user.id} className="flex items-center hover:bg-gray-50 p-2 rounded">
-								{user.teamProfile.profileImageUrl ? (
-									<img
-										src={user.teamProfile.profileImageUrl}
-										alt={user.teamProfile.displayName || "Team Member"}
-										className="mr-3 rounded-full w-8 h-8"
-									/>
-								) : (
-									<div className="flex justify-center items-center bg-gray-200 mr-3 rounded-full w-8 h-8">
-										{(user.teamProfile.displayName || "A").charAt(0)}
-									</div>
-								)}
-								<span>{user.teamProfile.displayName || "Team Member"}</span>
-							</div>
-						))
+						users?.map((user) => {
+							// Determine if this user is an admin
+							const userRole = isTeamAdmin(team, user.id) ? "admin" : "member"
+							return (
+								<div key={user.id} className="flex items-center hover:bg-gray-50 p-2 rounded">
+									{user.teamProfile.profileImageUrl ? (
+										<img
+											src={user.teamProfile.profileImageUrl}
+											alt={user.teamProfile.displayName || "Team Member"}
+											className="mr-3 rounded-full w-8 h-8"
+										/>
+									) : (
+										<div className="flex justify-center items-center bg-gray-200 mr-3 rounded-full w-8 h-8">
+											{(user.teamProfile.displayName || "A").charAt(0)}
+										</div>
+									)}
+									<span className="flex-grow">{user.teamProfile.displayName || "Team Member"}</span>
+									<Badge variant={userRole === "admin" ? "default" : "outline"}>
+										{userRole === "admin" ? "Admin" : "Member"}
+									</Badge>
+								</div>
+							)
+						})
 					) : (
 						<div className="py-4 text-gray-500 text-center">
 							{isPublic

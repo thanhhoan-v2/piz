@@ -189,6 +189,7 @@ export default function PostCommentsDialog({
 							postImageUrl={null}
 							postVideoUrl={null}
 							snippetId={null}
+							teamId={null}
 						/>
 
 						<PostContent

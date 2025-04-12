@@ -30,13 +30,23 @@ export async function GET(request: Request, { params }: { params: { teamId: stri
 			// If there's an error, we'll default to false
 		}
 
-		// Return the team information with membership status
+		// Check if the current user is an admin
+		let isAdmin = false
+		if (currentUser && team.clientMetadata?.admins) {
+			isAdmin =
+				Array.isArray(team.clientMetadata.admins) &&
+				team.clientMetadata.admins.includes(currentUser.id)
+		}
+
+		// Return the team information with membership and admin status
 		return NextResponse.json({
 			id: team.id,
 			displayName: team.displayName,
 			profileImageUrl: team.profileImageUrl,
 			isPublic: team.clientMetadata?.isPublic === true,
 			isMember: isMember,
+			isAdmin: isAdmin,
+			admins: team.clientMetadata?.admins || [],
 		})
 	} catch (error) {
 		console.error("Error fetching team info:", error)

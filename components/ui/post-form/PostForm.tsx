@@ -396,11 +396,10 @@ export default function PostForm({
 			setIsAddingVideo(false)
 
 			setSnippetId(null)
-			// Snippet storage removal removed
 
 			setPostVideoUrl(null)
 			setPostImageUrl(null)
-			storageRemovePostMediaFiles() // Keep media files storage removal
+			storageRemovePostMediaFiles()
 
 			// Call the onSuccess callback if provided
 			if (onSuccess) {
@@ -552,13 +551,15 @@ export default function PostForm({
 						setIsAddingImage={setIsAddingImage}
 						setIsAddingVideo={setIsAddingVideo}
 						setIsAddingSnippet={setIsAddingSnippet}
-						// Removed setAlertSnippetDiscard prop
 						handleSubmitPost={handleSubmitPost}
 						handleFakePost={handleFakePost}
 						isAddingImage={isAddingImage}
 						isAddingVideo={isAddingVideo}
 						isAddingSnippet={isAddingSnippet}
 						isSnippetPreviewed={snippetPreview}
+						setAlertSnippetDiscard={function (value: boolean): void {
+							throw new Error("Function not implemented.")
+						}}
 					/>
 				</DrawerContent>
 			</Drawer>

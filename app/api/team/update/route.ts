@@ -19,9 +19,13 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "Team not found" }, { status: 404 })
 		}
 
-		// Update the team's client metadata to set the new public status
+		// Get existing metadata to preserve other fields like admins
+		const existingMetadata = team.clientMetadata || {}
+
+		// Update the team's client metadata to set the new public status while preserving other fields
 		await team.update({
 			clientMetadata: {
+				...existingMetadata,
 				isPublic: isPublic === true, // Ensure isPublic is explicitly set to a boolean
 			},
 		})

@@ -3,8 +3,8 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
 	try {
-		// Get the current user
-		const currentUser = await stackServerApp.getCurrentUser()
+		// Get the user
+		const currentUser = await stackServerApp.getUser()
 
 		// Get all teams
 		const allTeams = await stackServerApp.listTeams()
@@ -13,8 +13,22 @@ export async function GET() {
 		const publicTeams = allTeams.filter((team) => team.clientMetadata?.isPublic === true)
 
 		// Get the teams the current user is a member of
-		const userTeams = currentUser ? await currentUser.getTeams() : []
-		const userTeamIds = userTeams.map((team) => team.id)
+		let userTeamIds: string[] = []
+		if (currentUser) {
+			// If we have a user, check which teams they're a member of
+			userTeamIds = await Promise.all(
+				publicTeams.map(async (team) => {
+					try {
+						// Try to get the user's team profile
+						const teamProfile = await currentUser.getTeamProfile(team)
+						return teamProfile ? team.id : null
+					} catch (error) {
+						console.error(`Error getting team profile for team ${team.id}:`, error)
+						return null
+					}
+				}),
+			).then((ids) => ids.filter((id): id is string => id !== null))
+		}
 
 		// Map to return only necessary data
 		const formattedTeams = await Promise.all(
@@ -25,7 +39,7 @@ export async function GET() {
 				// Get member count
 				let memberCount = 0
 				try {
-					const members = await team.getUsers()
+					const members = await team.listUsers()
 					memberCount = members ? members.length : 0
 				} catch (error) {
 					console.error(`Error getting members for team ${team.id}:`, error)

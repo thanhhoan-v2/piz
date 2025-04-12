@@ -129,7 +129,7 @@ export default function PostContent({
 							<div style={{ display: isVideoLoading ? 'none' : 'block' }}>
 								<VideoPlayer 
 									src={postVideoUrl} 
-									onLoad={() => setIsVideoLoading(false)}
+									onLoadedData={() => setIsVideoLoading(false)}
 								/>
 							</div>
 						</div>
@@ -143,7 +143,7 @@ export default function PostContent({
 									<Skeleton className="rounded-b-none w-full h-10" />
 									<Skeleton className="rounded-t-none w-full h-[200px]" />
 								</div>
-							) : snippet && snippet?.value && snippet?.lang ? (
+							) : snippet?.value && snippet?.lang ? (
 								<CodeBlock>
 									<CodeBlockGroup className="px-4 py-2 border-b border-border">
 										<div className="flex items-center gap-2">
