@@ -142,7 +142,13 @@ export default function PostContent({
 								</div>
 							)}
 							<div style={{ display: isVideoLoading ? "none" : "block" }}>
-								<VideoPlayer src={postVideoUrl} />
+								<VideoPlayer
+									src={postVideoUrl}
+									onLoaded={() => {
+										console.log("[POST] Video loaded in post content")
+										setIsVideoLoading(false)
+									}}
+								/>
 							</div>
 						</div>
 					)}

@@ -27,20 +27,51 @@ export function VideoUploadForm({
 
 	const supabase = createSupabaseBrowserClient()
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We only want to run this once on mount
 	useEffect(() => {
 		const storedPostVideoUrl = localStorage.getItem("postVideoUrl")
-		if (storedPostVideoUrl) setUploadedVideoPath(storedPostVideoUrl)
-	}, [])
+		if (storedPostVideoUrl) {
+			console.log("[UPLOAD] Found stored video URL:", storedPostVideoUrl)
+			setUploadedVideoPath(storedPostVideoUrl)
+
+			// Get the bucket path from the URL
+			const urlParts = storedPostVideoUrl.split(SUPABASE_STORAGE_PREFIX_URL)
+			if (urlParts.length > 1) {
+				setUploadedVideoBucketFolder(urlParts[1])
+			}
+
+			// Notify parent component
+			onVideoUploadAction(storedPostVideoUrl)
+		}
+	}, [onVideoUploadAction, SUPABASE_STORAGE_PREFIX_URL])
 
 	const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
 		setUploading(true)
 
 		try {
 			if (!event?.target.files || event.target.files.length === 0) {
-				throw new Error("You must select an image to upload.")
+				throw new Error("You must select a video to upload.")
 			}
 
 			const file = event.target.files[0]
+
+			// Validate file type
+			if (!file.type.startsWith("video/")) {
+				throw new Error("Please select a valid video file.")
+			}
+
+			// Validate file size (100MB max)
+			const MAX_SIZE = 100 * 1024 * 1024 // 100MB
+			if (file.size > MAX_SIZE) {
+				throw new Error("Video file is too large. Maximum size is 100MB.")
+			}
+
+			console.log("[UPLOAD] Uploading video file:", {
+				name: file.name,
+				type: file.type,
+				size: `${(file.size / (1024 * 1024)).toFixed(2)}MB`,
+			})
+
 			const fileExtension = file.name.split(".").pop()
 			const fileName = `${Math.random()}.${fileExtension}`
 			const filePath = `${fileName}`
@@ -54,16 +85,20 @@ export function VideoUploadForm({
 			}
 
 			const urlPath = SUPABASE_STORAGE_PREFIX_URL + data.path
+			console.log("[UPLOAD] Video uploaded successfully:", urlPath)
 
 			if (data) {
 				setUploadedVideoPath(urlPath)
 				setUploadedVideoBucketFolder(data.path)
 				onVideoUploadAction(urlPath)
 				localStorage.setItem("postVideoUrl", urlPath)
+
+				// Note: We keep uploading=true until the video player signals it's loaded
+				// The VideoPlayer component will call setUploading(false) when the video is ready
 			}
 		} catch (error) {
-			console.error("Error uploading file:", error)
-		} finally {
+			console.error("[UPLOAD] Error uploading video file:", error)
+			alert(error instanceof Error ? error.message : "Failed to upload video. Please try again.")
 			setUploading(false)
 		}
 	}
@@ -119,7 +154,13 @@ export function VideoUploadForm({
 								}
 							>
 								<div className="relative bg-muted rounded-md overflow-hidden">
-									<VideoPlayer src={uploadedVideoPath} />
+									<VideoPlayer
+										src={uploadedVideoPath}
+										onLoaded={() => {
+											console.log("[UPLOAD] Video loaded in upload form")
+											setUploading(false)
+										}}
+									/>
 								</div>
 							</Suspense>
 						</div>

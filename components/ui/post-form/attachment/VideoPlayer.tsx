@@ -23,10 +23,7 @@ const CustomSlider = ({
 }) => {
 	return (
 		<motion.div
-			className={cn(
-				"relative h-1 w-full cursor-pointer rounded-full bg-white/20",
-				className,
-			)}
+			className={cn("relative h-1 w-full cursor-pointer rounded-full bg-white/20", className)}
 			onClick={(e) => {
 				const rect = e.currentTarget.getBoundingClientRect()
 				const x = e.clientX - rect.left
@@ -35,7 +32,7 @@ const CustomSlider = ({
 			}}
 		>
 			<motion.div
-				className="absolute top-0 left-0 h-full rounded-full bg-white"
+				className="top-0 left-0 absolute bg-white rounded-full h-full"
 				style={{ width: `${value}%` }}
 				initial={{ width: 0 }}
 				animate={{ width: `${value}%` }}
@@ -45,7 +42,13 @@ const CustomSlider = ({
 	)
 }
 
-const VideoPlayer = ({ src }: { src: string | undefined }) => {
+const VideoPlayer = ({
+	src,
+	onLoaded,
+}: {
+	src: string | undefined
+	onLoaded?: () => void
+}) => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [isPlaying, setIsPlaying] = useState(false)
 	const [volume, setVolume] = useState(1)
@@ -78,8 +81,7 @@ const VideoPlayer = ({ src }: { src: string | undefined }) => {
 
 	const handleTimeUpdate = () => {
 		if (videoRef.current) {
-			const progress =
-				(videoRef.current.currentTime / videoRef.current.duration) * 100
+			const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100
 			setProgress(Number.isFinite(progress) ? progress : 0)
 			setCurrentTime(videoRef.current.currentTime)
 			setDuration(videoRef.current.duration)
@@ -118,7 +120,7 @@ const VideoPlayer = ({ src }: { src: string | undefined }) => {
 
 	return (
 		<motion.div
-			className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-xl bg-[#11111198] shadow-[0_0_20px_rgba(0,0,0,0.2)] backdrop-blur-sm"
+			className="relative bg-[#11111198] shadow-[0_0_20px_rgba(0,0,0,0.2)] backdrop-blur-sm mx-auto rounded-xl w-full max-w-4xl overflow-hidden"
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5 }}
@@ -131,7 +133,19 @@ const VideoPlayer = ({ src }: { src: string | undefined }) => {
 					className="w-full"
 					onTimeUpdate={handleTimeUpdate}
 					src={src}
+					preload="auto"
+					playsInline
 					onClick={togglePlay}
+					onLoadedData={() => {
+						console.log("[VIDEO] Video loaded successfully:", src)
+						if (onLoaded) onLoaded()
+					}}
+					onLoadedMetadata={() => {
+						console.log("[VIDEO] Video metadata loaded")
+					}}
+					onError={(e) => {
+						console.error("[VIDEO] Error loading video:", e)
+					}}
 				/>
 			) : (
 				<h3>Cannot find your video</h3>
@@ -140,80 +154,57 @@ const VideoPlayer = ({ src }: { src: string | undefined }) => {
 			<AnimatePresence>
 				{showControls && (
 					<motion.div
-						className="absolute right-0 bottom-0 left-0 m-2 mx-auto max-w-xl rounded-2xl bg-[#11111198] p-4 backdrop-blur-md"
+						className="right-0 bottom-0 left-0 absolute bg-[#11111198] backdrop-blur-md m-2 mx-auto p-4 rounded-2xl max-w-xl"
 						initial={{ y: 20, opacity: 0, filter: "blur(10px)" }}
 						animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
 						exit={{ y: 20, opacity: 0, filter: "blur(10px)" }}
 						transition={{ duration: 0.6, ease: "circInOut", type: "spring" }}
 					>
-						<div className="mb-2 flex items-center gap-2">
-							<span className="text-sm text-white">
-								{formatTime(currentTime)}
-							</span>
-							<CustomSlider
-								value={progress}
-								onChange={handleSeek}
-								className="flex-1"
-							/>
-							<span className="text-sm text-white">{formatTime(duration)}</span>
+						<div className="flex items-center gap-2 mb-2">
+							<span className="text-white text-sm">{formatTime(currentTime)}</span>
+							<CustomSlider value={progress} onChange={handleSeek} className="flex-1" />
+							<span className="text-white text-sm">{formatTime(duration)}</span>
 						</div>
 
-						<div className="flex items-center justify-between">
+						<div className="flex justify-between items-center">
 							<div className="flex items-center gap-4">
-								<motion.div
-									whileHover={{ scale: 1.1 }}
-									whileTap={{ scale: 0.9 }}
-								>
+								<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
 									<Button
 										onClick={togglePlay}
 										variant="ghost"
 										size="icon"
-										className="text-white hover:bg-[#111111d1] hover:text-white"
+										className="hover:bg-[#111111d1] text-white hover:text-white"
 									>
-										{isPlaying ? (
-											<Pause className="h-5 w-5" />
-										) : (
-											<Play className="h-5 w-5" />
-										)}
+										{isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
 									</Button>
 								</motion.div>
 								<div className="flex items-center gap-x-1">
-									<motion.div
-										whileHover={{ scale: 1.1 }}
-										whileTap={{ scale: 0.9 }}
-									>
+									<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
 										<Button
 											onClick={toggleMute}
 											variant="ghost"
 											size="icon"
-											className="text-white hover:bg-[#111111d1] hover:text-white"
+											className="hover:bg-[#111111d1] text-white hover:text-white"
 										>
 											{isMuted ? (
-												<VolumeX className="h-5 w-5" />
+												<VolumeX className="w-5 h-5" />
 											) : volume > 0.5 ? (
-												<Volume2 className="h-5 w-5" />
+												<Volume2 className="w-5 h-5" />
 											) : (
-												<Volume1 className="h-5 w-5" />
+												<Volume1 className="w-5 h-5" />
 											)}
 										</Button>
 									</motion.div>
 
 									<div className="w-24">
-										<CustomSlider
-											value={volume * 100}
-											onChange={handleVolumeChange}
-										/>
+										<CustomSlider value={volume * 100} onChange={handleVolumeChange} />
 									</div>
 								</div>
 							</div>
 
 							<div className="flex items-center gap-2">
 								{[0.5, 1, 1.5, 2].map((speed) => (
-									<motion.div
-										whileHover={{ scale: 1.1 }}
-										whileTap={{ scale: 0.9 }}
-										key={speed}
-									>
+									<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} key={speed}>
 										<Button
 											onClick={() => setSpeed(speed)}
 											variant="ghost"
