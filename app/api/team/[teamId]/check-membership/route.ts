@@ -1,10 +1,9 @@
 import { stackServerApp } from "@/stack"
 import { NextResponse } from "next/server"
 
-export async function GET(_request: Request, context: { params: { teamId: string } }) {
-	const { params } = context
+export async function GET(_request: Request, { params }: { params: Promise<{ teamId: string }> }) {
 	try {
-		const teamId = params.teamId
+		const { teamId } = await params
 
 		if (!teamId) {
 			return NextResponse.json({ error: "Team ID is required" }, { status: 400 })
