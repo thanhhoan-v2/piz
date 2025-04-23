@@ -19,8 +19,8 @@ import { isTeamAdmin } from "../../../utils/team.helpers"
 
 type TeamParams = { teamId: string }
 
-export default function TeamPage({ params }: { params: TeamParams }) {
-	const unwrappedParams = React.use(params as unknown as Promise<TeamParams>)
+export default function TeamPage({ params }: { params: Promise<TeamParams> }) {
+	const unwrappedParams = React.use(params)
 	const teamId = unwrappedParams.teamId
 	const user = useUser({ or: "redirect" })
 	const team = user.useTeam(teamId)
