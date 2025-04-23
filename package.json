@@ -2,7 +2,7 @@
 	"private": true,
 	"scripts": {
 		"postinstall": "prisma generate",
-		"vercel-build": "prisma generate && node scripts/fix-migrations.js && prisma migrate deploy && next build",
+		"vercel-build": "prisma generate && node scripts/fix-migrations.js && next build",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
@@ -12,8 +12,7 @@
 		"db:migrate": "npx prisma generate && npx prisma migrate dev",
 		"db:reset": "npx prisma migrate reset",
 		"db:status": "npx prisma migrate status",
-		"db:studio": "npx prisma studio",
-		"db:fix-migrations": "node scripts/fix-migrations.js"
+		"db:studio": "npx prisma studio"
 	},
 	"dependencies": {
 		"@ai-sdk/react": "^1.1.19",
