@@ -27,10 +27,23 @@ export default function ImageUploadForm({
 
 	const supabase = createSupabaseBrowserClient()
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We only want to run this once on mount
 	useEffect(() => {
 		const storedPostImageUrl = localStorage.getItem("postImageUrl")
-		if (storedPostImageUrl) setUploadedImageUrl(storedPostImageUrl)
-	}, [])
+		if (storedPostImageUrl) {
+			console.log("[IMAGE] Found stored image URL:", storedPostImageUrl)
+			setUploadedImageUrl(storedPostImageUrl)
+
+			// Get the bucket path from the URL
+			const urlParts = storedPostImageUrl.split(SUPABASE_STORAGE_PREFIX_URL)
+			if (urlParts.length > 1) {
+				setUploadedImageBucketFolder(urlParts[1])
+			}
+
+			// Notify parent component
+			onImageUploadAction(storedPostImageUrl)
+		}
+	}, [onImageUploadAction, SUPABASE_STORAGE_PREFIX_URL])
 
 	const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
 		setUploading(true)
@@ -41,6 +54,24 @@ export default function ImageUploadForm({
 			}
 
 			const file = event.target.files[0]
+
+			// Validate file type
+			if (!file.type.startsWith("image/")) {
+				throw new Error("Please select a valid image file.")
+			}
+
+			// Validate file size (10MB max)
+			const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+			if (file.size > MAX_SIZE) {
+				throw new Error("Image file is too large. Maximum size is 10MB.")
+			}
+
+			console.log("[IMAGE] Uploading image file:", {
+				name: file.name,
+				type: file.type,
+				size: `${(file.size / (1024 * 1024)).toFixed(2)}MB`,
+			})
+
 			const fileExtension = file.name.split(".").pop()
 			const fileName = `${Math.random()}.${fileExtension}`
 			const filePath = `${fileName}`
@@ -54,16 +85,20 @@ export default function ImageUploadForm({
 			}
 
 			const urlPath = SUPABASE_STORAGE_PREFIX_URL + data.path
+			console.log("[IMAGE] Image uploaded successfully:", urlPath)
 
 			if (data) {
 				setUploadedImageUrl(urlPath)
 				setUploadedImageBucketFolder(data.path)
 				onImageUploadAction(urlPath)
 				localStorage.setItem("postImageUrl", urlPath)
+
+				// We'll keep the loading state active until the image is fully loaded in the UI
+				// The onLoad handler in the Image component will set uploading to false
 			}
 		} catch (error) {
-			console.error("Error uploading file:", error)
-		} finally {
+			console.error("[IMAGE] Error uploading image file:", error)
+			alert(error instanceof Error ? error.message : "Failed to upload image. Please try again.")
 			setUploading(false)
 		}
 	}
@@ -124,6 +159,14 @@ export default function ImageUploadForm({
 										src={uploadedImagePath}
 										alt="Uploaded Image"
 										className="object-cover hover:scale-105 transition-all"
+										onLoad={() => {
+											console.log("[IMAGE] Image loaded in upload form")
+											setUploading(false)
+										}}
+										onError={() => {
+											console.error("[IMAGE] Error loading image in upload form")
+											setUploading(false)
+										}}
 									/>
 								</div>
 							</Suspense>

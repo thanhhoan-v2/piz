@@ -55,6 +55,22 @@ export default function PostContent({
 		}
 	}, [snippetId])
 
+	// Update image loading state when the image URL changes
+	useEffect(() => {
+		if (postImageUrl) {
+			console.log("[POST] Setting up image loading for:", postImageUrl)
+			setIsImageLoading(true)
+		}
+	}, [postImageUrl])
+
+	// Update video loading state when the video URL changes
+	useEffect(() => {
+		if (postVideoUrl) {
+			console.log("[POST] Setting up video loading for:", postVideoUrl)
+			setIsVideoLoading(true)
+		}
+	}, [postVideoUrl])
+
 	const clientGetSnippetById = async () => {
 		if (!snippetId) {
 			setIsSnippetLoading(false)
@@ -65,7 +81,7 @@ export default function PostContent({
 			console.log("[SNIPPET] Fetching snippet with ID:", snippetId)
 			const data = await getSnippetById(snippetId)
 
-			if (data && data.value && data.lang) {
+			if (data?.value && data?.lang) {
 				console.log("[SNIPPET] Successfully fetched snippet:", {
 					id: snippetId,
 					lang: data.lang,
@@ -127,7 +143,15 @@ export default function PostContent({
 									height={300}
 									src={postImageUrl}
 									alt="Uploaded Image"
-									onLoad={() => setIsImageLoading(false)}
+									priority
+									onLoad={() => {
+										console.log("[POST] Image loaded in post content")
+										setIsImageLoading(false)
+									}}
+									onError={() => {
+										console.error("[POST] Error loading image in post content")
+										setIsImageLoading(false)
+									}}
 								/>
 							</div>
 						</div>
