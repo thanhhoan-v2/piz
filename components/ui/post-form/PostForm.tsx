@@ -5,6 +5,7 @@ import {
 	PostVisibilityEnumArray,
 	type PostVisibilityEnumType,
 } from "@/types/post.types"
+import { Button } from "@components/ui/Button"
 import { Drawer, DrawerContent, DrawerTrigger } from "@components/ui/Drawer"
 import WelcomeModal from "@components/ui/modal/WelcomeModal"
 import { PostFormAlerts } from "@components/ui/post-form/PostFormAlerts"
@@ -65,12 +66,14 @@ export default function PostForm({
 	const [isAddingSnippet, setIsAddingSnippet] = React.useState<boolean>(false)
 	const [isAddingVideo, setIsAddingVideo] = React.useState<boolean>(false)
 	const [isAddingImage, setIsAddingImage] = React.useState<boolean>(false)
+	const [snippetDiscardAlert, setAlertSnippetDiscard] = React.useState<boolean>(false)
 
 	const [postImageUrl, setPostImageUrl] = React.useState<string | null>(null)
 	const [postVideoUrl, setPostVideoUrl] = React.useState<string | null>(null)
 	const [snippetId, setSnippetId] = React.useState<string | null>(null)
 	const [snippetCode, setSnippetCode] = useState<string>("")
 	const [snippetLang, setSnippetLang] = useState<string>("javascript")
+	// Theme is not currently used but kept for future enhancements
 	const [snippetTheme, setSnippetTheme] = useState<string>("dark")
 	const [snippetPreview, setSnippetPreview] = useState<boolean>(false)
 
@@ -261,17 +264,45 @@ export default function PostForm({
 		mutationKey: queryKey.post.insert(),
 		mutationFn: async (newPost: CreatePostProps) => {
 			// Handle snippet creation first if needed
-			if (isAddingSnippet == true && snippetId) {
+			if (isAddingSnippet && snippetCode && snippetCode.trim() !== "") {
 				try {
+					// Generate a snippet ID if one doesn't exist
+					const snippetIdToUse = snippetId || generateBase64uuid()
+
+					// Update snippetId if it was just generated
+					if (!snippetId) {
+						console.log("[POST] Generated new snippet ID in mutation:", snippetIdToUse)
+					}
+
 					const newSnippet: CreateSnippetProps = {
-						id: snippetId,
+						id: snippetIdToUse,
 						userId: userId,
 						value: snippetCode,
-						lang: snippetLang,
-						theme: "github-dark",
+						lang: snippetLang || "javascript",
 					}
-					await createSnippet(newSnippet)
+
+					console.log("[POST] Creating snippet with data:", {
+						id: snippetIdToUse,
+						lang: snippetLang,
+						valueLength: snippetCode.length,
+					})
+
+					// Create the snippet
+					const createdSnippet = await createSnippet(newSnippet)
+
+					if (!createdSnippet) {
+						throw new Error("Failed to create snippet - no response from server")
+					}
+
+					console.log("[POST] Successfully created snippet with ID:", snippetIdToUse)
+
+					// Make sure the post uses the correct snippet ID
+					newPost.snippetId = snippetIdToUse
+
+					// Update the snippet cache
+					queryClient.setQueryData(queryKey.snippet.selectId(snippetIdToUse), createdSnippet)
 				} catch (error) {
+					console.error("[POST] Failed to save code snippet:", error)
 					throw new Error("Failed to save code snippet")
 				}
 			}
@@ -448,6 +479,26 @@ export default function PostForm({
 			return
 		}
 
+		// Validate snippet if adding one
+		if (isAddingSnippet) {
+			if (!snippetCode || snippetCode.trim() === "") {
+				toast.error("Code snippet cannot be empty")
+				return
+			}
+
+			if (!snippetPreview) {
+				toast.error("Please save your code snippet before posting")
+				return
+			}
+
+			if (!snippetId) {
+				// Generate a snippet ID if one doesn't exist
+				const newSnippetId = generateBase64uuid()
+				console.log("[POST] Generated new snippet ID in handleSubmitPost:", newSnippetId)
+				setSnippetId(newSnippetId)
+			}
+		}
+
 		setOpenDrawer(false)
 
 		const date = new Date()
@@ -460,33 +511,36 @@ export default function PostForm({
 			content: postContent,
 			postImageUrl: postImageUrl,
 			postVideoUrl: postVideoUrl,
-			snippetId: snippetId,
+			snippetId: isAddingSnippet ? snippetId : null,
 			teamId: teamId || null, // Add teamId if provided
 		}
 
 		// Show toast notification while creating the post
-		// const toastId = toast.loading("Start to create your post...")
+		const toastId = toast.loading("Creating your post...")
 
 		// Add to creating posts list to show banner
 		addCreatingPost(newPost.id)
 
 		// Mutate and update toast based on result
 		addPostMutation.mutate(newPost, {
-			// onSuccess: () => {
-			// 	// Dismiss the loading toast and show success message
-			// 	const successMessage = teamId
-			// 		? "Your team post has been created."
-			// 		: "Your post has been created."
-			// 	toast.success(successMessage, {
-			// 		id: toastId, // Replace the loading toast with success
-			// 	})
+			onSuccess: () => {
+				// Dismiss the loading toast and show success message
+				const successMessage = teamId
+					? "Your team post has been created."
+					: "Your post has been created."
+				toast.success(successMessage, {
+					id: toastId, // Replace the loading toast with success
+				})
 
-			// 	// We'll keep the banner until the post appears in the list
-			// 	// The PostList component will handle removing it
-			// },
-			onError: () => {
-				// Dismiss the loading toast
-				// toast.dismiss(toastId)
+				// We'll keep the banner until the post appears in the list
+				// The PostList component will handle removing it
+			},
+			onError: (error) => {
+				// Dismiss the loading toast and show error message
+				toast.error("Failed to create post. Please try again.", {
+					id: toastId,
+				})
+				console.error("Error creating post:", error)
 
 				// Remove from creating posts list
 				removeCreatingPost(newPost.id)
@@ -525,11 +579,18 @@ export default function PostForm({
 						handleSelectUser={handleSelectUser}
 						// Snippet's
 						isAddingSnippet={isAddingSnippet}
-						setIsAddingSnippet={setIsAddingSnippet}
+						setIsAddingSnippet={(value) => {
+							// Generate a snippet ID when adding a snippet
+							if (value && !snippetId) {
+								const newSnippetId = generateBase64uuid()
+								console.log("[POST] Generated new snippet ID:", newSnippetId)
+								setSnippetId(newSnippetId)
+							}
+							setIsAddingSnippet(value)
+						}}
 						onSnippetUpload={(id) => setSnippetId(id)}
 						onSnippetCodeChange={(code) => setSnippetCode(code)}
 						onSnippetLangChange={(lang) => setSnippetLang(lang)}
-						onSnippetThemeChange={(theme) => setSnippetTheme(theme)}
 						onSnippetPreview={(isSnippetPreviewed) => setSnippetPreview(isSnippetPreviewed)}
 						onSnippetRemove={() => {
 							setSnippetId(null)
@@ -557,9 +618,7 @@ export default function PostForm({
 						isAddingVideo={isAddingVideo}
 						isAddingSnippet={isAddingSnippet}
 						isSnippetPreviewed={snippetPreview}
-						setAlertSnippetDiscard={function (value: boolean): void {
-							throw new Error("Function not implemented.")
-						}}
+						setAlertSnippetDiscard={setAlertSnippetDiscard}
 					/>
 				</DrawerContent>
 			</Drawer>
@@ -571,6 +630,36 @@ export default function PostForm({
 				handlePostDiscard={handlePostDiscard}
 				hasContent={hasUnsavedContent()}
 			/>
+
+			{/* Snippet Discard Alert */}
+			{snippetDiscardAlert && (
+				<div className="z-50 fixed inset-0 flex justify-center items-center bg-black/50">
+					<div className="bg-background-item p-6 rounded-lg w-full max-w-md">
+						<h3 className="mb-4 font-semibold text-xl">Discard Code Snippet?</h3>
+						<p className="mb-6 text-muted-foreground">
+							Are you sure you want to discard this code snippet? Your changes will be lost.
+						</p>
+						<div className="flex justify-end gap-3">
+							<Button variant="outline" onClick={() => setAlertSnippetDiscard(false)}>
+								Cancel
+							</Button>
+							<Button
+								variant="destructive"
+								onClick={() => {
+									setIsAddingSnippet(false)
+									setSnippetId(null)
+									setSnippetCode("")
+									setSnippetLang("javascript")
+									setSnippetPreview(false)
+									setAlertSnippetDiscard(false)
+								}}
+							>
+								Discard
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	)
 }

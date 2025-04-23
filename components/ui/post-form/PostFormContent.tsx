@@ -32,7 +32,6 @@ type PostFormContentProps = {
 	onSnippetUpload: (id: string) => void
 	onSnippetCodeChange: (code: string) => void
 	onSnippetLangChange: (lang: string) => void
-	onSnippetThemeChange: (theme: string) => void
 	onSnippetPreview: (isSnippetPreviewed: boolean) => void
 }
 
@@ -61,11 +60,10 @@ export function PostFormContent({
 	onSnippetRemove,
 	onSnippetCodeChange,
 	onSnippetLangChange,
-	onSnippetThemeChange,
 	onSnippetPreview,
 }: PostFormContentProps) {
 	return (
-		<ScrollArea className="h-[80vh] p-4">
+		<ScrollArea className="p-4 h-[80vh]">
 			<div className="flex-col items-start gap-3 p-4">
 				<div className="flex-y-center gap-2">
 					{mentionedUsers.length > 0 &&
@@ -75,7 +73,7 @@ export function PostFormContent({
 							</Badge>
 						))}
 				</div>
-				<div className="mb-1 w-full flex-start flex-col gap-2">
+				<div className="flex-col flex-start gap-2 mb-1 w-full">
 					<div className="flex-col gap-4">
 						<Textarea
 							autoFocus
@@ -95,7 +93,6 @@ export function PostFormContent({
 						setIsAddingSnippetAction={setIsAddingSnippet}
 						onSnippetCodeChangeAction={onSnippetCodeChange}
 						onSnippetLangChangeAction={onSnippetLangChange}
-						onSnippetThemeChangeAction={onSnippetThemeChange}
 						onSnippetPreviewAction={onSnippetPreview}
 					/>
 				)}
@@ -116,7 +113,7 @@ export function PostFormContent({
 			</div>
 
 			{showMentionSuggestions && searchResults?.length > 0 && (
-				<div className="mt-[20px] h-fit w-full flex-center">
+				<div className="flex-center mt-[20px] w-full h-fit">
 					<SearchList
 						searchResults={searchResults}
 						appUserId={userId}

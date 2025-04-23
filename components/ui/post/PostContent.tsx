@@ -1,13 +1,13 @@
 "use client"
 
 import { Button } from "@components/ui/Button"
-import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { Skeleton } from "@components/ui/Skeleton"
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { getSnippetById } from "@queries/server/snippet"
 import { Check, Copy, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import VideoPlayer from "../post-form/attachment/VideoPlayer"
 
 export type PostContentProps = {
@@ -48,25 +48,40 @@ export default function PostContent({
 		setTimeout(() => setCopied(false), 2000)
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (snippetId) {
 			setIsSnippetLoading(true)
 			clientGetSnippetById()
 		}
-	}, [])
+	}, [snippetId])
 
 	const clientGetSnippetById = async () => {
+		if (!snippetId) {
+			setIsSnippetLoading(false)
+			return
+		}
+
 		try {
+			console.log("[SNIPPET] Fetching snippet with ID:", snippetId)
 			const data = await getSnippetById(snippetId)
-			if (data)
+
+			if (data && data.value && data.lang) {
+				console.log("[SNIPPET] Successfully fetched snippet:", {
+					id: snippetId,
+					lang: data.lang,
+					valueLength: data.value.length,
+				})
 				setSnippet({
 					value: data.value,
-					theme: data.theme,
 					lang: data.lang,
 				})
+			} else {
+				console.error("[SNIPPET] Snippet data is incomplete or missing:", data)
+				setSnippet(undefined)
+			}
 		} catch (error) {
-			console.error("Error fetching snippet:", error)
+			console.error("[SNIPPET] Error fetching snippet:", error)
+			setSnippet(undefined)
 		} finally {
 			setIsSnippetLoading(false)
 		}
@@ -105,7 +120,7 @@ export default function PostContent({
 									<Skeleton className="rounded-lg w-[300px] h-[300px]" />
 								</div>
 							)}
-							<div className="flex-center" style={{ display: isImageLoading ? 'none' : 'flex' }}>
+							<div className="flex-center" style={{ display: isImageLoading ? "none" : "flex" }}>
 								<Image
 									className="rounded-lg"
 									width={300}
@@ -126,11 +141,8 @@ export default function PostContent({
 									<Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
 								</div>
 							)}
-							<div style={{ display: isVideoLoading ? 'none' : 'block' }}>
-								<VideoPlayer 
-									src={postVideoUrl} 
-									onLoadedData={() => setIsVideoLoading(false)}
-								/>
+							<div style={{ display: isVideoLoading ? "none" : "block" }}>
+								<VideoPlayer src={postVideoUrl} />
 							</div>
 						</div>
 					)}

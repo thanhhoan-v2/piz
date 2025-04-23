@@ -88,7 +88,10 @@ export default function CodeEditor({
 	const defaultCodeEditorValue = ""
 
 	const handlePreviewSnippet = () => {
+		// Save the snippet and mark it as previewed
+		setIsSaved(true)
 		onSnippetPreviewAction(true)
+		console.log("[SNIPPET] Snippet saved and previewed")
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -228,7 +231,14 @@ export default function CodeEditor({
 								)}
 							</div>
 
-							<form className="w-full" onSubmit={() => setIsSaved(true)}>
+							<form
+								className="w-full"
+								onSubmit={(e) => {
+									e.preventDefault()
+									setIsSaved(true)
+									onSnippetPreviewAction(true)
+								}}
+							>
 								<div className="">
 									<label htmlFor="comment" className="sr-only">
 										Add your code
