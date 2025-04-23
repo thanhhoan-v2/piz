@@ -1,7 +1,8 @@
 import { stackServerApp } from "@/stack"
 import { NextResponse } from "next/server"
 
-export async function GET(request: Request, { params }: { params: { teamId: string } }) {
+export async function GET(_request: Request, context: { params: { teamId: string } }) {
+	const { params } = context
 	try {
 		const teamId = params.teamId
 
@@ -27,7 +28,7 @@ export async function GET(request: Request, { params }: { params: { teamId: stri
 		try {
 			// Method 1: Check if the user is in the team's user list
 			const teamUsers = await team.getUsers()
-			if (teamUsers && teamUsers.some((user) => user.id === currentUser.id)) {
+			if (teamUsers?.some((user) => user.id === currentUser.id)) {
 				console.log(`User ${currentUser.id} is a member of team ${teamId} (method 1)`)
 				return NextResponse.json({ isMember: true })
 			}
@@ -46,7 +47,7 @@ export async function GET(request: Request, { params }: { params: { teamId: stri
 					console.log(`User ${currentUser.id} is a member of team ${teamId} (method 3)`)
 					return NextResponse.json({ isMember: true })
 				}
-			} catch (error) {
+			} catch (_error) {
 				console.log("Method 3 check failed, user likely not a member")
 			}
 
