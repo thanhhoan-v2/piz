@@ -1,4 +1,5 @@
 import { stackServerApp } from "@/stack"
+import { CurrentServerUser } from "@stackframe/stack"
 import { NextResponse } from "next/server"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ teamId: string }> }) {
@@ -19,14 +20,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tea
 		// Check if the current user is a member of the team
 		let isMember = false
 		let isAdmin = false
-		let currentUser = null
+		let currentUser: CurrentServerUser | null = null
 
 		try {
 			currentUser = await stackServerApp.getUser()
 			if (currentUser) {
 				// Check if the user is in the team's user list
 				const teamUsers = await team.listUsers()
-				isMember = teamUsers?.some((user) => user.id === currentUser.id)
+				isMember = teamUsers?.some((user) => user.id === currentUser?.id)
 
 				// Check if the current user is an admin
 				if (team.clientMetadata?.admins) {
