@@ -3,7 +3,6 @@ import { type CoreMessage, generateText } from "ai"
 import { createOllama } from "ollama-ai-provider"
 
 const ollama = createOllama()
-// Changed from deepseek to a different model
 const model = ollama("llama3")
 
 export async function POST(req: Request) {

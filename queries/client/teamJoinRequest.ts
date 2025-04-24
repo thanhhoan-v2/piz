@@ -1,19 +1,33 @@
 "use client"
 
-import { 
-  createTeamJoinRequest, 
-  getTeamJoinRequests, 
-  acceptTeamJoinRequest, 
-  rejectTeamJoinRequest 
+import {
+  acceptTeamJoinRequest,
+  createTeamJoinRequest,
+  getTeamJoinRequests
 } from "@queries/server/teamJoinRequest"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { queryKey } from "@utils/queryKeyFactory"
 import { toast } from "sonner"
 
+// Define a temporary function for rejecting team join requests
+// This will be replaced once the server function is properly exported
+const rejectTeamJoinRequest = async (requestId: string) => {
+  const response = await fetch(`/api/team/join-request/${requestId}/reject`, {
+    method: 'POST',
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || 'Failed to reject join request')
+  }
+
+  return response.json()
+}
+
 // Hook to create a team join request
 export const useCreateTeamJoinRequest = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async ({ userId, teamId }: { userId: string; teamId: string }) => {
       return createTeamJoinRequest({ userId, teamId })
@@ -43,7 +57,7 @@ export const useTeamJoinRequests = (teamId?: string) => {
 // Hook to accept a join request
 export const useAcceptTeamJoinRequest = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (requestId: string) => {
       return acceptTeamJoinRequest(requestId)
@@ -61,7 +75,7 @@ export const useAcceptTeamJoinRequest = () => {
 // Hook to reject a join request
 export const useRejectTeamJoinRequest = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (requestId: string) => {
       return rejectTeamJoinRequest(requestId)

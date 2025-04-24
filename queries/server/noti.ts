@@ -48,17 +48,22 @@ export async function createNotification({
 	try {
 		const { postId, commentId, teamId, roomId, metadata } = options
 
+		// Create the notification data object
+		const notificationData: any = {
+			receiverId,
+			senderId,
+			notificationType: type,
+			postId,
+			commentId,
+			metadata: metadata ? metadata : undefined,
+		}
+
+		// Add teamId and roomId if provided
+		if (teamId) notificationData.teamId = teamId
+		if (roomId) notificationData.roomId = roomId
+
 		const notification = await prisma.notification.create({
-			data: {
-				receiverId,
-				senderId,
-				notificationType: type,
-				postId,
-				commentId,
-				teamId,
-				roomId,
-				metadata: metadata ? metadata : undefined,
-			},
+			data: notificationData,
 		})
 
 		// Revalidate the notification page to show the new notification

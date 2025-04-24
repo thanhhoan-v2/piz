@@ -39,7 +39,8 @@ export type Noti = {
 	isDeleted: boolean
 	createdAt: Date
 	updatedAt: Date | null
-	metadata?: Record<string, unknown> | null // Additional data specific to notification type
+	// biome-ignore lint/suspicious/noExplicitAny: This needs to be any to match Prisma's Json type
+	metadata?: any // Additional data specific to notification type - can be any JSON value
 }
 
 export default function NotificationPage() {
@@ -149,7 +150,10 @@ export default function NotificationPage() {
 								{notifications
 									.filter((notification) => !notification.isRead)
 									.map((notification) => (
-										<NotificationItem key={notification.id} notification={notification} />
+										<NotificationItem
+											key={notification.id}
+											notification={notification as unknown as Noti}
+										/>
 									))}
 							</div>
 						</div>
@@ -163,7 +167,10 @@ export default function NotificationPage() {
 								{notifications
 									.filter((notification) => notification.isRead)
 									.map((notification) => (
-										<NotificationItem key={notification.id} notification={notification} />
+										<NotificationItem
+											key={notification.id}
+											notification={notification as unknown as Noti}
+										/>
 									))}
 							</div>
 						</div>

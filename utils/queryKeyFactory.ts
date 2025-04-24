@@ -10,6 +10,13 @@ export const queryKey = {
 		// user - select - { userName }
 		selectUserName: (userName: string) => [...queryKey.user.selects(), userName] as const,
 	},
+	team: {
+		all: ["teams"] as const,
+		// team - select
+		selects: () => [...queryKey.team.all, "select"] as const,
+		// team - select - { id }
+		selectId: (id: string) => [...queryKey.team.selects(), id] as const,
+	},
 	post: {
 		all: ["posts"] as const,
 		// posts - insert

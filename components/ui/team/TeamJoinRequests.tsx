@@ -31,9 +31,10 @@ export function TeamJoinRequests({ teamId }: { teamId: string }) {
 			if (!requests) return
 
 			const userInfoPromises = requests.map(async (request) => {
+				// getUserById already returns an object with userId
 				const userInfo = await getUserById(request.userId)
 				if (userInfo) {
-					return { userId: request.userId, ...userInfo }
+					return userInfo
 				}
 				return null
 			})

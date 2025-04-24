@@ -11,11 +11,11 @@ import {
 import { ScrollArea } from "@components/ui/ScrollArea"
 import { Skeleton } from "@components/ui/Skeleton"
 import { useQueryUserFollowers } from "@queries/client/follow"
-import { avatarPlaceholder } from "@utils/image.helpers"
-import { firstLetterToUpper } from "@utils/string.helpers"
-import { queryKey } from "@utils/queryKeyFactory"
-import { useCallback } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { avatarPlaceholder } from "@utils/image.helpers"
+import { queryKey } from "@utils/queryKeyFactory"
+import { firstLetterToUpper } from "@utils/string.helpers"
+import { useCallback } from "react"
 import FollowButton from "./FollowButton"
 
 // Using FollowerUser interface from '@queries/client/follow'
@@ -41,7 +41,7 @@ export default function FollowersDialog({
 	}, [followersQuery])
 
 	// Handle follow/unfollow to update counts and UI
-	const handleFollowAction = useCallback((followedUserId: string) => {
+	const handleFollowAction = useCallback(() => {
 		// Invalidate following-related queries to update UI
 		queryClient.invalidateQueries({ queryKey: queryKey.follow.all })
 		queryClient.invalidateQueries({ queryKey: ["user", userId, "following"] })
@@ -52,44 +52,44 @@ export default function FollowersDialog({
 			<DialogTrigger asChild>
 				{trigger || (
 					<div
-						className="flex flex-col p-4 rounded-lg transition-colors hover:bg-primary/5 cursor-pointer"
+						className="flex flex-col hover:bg-primary/5 p-4 rounded-lg transition-colors cursor-pointer"
 						onClick={fetchFollowers}
 					>
-						<span className="text-2xl font-bold">
-							{isLoading ? <Skeleton className="h-8 w-8" /> : followersCount}
+						<span className="font-bold text-2xl">
+							{isLoading ? <Skeleton className="w-8 h-8" /> : followersCount}
 						</span>
-						<span className="text-sm text-muted-foreground">Followers</span>
+						<span className="text-muted-foreground text-sm">Followers</span>
 					</div>
 				)}
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-md rounded-lg">
+			<DialogContent className="rounded-lg sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Followers</DialogTitle>
 					<DialogDescription>People who follow this account</DialogDescription>
 				</DialogHeader>
-				<ScrollArea className="h-[400px] mt-4 pr-4">
+				<ScrollArea className="mt-4 pr-4 h-[400px]">
 					{followersQuery.isLoading ? (
 						<div className="space-y-4">
 							{Array(3)
 								.fill(0)
-								.map((_, index) => (
+								.map((_, i) => (
 									<div
-										key={userId}
-										className="flex items-center gap-4 p-4 rounded-lg border border-border/30"
+										key={`skeleton-${i}`}
+										className="flex items-center gap-4 p-4 border border-border/30 rounded-lg"
 									>
-										<Skeleton className="h-10 w-10 rounded-full" />
+										<Skeleton className="rounded-full w-10 h-10" />
 										<div className="flex-1">
-											<Skeleton className="h-4 w-32 mb-2" />
-											<Skeleton className="h-3 w-20" />
+											<Skeleton className="mb-2 w-32 h-4" />
+											<Skeleton className="w-20 h-3" />
 										</div>
-										<Skeleton className="h-9 w-24" />
+										<Skeleton className="w-24 h-9" />
 									</div>
 								))}
 						</div>
 					) : followersQuery.isError ? (
-						<div className="text-center py-12">
-							<p className="text-lg text-muted-foreground">Unable to load followers</p>
-							<p className="text-sm text-muted-foreground mt-1">
+						<div className="py-12 text-center">
+							<p className="text-muted-foreground text-lg">Unable to load followers</p>
+							<p className="mt-1 text-muted-foreground text-sm">
 								There was an error loading the followers list.
 							</p>
 						</div>
@@ -98,7 +98,7 @@ export default function FollowersDialog({
 							{followersQuery.data.map((follower) => (
 								<div
 									key={follower.id}
-									className="flex items-center gap-4 p-4 rounded-lg border border-border/30 transition-colors hover:bg-primary/5"
+									className="flex items-center gap-4 hover:bg-primary/5 p-4 border border-border/30 rounded-lg transition-colors"
 								>
 									<Avatar>
 										<AvatarImage src={follower.avatarUrl ?? avatarPlaceholder} />
@@ -106,18 +106,18 @@ export default function FollowersDialog({
 									</Avatar>
 									<div className="flex-1">
 										<p className="font-medium">{firstLetterToUpper(follower.userName)}</p>
-										<p className="text-sm text-muted-foreground">@{follower.userName}</p>
+										<p className="text-muted-foreground text-sm">@{follower.userName}</p>
 									</div>
-									<div onClick={() => handleFollowAction(follower.id)}>
-										<FollowButton userId={follower.id} variant="secondary" size="sm" />
+									<div onClick={handleFollowAction}>
+										<FollowButton userId={follower.id}  />
 									</div>
 								</div>
 							))}
 						</div>
 					) : (
-						<div className="text-center py-12">
-							<p className="text-lg text-muted-foreground">No followers yet</p>
-							<p className="text-sm text-muted-foreground mt-1">
+						<div className="py-12 text-center">
+							<p className="text-muted-foreground text-lg">No followers yet</p>
+							<p className="mt-1 text-muted-foreground text-sm">
 								When people follow this account, they'll appear here.
 							</p>
 						</div>

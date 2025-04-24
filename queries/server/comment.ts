@@ -44,8 +44,10 @@ export const createComment = async (newComment: CreateCommentProps) => {
 					receiverId: post.userId,
 					senderId: newComment.userId,
 					type: "COMMENT",
-					postId: newComment.postId,
-					commentId: comment.id
+					options: {
+						postId: newComment.postId,
+						commentId: comment.id
+					}
 				})
 			} catch (error) {
 				console.error('[COMMENT] Error creating notification:', error)
@@ -161,8 +163,10 @@ export const createCommentReaction = async ({
 						receiverId: comment.userId,
 						senderId: userId,
 						type: "COMMENT_REACTION",
-						postId: comment.postId,
-						commentId,
+						options: {
+							postId: comment.postId,
+							commentId
+						}
 					})
 				}
 				return newCommentReaction

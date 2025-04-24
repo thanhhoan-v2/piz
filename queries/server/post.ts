@@ -104,7 +104,9 @@ export const createPost = async ({
 						receiverId: follower.followerId,
 						senderId: userId,
 						type: "POST",
-						postId: newPost.id,
+						options: {
+							postId: newPost.id
+						}
 					}),
 				),
 			)
@@ -150,11 +152,11 @@ export const getAllPosts = async (limit?: number, cursor?: string) => {
 		take: limit || undefined,
 		...(cursor
 			? {
-					skip: 1, // Skip the cursor
-					cursor: {
-						id: cursor,
-					},
-				}
+				skip: 1, // Skip the cursor
+				cursor: {
+					id: cursor,
+				},
+			}
 			: {}),
 		orderBy: {
 			createdAt: "desc",
@@ -205,11 +207,11 @@ export const getTeamPosts = async (teamId: string, limit?: number, cursor?: stri
 			take: limit || undefined,
 			...(cursor
 				? {
-						skip: 1, // Skip the cursor
-						cursor: {
-							id: cursor,
-						},
-					}
+					skip: 1, // Skip the cursor
+					cursor: {
+						id: cursor,
+					},
+				}
 				: {}),
 			orderBy: {
 				createdAt: "desc",

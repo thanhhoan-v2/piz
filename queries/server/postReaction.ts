@@ -48,7 +48,9 @@ export const createPostReaction = async ({
 				receiverId: post.userId,
 				senderId: userId,
 				type: "POST_REACTION",
-				postId,
+				options: {
+					postId
+				}
 			})
 		}
 
