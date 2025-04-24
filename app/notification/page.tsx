@@ -39,7 +39,7 @@ export type Noti = {
 	isDeleted: boolean
 	createdAt: Date
 	updatedAt: Date | null
-	metadata?: Record<string, unknown> // Additional data specific to notification type
+	metadata?: Record<string, unknown> | null // Additional data specific to notification type
 }
 
 export default function NotificationPage() {
