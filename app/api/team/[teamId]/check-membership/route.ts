@@ -26,7 +26,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tea
 		// Check if the user is a member of the team using multiple methods
 		try {
 			// Method 1: Check if the user is in the team's user list
-			const teamUsers = await team.getUsers()
+			const teamUsers = await team.listUsers()
 			if (teamUsers?.some((user) => user.id === currentUser.id)) {
 				console.log(`User ${currentUser.id} is a member of team ${teamId} (method 1)`)
 				return NextResponse.json({ isMember: true })
