@@ -13,7 +13,8 @@
 		"db:reset": "npx prisma migrate reset",
 		"db:status": "npx prisma migrate status",
 		"db:studio": "npx prisma studio",
-		"db:fix-migrations": "node scripts/fix-migrations.js"
+		"db:fix-migrations": "node scripts/fix-migrations.js",
+		"db:reset-migrations": "node scripts/fix-migrations.js"
 	},
 	"dependencies": {
 		"@ai-sdk/react": "^1.1.19",
