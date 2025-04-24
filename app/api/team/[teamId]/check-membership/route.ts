@@ -4,8 +4,8 @@ import { NextResponse } from "next/server"
 // Define a type for the user object
 type ServerUser = {
 	id: string
-	displayName?: string
-	profileImageUrl?: string
+	displayName?: string | null
+	profileImageUrl?: string | null
 	getTeamProfile: (team: ServerTeam) => Promise<unknown>
 	hasPermission: (team: ServerTeam, permission: string) => Promise<boolean>
 }
@@ -13,12 +13,12 @@ type ServerUser = {
 // Define a type for the team object
 type ServerTeam = {
 	id: string
-	displayName?: string
-	profileImageUrl?: string
+	displayName?: string | null
+	profileImageUrl?: string | null
 	clientMetadata?: {
 		isPublic?: boolean
-		admins?: string[]
-	}
+		admins?: string[] | null
+	} | null
 	listUsers: () => Promise<ServerUser[]>
 }
 
