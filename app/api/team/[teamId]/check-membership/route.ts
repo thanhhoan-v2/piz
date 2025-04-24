@@ -1,6 +1,27 @@
 import { stackServerApp } from "@/stack"
 import { NextResponse } from "next/server"
 
+// Define a type for the user object
+type ServerUser = {
+	id: string
+	displayName?: string
+	profileImageUrl?: string
+	getTeamProfile: (team: ServerTeam) => Promise<unknown>
+	hasPermission: (team: ServerTeam, permission: string) => Promise<boolean>
+}
+
+// Define a type for the team object
+type ServerTeam = {
+	id: string
+	displayName?: string
+	profileImageUrl?: string
+	clientMetadata?: {
+		isPublic?: boolean
+		admins?: string[]
+	}
+	listUsers: () => Promise<ServerUser[]>
+}
+
 export async function GET(_request: Request, { params }: { params: Promise<{ teamId: string }> }) {
 	try {
 		const { teamId } = await params
@@ -10,14 +31,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tea
 		}
 
 		// Get the current user
-		const currentUser = await stackServerApp.getUser()
+		const currentUser: ServerUser | null = await stackServerApp.getUser()
 
 		if (!currentUser) {
 			return NextResponse.json({ isMember: false })
 		}
 
 		// Get the team
-		const team = await stackServerApp.getTeam(teamId)
+		const team: ServerTeam | null = await stackServerApp.getTeam(teamId)
 
 		if (!team) {
 			return NextResponse.json({ error: "Team not found" }, { status: 404 })
