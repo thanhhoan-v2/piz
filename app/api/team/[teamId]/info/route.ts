@@ -1,5 +1,5 @@
 import { stackServerApp } from "@/stack"
-import { CurrentServerUser } from "@stackframe/stack"
+import type { CurrentServerUser } from "@stackframe/stack"
 import { NextResponse } from "next/server"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ teamId: string }> }) {
