@@ -18,24 +18,26 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tea
 
 		// Check if the current user is a member of the team
 		let isMember = false
+		let isAdmin = false
+		let currentUser = null
+
 		try {
-			const currentUser = await stackServerApp.getUser()
+			currentUser = await stackServerApp.getUser()
 			if (currentUser) {
 				// Check if the user is in the team's user list
 				const teamUsers = await team.listUsers()
 				isMember = teamUsers?.some((user) => user.id === currentUser.id)
+
+				// Check if the current user is an admin
+				if (team.clientMetadata?.admins) {
+					isAdmin =
+						Array.isArray(team.clientMetadata.admins) &&
+						team.clientMetadata.admins.includes(currentUser.id)
+				}
 			}
 		} catch (error) {
 			console.error("Error checking team membership:", error)
 			// If there's an error, we'll default to false
-		}
-
-		// Check if the current user is an admin
-		let isAdmin = false
-		if (currentUser && team.clientMetadata?.admins) {
-			isAdmin =
-				Array.isArray(team.clientMetadata.admins) &&
-				team.clientMetadata.admins.includes(currentUser.id)
 		}
 
 		// Return the team information with membership and admin status

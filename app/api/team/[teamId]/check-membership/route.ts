@@ -10,7 +10,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tea
 		}
 
 		// Get the current user
-		const currentUser = await stackServerApp.getCurrentUser()
+		const currentUser = await stackServerApp.getUser()
 
 		if (!currentUser) {
 			return NextResponse.json({ isMember: false })
