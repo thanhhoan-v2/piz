@@ -9,6 +9,10 @@ import {
 	SelectValue,
 } from "@components/ui/Select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/Tooltip"
+import {
+	STORAGE_KEY_POST_IMAGE_URL,
+	STORAGE_KEY_POST_VIDEO_URL,
+} from "@utils/local-storage.helpers"
 import { CodeXml, FileVideoIcon, ImageIcon } from "lucide-react"
 
 interface PostFormFooterProps {
@@ -38,8 +42,8 @@ export function PostFormFooter({
 	isAddingSnippet,
 	isSnippetPreviewed,
 }: PostFormFooterProps) {
-	const storedPostImageUrl = localStorage.getItem("postImageUrl")
-	const storedPostVideoUrl = localStorage.getItem("postVideoUrl")
+	const storedPostImageUrl = localStorage.getItem(STORAGE_KEY_POST_IMAGE_URL)
+	const storedPostVideoUrl = localStorage.getItem(STORAGE_KEY_POST_VIDEO_URL)
 
 	return (
 		<DrawerFooter>

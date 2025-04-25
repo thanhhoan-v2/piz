@@ -10,7 +10,7 @@ import {
 } from "@components/ui/DropdownMenu"
 import { Check, Moon, PaintbrushVertical, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 type ICustomTheme = {
 	group: "light" | "dark"
@@ -53,33 +53,13 @@ const customThemes: ICustomTheme[] = [
 
 /**
  * A dropdown menu component that allows users to select their preferred theme.
- * The currently selected theme is stored in local state and localStorage.
+ * The currently selected theme is stored in React state.
  *
  * @returns A JSX element representing the dropdown menu.
  */
 export const HeaderBarCustomTheme = () => {
-	const [customTheme, setCustomTheme] = useState<ICustomTheme>(() => {
-		// Initialize from localStorage if available
-		if (typeof window !== "undefined") {
-			const savedTheme = localStorage.getItem("piz_custom_theme")
-			if (savedTheme) {
-				try {
-					return JSON.parse(savedTheme)
-				} catch (e) {
-					console.error("Error parsing saved theme", e)
-				}
-			}
-		}
-		return customThemes[5] // Default to the last theme (dark dots)
-	})
+	const [customTheme, setCustomTheme] = useState<ICustomTheme>(customThemes[5]) // Default to the last theme (dark dots)
 	const { setTheme } = useTheme()
-
-	// Save to localStorage when theme changes
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			localStorage.setItem("piz_custom_theme", JSON.stringify(customTheme))
-		}
-	}, [customTheme])
 
 	const handleCustomTheme = (value: string) => {
 		const selectedCustomTheme =
