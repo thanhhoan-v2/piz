@@ -4,7 +4,9 @@ import { prisma } from "@prisma/createClient"
 import { createNotification } from "@queries/server/noti"
 
 // Define a type assertion function to handle notification types
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function assertNotificationType(type: string): any {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   return type as any
 }
 
