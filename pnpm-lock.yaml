@@ -9445,17 +9445,7 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  embla-carousel-react@8.5.2(react@18.2.0):
-    dependencies:
-      embla-carousel: 8.5.2
-      embla-carousel-reactive-utils: 8.5.2(embla-carousel@8.5.2)
-      react: 18.2.0
 
-  embla-carousel-reactive-utils@8.5.2(embla-carousel@8.5.2):
-    dependencies:
-      embla-carousel: 8.5.2
-
-  embla-carousel@8.5.2: {}
 
   emoji-regex-xs@1.0.0: {}
 
