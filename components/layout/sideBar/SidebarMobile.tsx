@@ -2,7 +2,7 @@
 
 import { ROUTE } from "@constants/route"
 import { cn } from "@utils/cn"
-import { Bell, Home, Search, User, Users } from "lucide-react"
+import { Bell, Home, NetworkIcon, Search, User, Users } from "lucide-react"
 import SideBarItem from "./SidebarItem"
 
 export default function MobileSideBar({
@@ -20,6 +20,7 @@ export default function MobileSideBar({
 					<SideBarItem href={ROUTE.HOME} icon={Home} />
 					<SideBarItem href={ROUTE.SEARCH} icon={Search} />
 					<SideBarItem href={ROUTE.TEAMS} icon={Users} />
+					<SideBarItem href="collab" icon={NetworkIcon} />
 					<SideBarItem href={ROUTE.NOTIFICATION} icon={Bell} />
 					<SideBarItem href="profile" icon={User} />
 				</div>

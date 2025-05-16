@@ -4,11 +4,13 @@ import { Button } from "@components/ui/Button"
 import { Skeleton } from "@components/ui/Skeleton"
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { getSnippetById } from "@queries/server/snippet"
-import { Check, Copy, Loader2 } from "lucide-react"
+import { Check, Copy, Loader2, UserPlus, Share2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import VideoPlayer from "../post-form/attachment/VideoPlayer"
+import { toast } from "sonner"
+import { createSupabaseBrowserClient } from "@utils/supabase/client"
 
 export type PostContentProps = {
 	content: string
@@ -18,10 +20,10 @@ export type PostContentProps = {
 	postId?: string
 	userId?: string
 }
+
 export type SnippetViewProps = {
-	value?: string | null
-	theme?: string | null
-	lang?: string | null
+	value: string
+	lang: string
 }
 
 export default function PostContent({
@@ -37,8 +39,51 @@ export default function PostContent({
 	const [isSnippetLoading, setIsSnippetLoading] = useState(!!snippetId)
 	const [isImageLoading, setIsImageLoading] = useState(!!postImageUrl)
 	const [isVideoLoading, setIsVideoLoading] = useState(!!postVideoUrl)
-
 	const [copied, setCopied] = useState(false)
+	const [isCreatingRoom, setIsCreatingRoom] = useState(false)
+	const supabase = createSupabaseBrowserClient()
+
+	// Function to create a new collab room with the snippet code
+	const createCollabRoom = async () => {
+		if (!snippet?.value) return
+
+		try {
+			setIsCreatingRoom(true)
+
+			// Create a new collab room in the database
+			const { data, error } = await supabase
+				.from("Collab")
+				.insert({
+					content: snippet.value,
+					updated_at: new Date().toISOString(),
+					version: "1.0.0",
+					room_id: Math.floor(100000 + Math.random() * 900000).toString(), // 6-digit random number
+					joined_users: [],
+				})
+				.select()
+				.single()
+
+			if (error) {
+				console.error("Error creating collab room:", error)
+				toast.error("Failed to create collaboration room")
+				return
+			}
+
+			// Navigate to the new collab room
+			const roomId = data.id.toString()
+			toast.success("Collaboration room created! Redirecting...")
+
+			// Give the toast time to show before redirecting
+			setTimeout(() => {
+				router.push(`/collab/${roomId}`)
+			}, 1000)
+		} catch (err) {
+			console.error("Failed to create collab room:", err)
+			toast.error("Something went wrong while creating the room")
+		} finally {
+			setIsCreatingRoom(false)
+		}
+	}
 
 	const handleCopy = () => {
 		if (snippet?.value) {
@@ -193,13 +238,41 @@ export default function PostContent({
 												{snippet.lang}
 											</div>
 										</div>
-										<Button variant="ghost" size="icon" className="w-8 h-8" onClick={handleCopy}>
-											{copied ? (
-												<Check className="w-4 h-4 text-green-500" />
-											) : (
-												<Copy className="w-4 h-4" />
-											)}
-										</Button>
+										<div className="flex gap-1">
+											<Button
+												variant="ghost"
+												size="icon"
+												className="w-8 h-8"
+												onClick={handleCopy}
+												title="Copy code"
+											>
+												{copied ? (
+													<Check className="w-4 h-4 text-green-500" />
+												) : (
+													<Copy className="w-4 h-4" />
+												)}
+											</Button>
+											<Button
+												variant="secondary"
+												size="sm"
+												className="text-xs flex gap-1 items-center px-2 bg-blue-600/30 text-blue-300 hover:bg-blue-600/40 border border-blue-600/40"
+												onClick={createCollabRoom}
+												disabled={isCreatingRoom}
+												title="Create a collaborative editing room with this code"
+											>
+												{isCreatingRoom ? (
+													<>
+														<Loader2 className="w-3 h-3 animate-spin" />
+														<span>Creating...</span>
+													</>
+												) : (
+													<>
+														<UserPlus className="w-3 h-3" />
+														<span>Edit in collaboration room</span>
+													</>
+												)}
+											</Button>
+										</div>
 									</CodeBlockGroup>
 									<CodeBlockCode code={snippet.value} language={snippet.lang} theme="github-dark" />
 								</CodeBlock>

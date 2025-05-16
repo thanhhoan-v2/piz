@@ -288,3 +288,38 @@ export async function createCollabRoomInvitationNotification(
     },
   })
 }
+
+/**
+ * Create a notification when a user is mentioned in a chat message
+ * @param mentionedByUserId - ID of the user who mentioned someone
+ * @param mentionedUserId - ID of the user who was mentioned
+ * @param roomId - ID of the collab room
+ * @param messageText - The chat message text containing the mention
+ */
+export async function createChatMentionNotification(
+  mentionedByUserId: string,
+  mentionedUserId: string,
+  roomId: string,
+  messageText: string
+) {
+  try {
+    // Don't create notification if sender is the same as receiver
+    if (mentionedByUserId === mentionedUserId) return null;
+
+    // Create a notification for the mentioned user
+    return createNotification({
+      senderId: mentionedByUserId,
+      receiverId: mentionedUserId,
+      type: assertNotificationType("CHAT_MENTION"),
+      options: {
+        roomId,
+        metadata: {
+          messageText: messageText.substring(0, 100), // Limit the message text to 100 chars
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error creating chat mention notification:", error);
+    return null;
+  }
+}

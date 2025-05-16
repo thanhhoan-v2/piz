@@ -158,6 +158,7 @@ model Collab {
   updated_by_userId String?
   version           String?
   room_id           String?
+  joined_users      Json?        @default("[]")
   chatMessages      CollabChat[]
 }
 
@@ -190,6 +191,7 @@ enum NotificationType {
   COLLAB_ROOM_JOINED
   COLLAB_ROOM_CREATED
   COLLAB_ROOM_INVITED
+  CHAT_MENTION
 }
 
 enum Privacy {
