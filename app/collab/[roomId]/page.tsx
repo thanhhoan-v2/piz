@@ -28,7 +28,7 @@ type JoinedUser = {
 }
 
 // Custom hook for real-time code syncing similar to cursor tracking
-const useRealtimeCode = (roomId: string, userId: string | undefined, userName: string) => {
+const useRealtimeCode = (displayRoomId: string, dbRoomId: string | undefined, userId: string | undefined, userName: string) => {
 	const [code, setCode] = useState("")
 	const [saveStatus, setSaveStatus] = useState<"saving" | "saved">("saved")
 	const supabase = createSupabaseBrowserClient()
@@ -41,10 +41,10 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 
 	// Initialize channel for real-time code updates
 	useEffect(() => {
-		if (!roomId || !userId) return
+		if (!displayRoomId || !userId) return
 
 		// Create a specific channel for code updates
-		const channelName = `code-${roomId}`
+		const channelName = `code-${displayRoomId}`
 		const channel = supabase.channel(channelName, {
 			config: {
 				broadcast: { self: false },
@@ -104,11 +104,11 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 		return () => {
 			channel.unsubscribe()
 		}
-	}, [roomId, userId, userName, supabase])
+	}, [displayRoomId, userId, userName, supabase])
 
 	// Function to update the database (with debounce)
 	const updateCodeInDatabase = useCallback(async (newCode: string) => {
-		if (!roomId || !userId) return
+		if (!dbRoomId || !userId) return
 
 		// Don't save if this is a remote change being applied
 		if (isRemoteChangeRef.current) {
@@ -124,7 +124,7 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 			return
 		}
 
-		console.log("Saving code to database:", newCode.length, "characters")
+		console.log("Saving code to database:", newCode.length, "characters", "using roomId:", dbRoomId)
 		setSaveStatus("saving")
 
 		try {
@@ -135,7 +135,7 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 					updated_at: new Date().toISOString(),
 					updated_by_userId: userId,
 				})
-				.eq("id", roomId)
+				.eq("id", dbRoomId)
 
 			if (error) {
 				console.error("Error updating code in database:", error)
@@ -147,11 +147,11 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 		} catch (err) {
 			console.error("Failed to update code in database:", err)
 		}
-	}, [roomId, userId, supabase])
+	}, [dbRoomId, userId, supabase])
 
 	// Function to broadcast code changes to other users
 	const broadcastCodeChange = useCallback((newCode: string) => {
-		if (!roomId || !userId || !channelRef.current) return
+		if (!displayRoomId || !userId || !channelRef.current) return
 
 		// Don't broadcast if this is processing a remote change
 		if (isRemoteChangeRef.current) return
@@ -173,7 +173,7 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 			.catch((error) => {
 				console.error("Error broadcasting code update:", error)
 			})
-	}, [roomId, userId, userName])
+	}, [displayRoomId, userId, userName])
 
 	// Function to handle code changes from the editor
 	const handleCodeChange = useCallback((value: string | undefined) => {
@@ -206,13 +206,17 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 
 	// Fetch initial code from database
 	const fetchInitialCode = useCallback(async () => {
-		if (!roomId) return
+		if (!dbRoomId) {
+			console.log("No database room ID available for fetching code")
+			return
+		}
 
 		try {
+			console.log("Fetching initial code using roomId:", dbRoomId)
 			const { data, error } = await supabase
 				.from("Collab")
 				.select("content")
-				.eq("id", roomId)
+				.eq("id", dbRoomId)
 				.single()
 
 			if (error) {
@@ -222,13 +226,14 @@ const useRealtimeCode = (roomId: string, userId: string | undefined, userName: s
 
 			if (data) {
 				const content = data.content || ""
+				console.log("Initial code fetched successfully, length:", content.length)
 				setCode(content)
 				lastSavedCodeRef.current = content
 			}
 		} catch (err) {
 			console.error("Failed to fetch initial code:", err)
 		}
-	}, [roomId, supabase])
+	}, [dbRoomId, supabase])
 
 	// Cleanup timeout on unmount
 	useEffect(() => {
@@ -258,13 +263,24 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null) // Use useRef to hold the channel
 	const presenceCheckIntervalRef = useRef<NodeJS.Timeout | null>(null) // Ref for the presence check interval
 	// Store collabInfo to access the BigInt id for the chat
-	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string } | null>(null)
+	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string; room_id?: string } | null>(null)
 	// Store joined users for tagging
 	const [joinedUsers, setJoinedUsers] = useState<JoinedUser[]>([])
 
+	// Get the actual database ID if we have collabInfo
+	const databaseRoomId = collabInfo?.id?.toString();
+
+	// Log when database room ID changes for debugging
+	useEffect(() => {
+		if (databaseRoomId) {
+			console.log("Database room ID updated:", databaseRoomId);
+		}
+	}, [databaseRoomId]);
+
 	// Use our new realtime code hook
 	const { code, saveStatus, handleCodeChange, fetchInitialCode } = useRealtimeCode(
-		roomId,
+		roomId, // Display room ID for real-time channels
+		databaseRoomId, // Database room ID for DB operations
 		userId,
 		userName
 	)
@@ -276,6 +292,14 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		}
 		getRoomId()
 	}, [params])
+
+	// Refetch initial code when database room ID becomes available
+	useEffect(() => {
+		if (databaseRoomId) {
+			console.log("Reloading code with database room ID:", databaseRoomId);
+			fetchInitialCode();
+		}
+	}, [databaseRoomId, fetchInitialCode]);
 
 	// Function to check if user is already joined
 	const isUserJoined = useCallback((userId: string) => {
@@ -493,67 +517,6 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		[userId],
 	)
 
-	// useEffect to initialize room data when roomId is ready
-	useEffect(() => {
-		if (!roomId) return
-
-		// Get collabInfo and initialize joined users
-		const initializeRoom = async () => {
-			try {
-				// First attempt to get the room by its numeric ID
-				let data;
-				let error;
-
-				try {
-					// Try convert to BigInt if possible (might be internal ID)
-					if (roomId.match(/^\d+$/)) {
-						const roomIdBigInt = BigInt(roomId);
-						const result = await supabase.from("Collab").select("*").eq("id", roomIdBigInt.toString()).single();
-						data = result.data;
-						error = result.error;
-					} else {
-						throw new Error("Not a numeric ID, try room_id lookup");
-					}
-				} catch (e) {
-					// If BigInt conversion fails, try by room_id
-					console.log("Attempting room lookup by room_id field instead of ID");
-					const result = await supabase.from("Collab").select("*").eq("room_id", roomId).single();
-					data = result.data;
-					error = result.error;
-				}
-
-				if (error) {
-					console.error("Error fetching collab info:", error);
-
-					// As a fallback, try both ways
-					console.log("Trying fallback lookup methods for room ID:", roomId);
-
-					// Try with a more general query to debug the issue
-					const allRooms = await supabase.from("Collab").select("*").limit(5);
-					console.log("Available rooms:", allRooms.data?.map(r => ({
-						id: r.id.toString(),
-						room_id: r.room_id
-					})));
-
-					return;
-				}
-
-				console.log("Fetched collab info:", data);
-				setCollabInfo(data);
-			} catch (err) {
-				console.error("Failed to fetch collab info:", err);
-			}
-
-			// Fetch joined users
-			fetchJoinedUsers();
-
-			// Fetch initial code
-			fetchInitialCode();
-		}
-
-		initializeRoom();
-	}, [roomId, supabase, fetchJoinedUsers, fetchInitialCode]);
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!roomId || !userId) return
@@ -562,6 +525,18 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 		let channel: any = null
 
 		const setupChannel = async () => {
+			// If there's an existing channel, clean it up first
+			if (channelRef.current) {
+				try {
+					console.log("Cleaning up previous channel before setup")
+					await channelRef.current.unsubscribe()
+				} catch (err) {
+					console.error("Error cleaning up previous channel:", err)
+				}
+			}
+
+			console.log("Setting up channel for room:", roomId, "with database ID:", databaseRoomId || "not available yet")
+
 			// Create a new channel for this room
 			channel = supabase.channel(`room:${roomId}`, {
 				config: {
@@ -642,13 +617,16 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						checkPresenceState()
 					},
 				)
-				.on(
+
+			// Only set up the Postgres changes listener if we have a valid database ID
+			if (databaseRoomId) {
+				channel.on(
 					"postgres_changes",
 					{
 						event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
 						schema: "public",
 						table: "Collab",
-						filter: `id=eq.${roomId}`,
+						filter: `id=eq.${databaseRoomId}`,
 					},
 					(payload: { new: { updated_by_userId: string; content: string } }) => {
 						// We no longer need to handle code updates here
@@ -656,9 +634,13 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						console.log("Received database change notification - handled by realtime hook")
 					},
 				)
-				.subscribe((status: string) => {
-					console.log(`Room channel status: ${status}`)
-				})
+			} else {
+				console.log("Skipping Postgres changes listener setup - no database ID available")
+			}
+
+			channel.subscribe((status: string) => {
+				console.log(`Room channel status: ${status}`)
+			})
 
 			// Track our initial presence
 			await trackPresence(channel)
@@ -682,12 +664,6 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					channel.unsubscribe()
 				}
 			}
-		}
-
-		// Fetch initial code
-		const fetchCode = async () => {
-			// We don't need this function anymore
-			// Code fetching is now handled by useRealtimeCode hook
 		}
 
 		// Initialize the channel
@@ -763,7 +739,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					})
 			}
 		}
-	}, [roomId, supabase, userId, userName, checkPresenceState, trackPresence, broadcastPresence])
+	}, [roomId, databaseRoomId, supabase, userId, userName, checkPresenceState, trackPresence, broadcastPresence])
 
 	// Set up a separate interval to check presence every second
 	useEffect(() => {
@@ -790,6 +766,64 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 			}
 		}
 	}, [roomId, checkPresenceState])
+
+	// useEffect to initialize room data when roomId is ready
+	useEffect(() => {
+		if (!roomId) return
+
+		// Get collabInfo and initialize joined users
+		const initializeRoom = async () => {
+			try {
+				// First attempt to get the room by its numeric ID
+				let data;
+				let error;
+
+				try {
+					// Try convert to BigInt if possible (might be internal ID)
+					if (roomId.match(/^\d+$/)) {
+						const roomIdBigInt = BigInt(roomId);
+						const result = await supabase.from("Collab").select("*").eq("id", roomIdBigInt.toString()).single();
+						data = result.data;
+						error = result.error;
+					} else {
+						throw new Error("Not a numeric ID, try room_id lookup");
+					}
+				} catch (e) {
+					// If BigInt conversion fails, try by room_id
+					console.log("Attempting room lookup by room_id field instead of ID");
+					const result = await supabase.from("Collab").select("*").eq("room_id", roomId).single();
+					data = result.data;
+					error = result.error;
+				}
+
+				if (error) {
+					console.error("Error fetching collab info:", error);
+
+					// As a fallback, try both ways
+					console.log("Trying fallback lookup methods for room ID:", roomId);
+
+					// Try with a more general query to debug the issue
+					const allRooms = await supabase.from("Collab").select("*").limit(5);
+					console.log("Available rooms:", allRooms.data?.map(r => ({
+						id: r.id.toString(),
+						room_id: r.room_id
+					})));
+
+					return;
+				}
+
+				console.log("Fetched collab info:", data);
+				setCollabInfo(data);
+			} catch (err) {
+				console.error("Failed to fetch collab info:", err);
+			}
+
+			// Fetch joined users
+			fetchJoinedUsers();
+		}
+
+		initializeRoom();
+	}, [roomId, supabase, fetchJoinedUsers]);
 
 	return (
 		<CollabUI
