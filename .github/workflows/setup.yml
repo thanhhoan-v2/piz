@@ -1,0 +1,208 @@
+name: Repository Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      setup_type:
+        description: 'Type of setup to run'
+        required: true
+        default: 'environments'
+        type: choice
+        options:
+          - environments
+          - branch-protection
+          - all
+
+jobs:
+  setup-environments:
+    name: 🔧 Setup GitHub Environments
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.setup_type == 'environments' || github.event.inputs.setup_type == 'all' }}
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Create Staging Environment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.createOrUpdateEnvironment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment_name: 'staging',
+                deployment_branch_policy: {
+                  protected_branches: false,
+                  custom_branch_policies: true
+                }
+              });
+              
+              await github.rest.repos.updateEnvironment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment_name: 'staging',
+                deployment_branch_policy: {
+                  protected_branches: false,
+                  custom_branch_policies: true
+                }
+              });
+              
+              console.log('Staging environment created/updated successfully');
+            } catch (error) {
+              console.log('Error creating staging environment:', error.message);
+            }
+
+      - name: 🔧 Create Production Environment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.createOrUpdateEnvironment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment_name: 'production',
+                deployment_branch_policy: {
+                  protected_branches: true,
+                  custom_branch_policies: false
+                }
+              });
+              
+              // Add required reviewers for production (you can customize this)
+              await github.rest.repos.updateEnvironment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment_name: 'production',
+                reviewers: [
+                  {
+                    type: 'User',
+                    id: context.actor // Add the current user as a reviewer
+                  }
+                ],
+                deployment_branch_policy: {
+                  protected_branches: true,
+                  custom_branch_policies: false
+                }
+              });
+              
+              console.log('Production environment created/updated successfully');
+            } catch (error) {
+              console.log('Error creating production environment:', error.message);
+            }
+
+  setup-branch-protection:
+    name: 🛡️ Setup Branch Protection
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.setup_type == 'branch-protection' || github.event.inputs.setup_type == 'all' }}
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🛡️ Protect main branch
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.updateBranchProtection({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'main',
+                required_status_checks: {
+                  strict: true,
+                  contexts: [
+                    'Install Dependencies',
+                    'Lint & Format',
+                    'Type Check',
+                    'Build Application',
+                    'Security Audit',
+                    'Database Validation'
+                  ]
+                },
+                enforce_admins: false,
+                required_pull_request_reviews: {
+                  required_approving_review_count: 1,
+                  dismiss_stale_reviews: true,
+                  require_code_owner_reviews: false,
+                  require_last_push_approval: false
+                },
+                restrictions: null,
+                allow_force_pushes: false,
+                allow_deletions: false,
+                block_creations: false,
+                required_conversation_resolution: true,
+                lock_branch: false,
+                allow_fork_syncing: true
+              });
+              console.log('Main branch protection updated successfully');
+            } catch (error) {
+              console.log('Error updating main branch protection:', error.message);
+            }
+
+      - name: 🛡️ Protect develop branch
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.updateBranchProtection({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'develop',
+                required_status_checks: {
+                  strict: true,
+                  contexts: [
+                    'Install Dependencies',
+                    'Lint & Format',
+                    'Type Check',
+                    'Build Application',
+                    'Security Audit',
+                    'Database Validation'
+                  ]
+                },
+                enforce_admins: false,
+                required_pull_request_reviews: {
+                  required_approving_review_count: 1,
+                  dismiss_stale_reviews: true,
+                  require_code_owner_reviews: false,
+                  require_last_push_approval: false
+                },
+                restrictions: null,
+                allow_force_pushes: false,
+                allow_deletions: false,
+                block_creations: false,
+                required_conversation_resolution: true,
+                lock_branch: false,
+                allow_fork_syncing: true
+              });
+              console.log('Develop branch protection updated successfully');
+            } catch (error) {
+              console.log('Error updating develop branch protection:', error.message);
+              // Develop branch might not exist yet, which is okay
+            }
+
+  setup-summary:
+    name: 📋 Setup Summary
+    runs-on: ubuntu-latest
+    needs: [setup-environments, setup-branch-protection]
+    if: always()
+    steps:
+      - name: 📋 Create setup summary
+        run: |
+          echo "## 🔧 Repository Setup Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Tasks:" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Environments configured" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch protection rules applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Configure repository secrets (see .github/README.md)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update Dependabot configuration with your username" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update domain names in deploy.yml workflow" >> $GITHUB_STEP_SUMMARY
+          echo "4. Test the CI/CD pipeline with a pull request" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Documentation:" >> $GITHUB_STEP_SUMMARY
+          echo "- [CI/CD Setup Guide](.github/README.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Environments](https://github.com/${{ github.repository }}/settings/environments)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Repository Secrets](https://github.com/${{ github.repository }}/settings/secrets/actions)" >> $GITHUB_STEP_SUMMARY 

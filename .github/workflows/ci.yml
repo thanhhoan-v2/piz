@@ -1,0 +1,286 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # Install dependencies and cache them
+  install:
+    name: 📦 Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 💾 Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+  # Lint and format check
+  lint:
+    name: 🧹 Lint & Format
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 💾 Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧹 Run Biome linter
+        run: npx @biomejs/biome check .
+
+      - name: 🧹 Run Biome formatter
+        run: npx @biomejs/biome format . --check
+
+  # Type checking
+  typecheck:
+    name: 🔍 Type Check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 💾 Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🎯 Generate Prisma client
+        run: pnpm db:generate
+
+      - name: 🔍 Run TypeScript compiler
+        run: npx tsc --noEmit
+
+  # Build application
+  build:
+    name: 🏗 Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 💾 Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🎯 Generate Prisma client
+        run: pnpm db:generate
+
+      - name: 🏗 Build Next.js application
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: 💾 Cache build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+            .next/static
+            .next/standalone
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+  # Security audit
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 💾 Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔒 Run security audit
+        run: pnpm audit --audit-level moderate
+
+  # Database validation
+  database:
+    name: 🗃️ Database Validation
+    runs-on: ubuntu-latest
+    needs: install
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 💾 Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🎯 Generate Prisma client
+        run: pnpm db:generate
+
+      - name: 🗃️ Run Prisma migrate
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+      - name: 🔍 Validate database schema
+        run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+  # All checks passed
+  all-checks:
+    name: ✅ All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, build, security, database]
+    if: always()
+    steps:
+      - name: ✅ All checks passed
+        if: ${{ needs.lint.result == 'success' && needs.typecheck.result == 'success' && needs.build.result == 'success' && needs.security.result == 'success' && needs.database.result == 'success' }}
+        run: echo "All checks passed successfully!"
+
+      - name: ❌ Some checks failed
+        if: ${{ needs.lint.result != 'success' || needs.typecheck.result != 'success' || needs.build.result != 'success' || needs.security.result != 'success' || needs.database.result != 'success' }}
+        run: |
+          echo "Some checks failed:"
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "TypeCheck: ${{ needs.typecheck.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo "Database: ${{ needs.database.result }}"
+          exit 1 
