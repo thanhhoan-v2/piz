@@ -86,7 +86,7 @@
 		"shiki": "^3.2.1",
 		"sonner": "^1.7.4",
 		"tailwind-merge": "^2.6.0",
-		"typesense": "^1.8.2",
+		"typesense": "^2.0.3",
 		"typesense-instantsearch-adapter": "^2.8.0",
 		"use-dehydrated-state": "^0.1.0",
 		"uuid": "^10.0.0",
