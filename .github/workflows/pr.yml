@@ -270,7 +270,7 @@ jobs:
         run: pnpm test:coverage  # Add this script to package.json when tests are implemented
 
       - name: 📊 Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage/lcov.info
