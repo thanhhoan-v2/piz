@@ -39,6 +39,13 @@
 		},
 		"baseUrl": "."
 	},
-	"include": ["next-env.d.ts", "video.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+	"include": [
+		"next-env.d.ts",
+		"video.d.ts",
+		"types.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts"
+	],
 	"exclude": ["node_modules", "node_modules/@radix-ui/**"]
 }
