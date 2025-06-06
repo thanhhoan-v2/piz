@@ -49,20 +49,18 @@ export default function CommentReactButton({
 
 			// Snapshot the previous value
 			const previousReaction = queryClient.getQueryData(
-				queryKey.comment.selectReactionByUser({ userId, commentId }),
+				queryKey.comment.selectReactionByUser({ userId, commentId })
 			)
 			const previousCounts = queryClient.getQueryData(
-				queryKey.comment.selectCountByComment({ commentId, parentId }),
+				queryKey.comment.selectCountByComment({ commentId, parentId })
 			)
 
 			queryClient.setQueryData(
 				queryKey.comment.selectCountByComment({ commentId, parentId }),
 				(prev: PostCounts) => ({
 					...prev,
-					noReactions: localIsReacted
-						? prev.noReactions - 1
-						: prev.noReactions + 1,
-				}),
+					noReactions: localIsReacted ? prev.noReactions - 1 : prev.noReactions + 1,
+				})
 			)
 
 			// Return a context object with the snapshotted value
@@ -73,11 +71,11 @@ export default function CommentReactButton({
 			if (context) {
 				queryClient.setQueryData(
 					queryKey.comment.selectCountByComment({ commentId, parentId }),
-					context.previousCounts,
+					context.previousCounts
 				)
 				queryClient.setQueryData(
 					queryKey.comment.selectReactionByUser({ userId, commentId }),
-					context.previousReaction,
+					context.previousReaction
 				)
 			}
 		},
@@ -100,10 +98,7 @@ export default function CommentReactButton({
 		<div className={wrapperClassName}>
 			<Button variant="ghost" className={className} onClick={handleReact}>
 				<Heart
-					className={cn(
-						"w-[20px]",
-						localIsReacted ? "animate-fillHeart" : "animate-unfillHeart",
-					)}
+					className={cn("w-[20px]", localIsReacted ? "animate-fillHeart" : "animate-unfillHeart")}
 				/>
 			</Button>
 			<span>{initialReactionCount}</span>

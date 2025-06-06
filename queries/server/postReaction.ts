@@ -9,10 +9,7 @@ export type GetPostReactionProps = {
 	postId: string
 }
 
-export const getPostReaction = async ({
-	userId,
-	postId,
-}: GetPostReactionProps) => {
+export const getPostReaction = async ({ userId, postId }: GetPostReactionProps) => {
 	return await prisma.postReaction.findFirst({
 		where: { userId: userId, postId: postId },
 	})
@@ -24,10 +21,7 @@ export type CreatePostReactionProps = {
 }
 
 // CREATE a new post reaction or DELETE the existing one
-export const createPostReaction = async ({
-	userId,
-	postId,
-}: CreatePostReactionProps) => {
+export const createPostReaction = async ({ userId, postId }: CreatePostReactionProps) => {
 	try {
 		if (!userId) {
 			console.log("[POST_REACTION] Missing userId when creating reaction")
@@ -49,37 +43,30 @@ export const createPostReaction = async ({
 				senderId: userId,
 				type: "POST_REACTION",
 				options: {
-					postId
-				}
+					postId,
+				},
 			})
 		}
 
 		return reaction
 	} catch (error) {
-		console.error(
-			"[POST_REACTION] Error creating: ",
-			JSON.stringify(error, null, 2),
-		)
+		console.error("[POST_REACTION] Error creating: ", JSON.stringify(error, null, 2))
 	}
 }
 
 // DELETE a post reaction
-export const deletePostReaction = async ({
-	userId,
-	postId,
-}: CreatePostReactionProps) => {
+export const deletePostReaction = async ({ userId, postId }: CreatePostReactionProps) => {
 	try {
 		if (userId) {
 			const existingReaction = await getPostReaction({ userId, postId })
 
 			// If the user has already reacted to the post, delete the reaction
 			if (existingReaction) {
-				const deletedPostReaction: PostReaction =
-					await prisma.postReaction.delete({
-						where: {
-							id: existingReaction.id,
-						},
-					})
+				const deletedPostReaction: PostReaction = await prisma.postReaction.delete({
+					where: {
+						id: existingReaction.id,
+					},
+				})
 				console.log("[POST_REACTION] Deleted: ", deletedPostReaction)
 			} else {
 				console.log("[POST_REACTION] No existing reaction found to delete")

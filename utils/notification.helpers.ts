@@ -52,10 +52,10 @@ export const getNotificationLink = (notification: Noti): Route => {
 		: postIdRoute
 	const teamRoute = notification.teamId
 		? (`/team/${notification.teamId}` as Route)
-		: (`/team` as Route)
+		: ("/team" as Route)
 	const collabRoute = notification.roomId
 		? (`/collab/${notification.roomId}` as Route)
-		: (`/collab` as Route)
+		: ("/collab" as Route)
 
 	switch (notification.notificationType) {
 		case "FOLLOW":

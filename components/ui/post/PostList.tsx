@@ -95,7 +95,7 @@ export default function PostList() {
 								snippetId,
 								teamId,
 							},
-							index,
+							index
 						) => (
 							<Post
 								postIndex={index}
@@ -114,7 +114,7 @@ export default function PostList() {
 								snippetId={snippetId}
 								teamId={teamId}
 							/>
-						),
+						)
 					)}
 				</div>
 				{/* Show Load More button only if there are more posts to load */}

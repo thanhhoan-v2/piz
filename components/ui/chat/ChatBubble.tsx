@@ -23,7 +23,7 @@ export function ChatBubble({
 			className={cn(
 				"flex items-center gap-2 mb-4",
 				variant === "sent" && "flex-row-reverse",
-				className,
+				className
 			)}
 		>
 			{children}
@@ -49,7 +49,7 @@ export function ChatBubbleMessage({
 			className={cn(
 				"rounded-lg p-3",
 				variant === "sent" ? "bg-primary text-primary-foreground" : "bg-muted",
-				className,
+				className
 			)}
 		>
 			{isLoading ? (

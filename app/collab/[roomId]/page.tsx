@@ -28,7 +28,12 @@ type JoinedUser = {
 }
 
 // Custom hook for real-time code syncing similar to cursor tracking
-const useRealtimeCode = (displayRoomId: string, dbRoomId: string | undefined, userId: string | undefined, userName: string) => {
+const useRealtimeCode = (
+	displayRoomId: string,
+	dbRoomId: string | undefined,
+	userId: string | undefined,
+	userName: string
+) => {
 	const [code, setCode] = useState("")
 	const [saveStatus, setSaveStatus] = useState<"saving" | "saved">("saved")
 	const supabase = createSupabaseBrowserClient()
@@ -67,24 +72,28 @@ const useRealtimeCode = (displayRoomId: string, dbRoomId: string | undefined, us
 				setCode(data.payload.content)
 				setSaveStatus("saved")
 			})
-			.on("broadcast", { event: CODE_REQUEST_EVENT }, (data: { payload: { requesterId: string } }) => {
-				// Another user is requesting the current code (they just joined)
-				if (data.payload.requesterId !== userId && lastSavedCodeRef.current) {
-					console.log("Sending current code to new user:", data.payload.requesterId)
+			.on(
+				"broadcast",
+				{ event: CODE_REQUEST_EVENT },
+				(data: { payload: { requesterId: string } }) => {
+					// Another user is requesting the current code (they just joined)
+					if (data.payload.requesterId !== userId && lastSavedCodeRef.current) {
+						console.log("Sending current code to new user:", data.payload.requesterId)
 
-					// Send current code to the requester
-					channel.send({
-						type: "broadcast",
-						event: CODE_UPDATE_EVENT,
-						payload: {
-							content: lastSavedCodeRef.current,
-							userId: userId,
-							userName: userName,
-							timestamp: Date.now(),
-						},
-					})
+						// Send current code to the requester
+						channel.send({
+							type: "broadcast",
+							event: CODE_UPDATE_EVENT,
+							payload: {
+								content: lastSavedCodeRef.current,
+								userId: userId,
+								userName: userName,
+								timestamp: Date.now(),
+							},
+						})
+					}
 				}
-			})
+			)
 			.subscribe((status) => {
 				console.log(`Code sync channel status: ${status}`)
 
@@ -107,102 +116,117 @@ const useRealtimeCode = (displayRoomId: string, dbRoomId: string | undefined, us
 	}, [displayRoomId, userId, userName, supabase])
 
 	// Function to update the database (with debounce)
-	const updateCodeInDatabase = useCallback(async (newCode: string) => {
-		if (!dbRoomId || !userId) return
+	const updateCodeInDatabase = useCallback(
+		async (newCode: string) => {
+			if (!dbRoomId || !userId) return
 
-		// Don't save if this is a remote change being applied
-		if (isRemoteChangeRef.current) {
-			console.log("Skipping database save for remote change")
-			isRemoteChangeRef.current = false
-			return
-		}
-
-		// Don't save if code hasn't changed
-		if (newCode === lastSavedCodeRef.current) {
-			console.log("Code hasn't changed, skipping database save")
-			setSaveStatus("saved")
-			return
-		}
-
-		console.log("Saving code to database:", newCode.length, "characters", "using roomId:", dbRoomId)
-		setSaveStatus("saving")
-
-		try {
-			const { error } = await supabase
-				.from("Collab")
-				.update({
-					content: newCode,
-					updated_at: new Date().toISOString(),
-					updated_by_userId: userId,
-				})
-				.eq("id", dbRoomId)
-
-			if (error) {
-				console.error("Error updating code in database:", error)
-			} else {
-				console.log("Code saved successfully to database")
-				lastSavedCodeRef.current = newCode
-				setSaveStatus("saved")
+			// Don't save if this is a remote change being applied
+			if (isRemoteChangeRef.current) {
+				console.log("Skipping database save for remote change")
+				isRemoteChangeRef.current = false
+				return
 			}
-		} catch (err) {
-			console.error("Failed to update code in database:", err)
-		}
-	}, [dbRoomId, userId, supabase])
+
+			// Don't save if code hasn't changed
+			if (newCode === lastSavedCodeRef.current) {
+				console.log("Code hasn't changed, skipping database save")
+				setSaveStatus("saved")
+				return
+			}
+
+			console.log(
+				"Saving code to database:",
+				newCode.length,
+				"characters",
+				"using roomId:",
+				dbRoomId
+			)
+			setSaveStatus("saving")
+
+			try {
+				const { error } = await supabase
+					.from("Collab")
+					.update({
+						content: newCode,
+						updated_at: new Date().toISOString(),
+						updated_by_userId: userId,
+					})
+					.eq("id", dbRoomId)
+
+				if (error) {
+					console.error("Error updating code in database:", error)
+				} else {
+					console.log("Code saved successfully to database")
+					lastSavedCodeRef.current = newCode
+					setSaveStatus("saved")
+				}
+			} catch (err) {
+				console.error("Failed to update code in database:", err)
+			}
+		},
+		[dbRoomId, userId, supabase]
+	)
 
 	// Function to broadcast code changes to other users
-	const broadcastCodeChange = useCallback((newCode: string) => {
-		if (!displayRoomId || !userId || !channelRef.current) return
+	const broadcastCodeChange = useCallback(
+		(newCode: string) => {
+			if (!displayRoomId || !userId || !channelRef.current) return
 
-		// Don't broadcast if this is processing a remote change
-		if (isRemoteChangeRef.current) return
+			// Don't broadcast if this is processing a remote change
+			if (isRemoteChangeRef.current) return
 
-		const payload: CodeUpdatePayload = {
-			content: newCode,
-			userId: userId,
-			userName: userName,
-			timestamp: Date.now(),
-		}
+			const payload: CodeUpdatePayload = {
+				content: newCode,
+				userId: userId,
+				userName: userName,
+				timestamp: Date.now(),
+			}
 
-		// Broadcast the code change to all users
-		channelRef.current
-			.send({
-				type: "broadcast",
-				event: CODE_UPDATE_EVENT,
-				payload: payload,
-			})
-			.catch((error) => {
-				console.error("Error broadcasting code update:", error)
-			})
-	}, [displayRoomId, userId, userName])
+			// Broadcast the code change to all users
+			channelRef.current
+				.send({
+					type: "broadcast",
+					event: CODE_UPDATE_EVENT,
+					payload: payload,
+				})
+				.catch((error) => {
+					console.error("Error broadcasting code update:", error)
+				})
+		},
+		[displayRoomId, userId, userName]
+	)
 
 	// Function to handle code changes from the editor
-	const handleCodeChange = useCallback((value: string | undefined) => {
-		if (value === undefined) return
+	const handleCodeChange = useCallback(
+		(value: string | undefined) => {
+			if (value === undefined) return
 
-		// Skip if this is a remote change being applied
-		if (isRemoteChangeRef.current) {
-			console.log("Processing remote code change")
-			isRemoteChangeRef.current = false
-			return
-		}
+			// Skip if this is a remote change being applied
+			if (isRemoteChangeRef.current) {
+				console.log("Processing remote code change")
+				isRemoteChangeRef.current = false
+				return
+			}
 
-		// Update local state immediately
-		setCode(value)
-		setSaveStatus("saving")
+			// Update local state immediately
+			setCode(value)
+			setSaveStatus("saving")
 
-		// Broadcast change to other users immediately
-		broadcastCodeChange(value)
+			// Broadcast change to other users immediately
+			broadcastCodeChange(value)
 
-		// Clear any existing timeout
-		if (saveTimeoutRef.current) {
-			clearTimeout(saveTimeoutRef.current)
-		}
+			// Clear any existing timeout
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current)
+			}
 
-		// Debounce the database save
-		saveTimeoutRef.current = setTimeout(() => {
-			updateCodeInDatabase(value);
-		}, 1000) // 1 second debounce for database updates
-	}, [broadcastCodeChange, updateCodeInDatabase])
+			// Debounce the database save
+			saveTimeoutRef.current = setTimeout(() => {
+				updateCodeInDatabase(value)
+			}, 1000) // 1 second debounce for database updates
+		},
+		[broadcastCodeChange, updateCodeInDatabase]
+	)
 
 	// Fetch initial code from database
 	const fetchInitialCode = useCallback(async () => {
@@ -263,19 +287,24 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null) // Use useRef to hold the channel
 	const presenceCheckIntervalRef = useRef<NodeJS.Timeout | null>(null) // Ref for the presence check interval
 	// Store collabInfo to access the BigInt id for the chat
-	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string; room_id?: string; metadata?: any } | null>(null)
+	const [collabInfo, setCollabInfo] = useState<{
+		id?: bigint
+		content?: string
+		room_id?: string
+		metadata?: any
+	} | null>(null)
 	// Store joined users for tagging
 	const [joinedUsers, setJoinedUsers] = useState<JoinedUser[]>([])
 
 	// Get the actual database ID if we have collabInfo
-	const databaseRoomId = collabInfo?.id?.toString();
+	const databaseRoomId = collabInfo?.id?.toString()
 
 	// Log when database room ID changes for debugging
 	useEffect(() => {
 		if (databaseRoomId) {
-			console.log("Database room ID updated:", databaseRoomId);
+			console.log("Database room ID updated:", databaseRoomId)
 		}
-	}, [databaseRoomId]);
+	}, [databaseRoomId])
 
 	// Use our new realtime code hook
 	const { code, saveStatus, handleCodeChange, fetchInitialCode } = useRealtimeCode(
@@ -296,57 +325,63 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	// Refetch initial code when database room ID becomes available
 	useEffect(() => {
 		if (databaseRoomId) {
-			console.log("Reloading code with database room ID:", databaseRoomId);
-			fetchInitialCode();
+			console.log("Reloading code with database room ID:", databaseRoomId)
+			fetchInitialCode()
 		}
-	}, [databaseRoomId, fetchInitialCode]);
+	}, [databaseRoomId, fetchInitialCode])
 
 	// Function to check if user is already joined
-	const isUserJoined = useCallback((userId: string) => {
-		return joinedUsers.some(user => user.id === userId)
-	}, [joinedUsers])
+	const isUserJoined = useCallback(
+		(userId: string) => {
+			return joinedUsers.some((user) => user.id === userId)
+		},
+		[joinedUsers]
+	)
 
 	// Function to add user to joined users and update database
-	const addJoinedUser = useCallback(async (userId: string, userName: string) => {
-		if (!roomId || !userId || isUserJoined(userId)) return
+	const addJoinedUser = useCallback(
+		async (userId: string, userName: string) => {
+			if (!roomId || !userId || isUserJoined(userId)) return
 
-		const newUser = { id: userId, userName }
-		setJoinedUsers(prev => [...prev, newUser])
+			const newUser = { id: userId, userName }
+			setJoinedUsers((prev) => [...prev, newUser])
 
-		// Update joined_users in the database
-		try {
-			const { data, error } = await supabase
-				.from("Collab")
-				.select("joined_users")
-				.eq("id", roomId)
-				.single()
-
-			if (error) {
-				console.error("Error fetching joined users:", error)
-				return
-			}
-
-			// Get current joined users or initialize empty array
-			const currentJoinedUsers = data?.joined_users || []
-
-			// Only add if user isn't already in the list
-			if (!currentJoinedUsers.some((u: JoinedUser) => u.id === userId)) {
-				const updatedJoinedUsers = [...currentJoinedUsers, newUser]
-
-				// Update the database
-				const { error: updateError } = await supabase
+			// Update joined_users in the database
+			try {
+				const { data, error } = await supabase
 					.from("Collab")
-					.update({ joined_users: updatedJoinedUsers })
+					.select("joined_users")
 					.eq("id", roomId)
+					.single()
 
-				if (updateError) {
-					console.error("Error updating joined users:", updateError)
+				if (error) {
+					console.error("Error fetching joined users:", error)
+					return
 				}
+
+				// Get current joined users or initialize empty array
+				const currentJoinedUsers = data?.joined_users || []
+
+				// Only add if user isn't already in the list
+				if (!currentJoinedUsers.some((u: JoinedUser) => u.id === userId)) {
+					const updatedJoinedUsers = [...currentJoinedUsers, newUser]
+
+					// Update the database
+					const { error: updateError } = await supabase
+						.from("Collab")
+						.update({ joined_users: updatedJoinedUsers })
+						.eq("id", roomId)
+
+					if (updateError) {
+						console.error("Error updating joined users:", updateError)
+					}
+				}
+			} catch (err) {
+				console.error("Error in addJoinedUser:", err)
 			}
-		} catch (err) {
-			console.error("Error in addJoinedUser:", err)
-		}
-	}, [roomId, supabase, isUserJoined])
+		},
+		[roomId, supabase, isUserJoined]
+	)
 
 	// Function to fetch joined users from database
 	const fetchJoinedUsers = useCallback(async () => {
@@ -354,7 +389,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 		try {
 			// Try to get the room first to identify the correct record
-			let collabRoom;
+			let collabRoom
 
 			try {
 				// Try by numeric ID first
@@ -363,10 +398,10 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						.from("Collab")
 						.select("id, room_id, joined_users")
 						.eq("id", roomId)
-						.single();
+						.single()
 
 					if (!error && data) {
-						collabRoom = data;
+						collabRoom = data
 					}
 				}
 
@@ -376,47 +411,46 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						.from("Collab")
 						.select("id, room_id, joined_users")
 						.eq("room_id", roomId)
-						.single();
+						.single()
 
 					if (!error && data) {
-						collabRoom = data;
+						collabRoom = data
 					}
 				}
 
 				// If still not found, log error
 				if (!collabRoom) {
-					console.error("Room not found for joined users:", roomId);
-					return;
+					console.error("Room not found for joined users:", roomId)
+					return
 				}
 
 				// Set the collabInfo if we found the room and it's not already set
 				if (!collabInfo && collabRoom) {
-					setCollabInfo(collabRoom);
+					setCollabInfo(collabRoom)
 				}
 
 				// Set joined users
 				if (collabRoom.joined_users) {
-					setJoinedUsers(collabRoom.joined_users);
+					setJoinedUsers(collabRoom.joined_users)
 				} else {
 					// Initialize with empty array if not yet set
-					const roomIdToUse = collabRoom.id.toString();
+					const roomIdToUse = collabRoom.id.toString()
 					const { error: updateError } = await supabase
 						.from("Collab")
 						.update({ joined_users: [] })
-						.eq("id", roomIdToUse);
+						.eq("id", roomIdToUse)
 
 					if (updateError) {
-						console.error("Error initializing joined users:", updateError);
+						console.error("Error initializing joined users:", updateError)
 					}
 				}
-
 			} catch (error) {
-				console.error("Error in room lookup for joined users:", error);
+				console.error("Error in room lookup for joined users:", error)
 			}
 		} catch (err) {
-			console.error("Error in fetchJoinedUsers:", err);
+			console.error("Error in fetchJoinedUsers:", err)
 		}
-	}, [roomId, supabase, collabInfo]);
+	}, [roomId, supabase, collabInfo])
 
 	// Function to check and update presence state - memoized with useCallback
 	const checkPresenceState = useCallback(() => {
@@ -495,7 +529,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 				}
 			}
 		},
-		[userId, userName],
+		[userId, userName]
 	)
 
 	// Function to broadcast presence to all users
@@ -514,7 +548,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					console.error("Error broadcasting presence:", err)
 				})
 		},
-		[userId],
+		[userId]
 	)
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -535,7 +569,12 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 				}
 			}
 
-			console.log("Setting up channel for room:", roomId, "with database ID:", databaseRoomId || "not available yet")
+			console.log(
+				"Setting up channel for room:",
+				roomId,
+				"with database ID:",
+				databaseRoomId || "not available yet"
+			)
 
 			// Create a new channel for this room
 			channel = supabase.channel(`room:${roomId}`, {
@@ -574,7 +613,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 								broadcastPresence(channel)
 							}, 500)
 						}
-					},
+					}
 				)
 				.on(
 					"presence",
@@ -594,7 +633,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 							.catch((err: Error) => {
 								console.error("Error sending leave broadcast:", err)
 							})
-					},
+					}
 				)
 				.on(
 					"broadcast",
@@ -606,7 +645,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 							console.log("Received sync request from:", payload.userId)
 							trackPresence(channel)
 						}
-					},
+					}
 				)
 				.on(
 					"broadcast",
@@ -615,7 +654,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						// Force a presence check when we receive a user_left broadcast
 						console.log("User left notification received:", payload.userId)
 						checkPresenceState()
-					},
+					}
 				)
 
 			// Only set up the Postgres changes listener if we have a valid database ID
@@ -632,7 +671,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 						// We no longer need to handle code updates here
 						// This is now handled by the useRealtimeCode hook
 						console.log("Received database change notification - handled by realtime hook")
-					},
+					}
 				)
 			} else {
 				console.log("Skipping Postgres changes listener setup - no database ID available")
@@ -739,7 +778,16 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 					})
 			}
 		}
-	}, [roomId, databaseRoomId, supabase, userId, userName, checkPresenceState, trackPresence, broadcastPresence])
+	}, [
+		roomId,
+		databaseRoomId,
+		supabase,
+		userId,
+		userName,
+		checkPresenceState,
+		trackPresence,
+		broadcastPresence,
+	])
 
 	// Set up a separate interval to check presence every second
 	useEffect(() => {
@@ -769,59 +817,59 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 	// useEffect to initialize room data when roomId is ready
 	useEffect(() => {
-		if (!roomId) return;
+		if (!roomId) return
 
 		const fetchRoomInfo = async () => {
 			try {
-				let idToQuery = roomId;
+				const idToQuery = roomId
 
 				// Try to determine if this is a numeric ID or a room_id string
-				const isNumericId = !isNaN(Number(roomId));
+				const isNumericId = !Number.isNaN(Number(roomId))
 
 				const { data, error } = await supabase
-					.from('Collab')
-					.select('*')
-					.eq(isNumericId ? 'id' : 'room_id', roomId)
-					.single();
+					.from("Collab")
+					.select("*")
+					.eq(isNumericId ? "id" : "room_id", roomId)
+					.single()
 
 				if (error) {
-					console.error('Error fetching room info:', error);
-					return;
+					console.error("Error fetching room info:", error)
+					return
 				}
 
 				if (data) {
-					console.log('Room info retrieved:', {
+					console.log("Room info retrieved:", {
 						id: data.id.toString(),
 						room_id: data.room_id,
-						metadata: data.metadata
-					});
+						metadata: data.metadata,
+					})
 
 					setCollabInfo({
 						id: data.id,
 						content: data.content,
 						room_id: data.room_id,
-						metadata: data.metadata || {}
-					});
+						metadata: data.metadata || {},
+					})
 
 					// Update joined users from database
 					if (data.joined_users) {
 						try {
 							const parsedUsers = Array.isArray(data.joined_users)
 								? data.joined_users
-								: JSON.parse(data.joined_users);
-							setJoinedUsers(parsedUsers);
+								: JSON.parse(data.joined_users)
+							setJoinedUsers(parsedUsers)
 						} catch (e) {
-							console.error('Error parsing joined users:', e);
+							console.error("Error parsing joined users:", e)
 						}
 					}
 				}
 			} catch (err) {
-				console.error('Failed to fetch room info:', err);
+				console.error("Failed to fetch room info:", err)
 			}
-		};
+		}
 
-		fetchRoomInfo();
-	}, [roomId, supabase]);
+		fetchRoomInfo()
+	}, [roomId, supabase])
 
 	return (
 		<CollabUI

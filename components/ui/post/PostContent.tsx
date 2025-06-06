@@ -4,13 +4,13 @@ import { Button } from "@components/ui/Button"
 import { Skeleton } from "@components/ui/Skeleton"
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "@components/ui/extras/code-block"
 import { getSnippetById } from "@queries/server/snippet"
-import { Check, Copy, Loader2, UserPlus, Share2 } from "lucide-react"
+import { createSupabaseBrowserClient } from "@utils/supabase/client"
+import { Check, Copy, Loader2, Share2, UserPlus } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import VideoPlayer from "../post-form/attachment/VideoPlayer"
 import { toast } from "sonner"
-import { createSupabaseBrowserClient } from "@utils/supabase/client"
+import VideoPlayer from "../post-form/attachment/VideoPlayer"
 
 export type PostContentProps = {
 	content: string
@@ -61,7 +61,7 @@ export default function PostContent({
 					userId: userId,
 					sourceType: "post",
 					sourceId: postId,
-					snippetId: snippetId
+					snippetId: snippetId,
 				}),
 			})
 

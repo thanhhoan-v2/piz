@@ -131,7 +131,7 @@ export default function PostCommentsDialog({
 					userId: currentUserId,
 					commentId: newComment.id,
 				}),
-				null,
+				null
 			)
 
 			queryClient.setQueryData(queryKey.post.selectCount(postId), (prev: PostCounts) => ({

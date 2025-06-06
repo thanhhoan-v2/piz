@@ -18,7 +18,7 @@ export function TeamCreationListener() {
 					// Check if we've been redirected to a team page after creation
 					if (window.location.pathname.startsWith("/team/")) {
 						console.log(
-							"TeamCreationListener - Detected possible team creation via MutationObserver",
+							"TeamCreationListener - Detected possible team creation via MutationObserver"
 						)
 						handleTeamPage()
 					}
@@ -58,7 +58,7 @@ export function TeamCreationListener() {
 						if (teamInfo && (!teamInfo.admins || teamInfo.admins.length === 0)) {
 							console.log(
 								"TeamCreationListener - New team detected, setting creator as admin:",
-								teamId,
+								teamId
 							)
 
 							// Call our API to set the creator as admin

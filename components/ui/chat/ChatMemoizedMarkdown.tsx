@@ -19,7 +19,7 @@ const MemoizedMarkdownBlock = memo(
 	(prevProps, nextProps) => {
 		if (prevProps.content !== nextProps.content) return false
 		return true
-	},
+	}
 )
 
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock"

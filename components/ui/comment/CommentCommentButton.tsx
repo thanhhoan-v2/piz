@@ -106,7 +106,7 @@ export default function CommentCommentButton({
 					userId,
 					commentId: newComment.id,
 				}),
-				null,
+				null
 			)
 			queryClient.setQueryData(queryKey.post.selectCount(postId), (prev: PostCounts) => ({
 				...prev,

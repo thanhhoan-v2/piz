@@ -11,11 +11,11 @@ import {
 import { ScrollArea } from "@components/ui/ScrollArea"
 import { Skeleton } from "@components/ui/Skeleton"
 import { useQueryUserFollowing } from "@queries/client/follow"
-import { avatarPlaceholder } from "@utils/image.helpers"
-import { firstLetterToUpper } from "@utils/string.helpers"
-import { queryKey } from "@utils/queryKeyFactory"
-import { useCallback, useState, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { avatarPlaceholder } from "@utils/image.helpers"
+import { queryKey } from "@utils/queryKeyFactory"
+import { firstLetterToUpper } from "@utils/string.helpers"
+import { useCallback, useEffect, useState } from "react"
 import FollowButton from "./FollowButton"
 
 interface FollowingDialogProps {
@@ -45,16 +45,19 @@ export default function FollowingDialog({
 	const fetchFollowing = useCallback(() => {
 		followingQuery.refetch()
 	}, [followingQuery])
-	
+
 	// Handle unfollow action
-	const handleUnfollow = useCallback((unfollowedUserId: string) => {
-		// Optimistically update local count
-		setLocalFollowingCount(prev => Math.max(0, prev - 1))
-		
-		// Invalidate queries
-		queryClient.invalidateQueries({ queryKey: queryKey.follow.all })
-		queryClient.invalidateQueries({ queryKey: ["user", userId, "following"] })
-	}, [queryClient, userId])
+	const handleUnfollow = useCallback(
+		(unfollowedUserId: string) => {
+			// Optimistically update local count
+			setLocalFollowingCount((prev) => Math.max(0, prev - 1))
+
+			// Invalidate queries
+			queryClient.invalidateQueries({ queryKey: queryKey.follow.all })
+			queryClient.invalidateQueries({ queryKey: ["user", userId, "following"] })
+		},
+		[queryClient, userId]
+	)
 
 	return (
 		<Dialog>

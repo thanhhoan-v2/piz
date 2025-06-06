@@ -12,7 +12,7 @@ export default function MobileSideBar({
 		<div
 			className={cn(
 				"mobile-only right-0 bottom-0 left-0 z-50 h-18 w-screen bg-background p-2",
-				mobileSideBarClassName,
+				mobileSideBarClassName
 			)}
 		>
 			<div className="flex-center">

@@ -174,7 +174,7 @@ export default function TeamPage({ params }: { params: Promise<TeamParams> }) {
 					console.error("Error requesting to join team:", error)
 					toast.error("Failed to send join request")
 				},
-			},
+			}
 		)
 	}
 
@@ -275,7 +275,7 @@ export default function TeamPage({ params }: { params: Promise<TeamParams> }) {
 				if (!response.ok) {
 					console.error("Leave team error response:", responseData)
 					throw new Error(
-						`${responseData?.details || responseData?.error || "Failed to leave team"} (Status: ${response.status})`,
+						`${responseData?.details || responseData?.error || "Failed to leave team"} (Status: ${response.status})`
 					)
 				}
 			}

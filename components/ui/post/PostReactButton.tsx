@@ -48,33 +48,23 @@ export default function PostReactButton({
 
 			// Snapshot the previous value
 			const previousPostReaction = queryClient.getQueryData(
-				queryKey.post.selectReactionByUser({ userId, postId }),
+				queryKey.post.selectReactionByUser({ userId, postId })
 			)
-			const previousPostCounts = queryClient.getQueryData(
-				queryKey.post.selectCount(postId),
-			)
+			const previousPostCounts = queryClient.getQueryData(queryKey.post.selectCount(postId))
 
-			queryClient.setQueryData(
-				queryKey.post.selectCount(postId),
-				(prev: PostCounts) => ({
-					...prev,
-					noReactions: localIsReacted
-						? prev.noReactions - 1
-						: prev.noReactions + 1,
-				}),
-			)
+			queryClient.setQueryData(queryKey.post.selectCount(postId), (prev: PostCounts) => ({
+				...prev,
+				noReactions: localIsReacted ? prev.noReactions - 1 : prev.noReactions + 1,
+			}))
 
 			return { previousPostReaction, previousPostCounts }
 		},
 		onError: (err, newReaction, context) => {
 			if (context) {
-				queryClient.setQueryData(
-					queryKey.post.selectCount(postId),
-					context.previousPostCounts,
-				)
+				queryClient.setQueryData(queryKey.post.selectCount(postId), context.previousPostCounts)
 				queryClient.setQueryData(
 					queryKey.post.selectReactionByUser({ userId, postId }),
-					context.previousPostReaction,
+					context.previousPostReaction
 				)
 			}
 		},
@@ -97,10 +87,7 @@ export default function PostReactButton({
 		<div className={wrapperClassName}>
 			<Button variant="ghost" className={className} onClick={handleReact}>
 				<Heart
-					className={cn(
-						"w-[20px]",
-						localIsReacted ? "animate-fillHeart" : "animate-unfillHeart",
-					)}
+					className={cn("w-[20px]", localIsReacted ? "animate-fillHeart" : "animate-unfillHeart")}
 				/>
 			</Button>
 			<span>{initialReactionCount}</span>

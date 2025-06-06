@@ -57,7 +57,7 @@ export const buildCommentTree = (comments: IComment[], rootId?: string) => {
 
 export const extractFromCommentTreeById = (
 	comments: CommentWithChildren[],
-	extractId: string,
+	extractId: string
 ): CommentWithChildren[] => {
 	for (const comment of comments) {
 		if (comment.id === extractId) {

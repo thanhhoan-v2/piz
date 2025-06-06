@@ -40,7 +40,7 @@ export default function SearchList({
 					<div
 						key={result.id}
 						className={cn(
-							"flex-between cursor-pointer rounded-lg bg-background-item p-4 hover:bg-background-item/80",
+							"flex-between cursor-pointer rounded-lg bg-background-item p-4 hover:bg-background-item/80"
 						)}
 						onClick={() => onSearchResultClick?.(result.id, result.userName)}
 					>
@@ -48,13 +48,16 @@ export default function SearchList({
 						<FollowButtonSection result={result} appUserId={appUserId} />
 					</div>
 				) : (
-					<div key={result.id} className="flex-between bg-background-item hover:bg-background-item/80 p-4 rounded-lg">
+					<div
+						key={result.id}
+						className="flex-between bg-background-item hover:bg-background-item/80 p-4 rounded-lg"
+					>
 						<Link href={`/${result.id}`} className="flex-1">
 							<UserInfo result={result} />
 						</Link>
 						<FollowButtonSection result={result} appUserId={appUserId} />
 					</div>
-				),
+				)
 			)}
 		</div>
 	)
@@ -115,9 +118,7 @@ function FollowButtonSection({
 
 	return (
 		<div className="flex items-center gap-2">
-			{result.id === appUserId && (
-				<span className="text-muted-foreground text-sm">You</span>
-			)}
+			{result.id === appUserId && <span className="text-muted-foreground text-sm">You</span>}
 			{showFollowButton && (
 				<Button
 					size="sm"

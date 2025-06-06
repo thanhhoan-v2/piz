@@ -343,7 +343,7 @@ export default function PostForm({
 						...old,
 						posts: [optimisticPost, ...(old.posts || [])],
 					}
-				},
+				}
 			)
 
 			// If this is a team post, also update the team posts cache
@@ -356,7 +356,7 @@ export default function PostForm({
 							...old,
 							posts: [optimisticPost, ...(old.posts || [])],
 						}
-					},
+					}
 				)
 			}
 			queryClient.setQueryData(queryKey.post.selectCount(newPost.id), {
@@ -366,7 +366,7 @@ export default function PostForm({
 			})
 			queryClient.setQueryData(
 				queryKey.post.selectReactionByUser({ userId, postId: newPost.id }),
-				null,
+				null
 			)
 
 			// Return a context object with the snapshotted values
@@ -387,14 +387,14 @@ export default function PostForm({
 
 						// Replace the optimistic post with the real one
 						const updatedPosts = old.posts.map((post: Post) =>
-							post.id === realPost.id ? { ...realPost } : post,
+							post.id === realPost.id ? { ...realPost } : post
 						)
 
 						return {
 							...old,
 							posts: updatedPosts,
 						}
-					},
+					}
 				)
 
 				// Also update team posts if applicable
@@ -406,14 +406,14 @@ export default function PostForm({
 
 							// Replace the optimistic post with the real one
 							const updatedPosts = old.posts.map((post: Post) =>
-								post.id === realPost.id ? { ...realPost } : post,
+								post.id === realPost.id ? { ...realPost } : post
 							)
 
 							return {
 								...old,
 								posts: updatedPosts,
 							}
-						},
+						}
 					)
 				}
 			}

@@ -6,18 +6,32 @@ import { Button } from "@components/ui/Button"
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogDescription,
-	DialogFooter
 } from "@components/ui/Dialog"
 import { Input } from "@components/ui/Input"
 import { RealtimeCursors } from "@components/ui/supabase-ui/realtime-cursor"
 import { Editor } from "@monaco-editor/react"
-import { CheckCircle, Clock, CopyIcon, InfoIcon, Loader2, MessageSquare, Search, UserIcon, UserPlus, X, Sparkles, Link2, Code } from "lucide-react"
+import {
+	CheckCircle,
+	Clock,
+	Code,
+	CopyIcon,
+	InfoIcon,
+	Link2,
+	Loader2,
+	MessageSquare,
+	Search,
+	Sparkles,
+	UserIcon,
+	UserPlus,
+	X,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 
 export type PresenceUser = {
 	userId: string
@@ -120,7 +134,7 @@ export function CollabUI({
 				roomId: roomId,
 				collabInfoId: collabInfo?.id?.toString(),
 				actualRoomId: actualRoomId,
-				displayRoomId: displayRoomId
+				displayRoomId: displayRoomId,
 			})
 
 			const response = await fetch("/api/collab/invite", {
@@ -174,9 +188,9 @@ export function CollabUI({
 	}
 
 	const createEnhancedVersion = async () => {
-		if (!code || !userId) return;
+		if (!code || !userId) return
 
-		setIsCreatingEnhanced(true);
+		setIsCreatingEnhanced(true)
 		try {
 			// Call the API to create a post from the collab room
 			const response = await fetch("/api/collab/create-post-from-room", {
@@ -191,26 +205,26 @@ export function CollabUI({
 					userAvatarUrl: null, // We don't have this info in the current context
 					roomId: roomId,
 					roomDisplayId: displayRoomId,
-					language: "typescript" // Default language for Monaco editor
+					language: "typescript", // Default language for Monaco editor
 				}),
-			});
+			})
 
-			const data = await response.json();
+			const data = await response.json()
 
 			if (response.ok) {
-				toast.success("Enhanced version posted to your profile!");
+				toast.success("Enhanced version posted to your profile!")
 				// No need to redirect - we stay in the same room
 			} else {
-				toast.error("Failed to create enhanced version");
-				console.error("Error creating enhanced version:", data);
+				toast.error("Failed to create enhanced version")
+				console.error("Error creating enhanced version:", data)
 			}
 		} catch (error) {
-			toast.error("Something went wrong");
-			console.error("Failed to create enhanced version:", error);
+			toast.error("Something went wrong")
+			console.error("Failed to create enhanced version:", error)
 		} finally {
-			setIsCreatingEnhanced(false);
+			setIsCreatingEnhanced(false)
 		}
-	};
+	}
 
 	return (
 		<div className="flex flex-col w-full mt-[100px] h-screen">
@@ -378,14 +392,14 @@ export function CollabUI({
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
 						<DialogTitle>Room Information</DialogTitle>
-						<DialogDescription>
-							Details about this collaboration room.
-						</DialogDescription>
+						<DialogDescription>Details about this collaboration room.</DialogDescription>
 					</DialogHeader>
 					<div className="py-4">
 						<div className="space-y-4">
 							<div>
-								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Display Room ID</h3>
+								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+									Display Room ID
+								</h3>
 								<div className="flex items-center mt-1 gap-2">
 									<p className="text-lg font-mono">{displayRoomId}</p>
 									<button
@@ -403,7 +417,9 @@ export function CollabUI({
 							</div>
 
 							<div>
-								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Internal DB ID</h3>
+								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+									Internal DB ID
+								</h3>
 								<p className="mt-1 text-lg font-mono">{actualRoomId}</p>
 							</div>
 
@@ -412,13 +428,19 @@ export function CollabUI({
 									<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Source</h3>
 									<div className="mt-1">
 										{(collabInfo.metadata as any)?.sourcePost && (
-											<Badge variant="outline" className="mr-2 bg-blue-900/20 border-blue-800 text-blue-400">
+											<Badge
+												variant="outline"
+												className="mr-2 bg-blue-900/20 border-blue-800 text-blue-400"
+											>
 												<Link2 size={14} className="mr-1.5" />
 												<span>From Post</span>
 											</Badge>
 										)}
 										{(collabInfo.metadata as any)?.sourceSnippet && (
-											<Badge variant="outline" className="bg-purple-900/20 border-purple-800 text-purple-400">
+											<Badge
+												variant="outline"
+												className="bg-purple-900/20 border-purple-800 text-purple-400"
+											>
 												<Code size={14} className="mr-1.5" />
 												<span>From Snippet</span>
 											</Badge>
@@ -428,19 +450,23 @@ export function CollabUI({
 							)}
 
 							<div>
-								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users</h3>
+								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+									Active Users
+								</h3>
 								<div className="mt-1 flex flex-wrap gap-2">
 									{Object.values(users).flat().length > 0 ? (
-										Object.values(users).flat().map((user) => (
-											<Badge
-												key={user.presence_ref}
-												variant="outline"
-												className="bg-purple-900/20 border-purple-800 text-purple-400"
-											>
-												<UserIcon size={14} className="mr-1.5" />
-												<span>{user.userName || "Anonymous"}</span>
-											</Badge>
-										))
+										Object.values(users)
+											.flat()
+											.map((user) => (
+												<Badge
+													key={user.presence_ref}
+													variant="outline"
+													className="bg-purple-900/20 border-purple-800 text-purple-400"
+												>
+													<UserIcon size={14} className="mr-1.5" />
+													<span>{user.userName || "Anonymous"}</span>
+												</Badge>
+											))
 									) : (
 										<span className="text-gray-500 dark:text-gray-400">No active users</span>
 									)}
@@ -449,21 +475,22 @@ export function CollabUI({
 						</div>
 					</div>
 					<DialogFooter>
-						<Button onClick={() => setShowRoomInfoDialog(false)}>
-							Close
-						</Button>
+						<Button onClick={() => setShowRoomInfoDialog(false)}>Close</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 
 			{/* Invite User Dialog */}
-			<Dialog open={showInviteDialog} onOpenChange={(open) => {
-				setShowInviteDialog(open);
-				if (!open) {
-					clearSearch();
-					setSelectedUser(null);
-				}
-			}}>
+			<Dialog
+				open={showInviteDialog}
+				onOpenChange={(open) => {
+					setShowInviteDialog(open)
+					if (!open) {
+						clearSearch()
+						setSelectedUser(null)
+					}
+				}}
+			>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
 						<DialogTitle>Invite User to Collaboration</DialogTitle>
@@ -506,10 +533,11 @@ export function CollabUI({
 										<li key={user.id}>
 											<button
 												onClick={() => setSelectedUser(user)}
-												className={`flex items-center gap-3 w-full p-2 rounded-md transition-colors ${selectedUser?.id === user.id
-													? "bg-primary/10 text-primary"
-													: "hover:bg-gray-100/10"
-													}`}
+												className={`flex items-center gap-3 w-full p-2 rounded-md transition-colors ${
+													selectedUser?.id === user.id
+														? "bg-primary/10 text-primary"
+														: "hover:bg-gray-100/10"
+												}`}
 											>
 												<div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
 													{user.userAvatarUrl ? (
@@ -531,9 +559,7 @@ export function CollabUI({
 									))}
 								</ul>
 							) : searchQuery.length > 1 ? (
-								<div className="text-center py-4 text-gray-500">
-									No users found
-								</div>
+								<div className="text-center py-4 text-gray-500">No users found</div>
 							) : searchQuery ? (
 								<div className="text-center py-4 text-gray-500">
 									Type at least 2 characters to search
@@ -543,11 +569,14 @@ export function CollabUI({
 					</div>
 
 					<DialogFooter>
-						<Button variant="outline" onClick={() => {
-							setShowInviteDialog(false);
-							clearSearch();
-							setSelectedUser(null);
-						}}>
+						<Button
+							variant="outline"
+							onClick={() => {
+								setShowInviteDialog(false)
+								clearSearch()
+								setSelectedUser(null)
+							}}
+						>
 							Cancel
 						</Button>
 						<Button

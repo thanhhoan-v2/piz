@@ -82,7 +82,7 @@ export function PostFormContent({
 							onChange={handleInputChange}
 							placeholder="What's on your mind?"
 							className={cn(
-								"min-h-[10px] max-w-[90vw] resize-none bg-cynical-black border-none p-0 text-xl focus-visible:ring-0",
+								"min-h-[10px] max-w-[90vw] resize-none bg-cynical-black border-none p-0 text-xl focus-visible:ring-0"
 							)}
 						/>
 					</div>

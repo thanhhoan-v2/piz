@@ -106,7 +106,7 @@ export default function ChatInput({
 							"border-none ring-black/30 dark:ring-white/30",
 							"text-black dark:text-white resize-none text-wrap leading-[1.2]",
 							"overflow-hidden", // Add this to prevent scrollbar flash
-							`min-h-[${minHeight}px]`,
+							`min-h-[${minHeight}px]`
 						)}
 						ref={textareaRef}
 						value={value ?? inputValue}
@@ -131,7 +131,7 @@ export default function ChatInput({
 						className={cn(
 							"absolute right-6 top-1/2 -translate-y-1/2 rounded-full p-2 w-[50px] py-1 px-1",
 							submitted ? "bg-none" : "bg-black/5 dark:bg-white/5",
-							(value ?? inputValue).trim() ? "cursor-pointer" : "cursor-not-allowed opacity-50",
+							(value ?? inputValue).trim() ? "cursor-pointer" : "cursor-not-allowed opacity-50"
 						)}
 						disabled={submitted || !(value ?? inputValue).trim()}
 					>
@@ -141,7 +141,7 @@ export default function ChatInput({
 							<CornerRightUp
 								className={cn(
 									"w-4 h-4 transition-opacity",
-									(value ?? inputValue).trim() ? "opacity-100" : "opacity-30",
+									(value ?? inputValue).trim() ? "opacity-100" : "opacity-30"
 								)}
 							/>
 						)}

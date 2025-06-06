@@ -211,7 +211,7 @@ const VideoPlayer = ({
 											size="icon"
 											className={cn(
 												"text-white hover:bg-[#111111d1] hover:text-white",
-												playbackSpeed === speed && "bg-[#111111d1]",
+												playbackSpeed === speed && "bg-[#111111d1]"
 											)}
 										>
 											{speed}x

@@ -6,10 +6,7 @@ export async function GET(request: Request) {
 	const query = searchParams.get("query")
 
 	if (!query) {
-		return NextResponse.json(
-			{ error: "Query parameter is required" },
-			{ status: 400 },
-		)
+		return NextResponse.json({ error: "Query parameter is required" }, { status: 400 })
 	}
 
 	try {
@@ -34,9 +31,6 @@ export async function GET(request: Request) {
 		return NextResponse.json(users)
 	} catch (error) {
 		console.error("Search error:", error)
-		return NextResponse.json(
-			{ error: "Failed to search users" },
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: "Failed to search users" }, { status: 500 })
 	}
 }

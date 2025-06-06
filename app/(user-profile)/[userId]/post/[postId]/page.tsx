@@ -8,9 +8,7 @@ import { buildCommentTree } from "@utils/comment-tree.helpers"
 import { RefreshCw } from "lucide-react"
 import React from "react"
 
-export default function PostPage({
-	params,
-}: { params: Promise<{ postId: string }> }) {
+export default function PostPage({ params }: { params: Promise<{ postId: string }> }) {
 	const [postId, setPostId] = React.useState("")
 
 	React.useEffect(() => {
@@ -26,15 +24,12 @@ export default function PostPage({
 		enabled: !!postId,
 	})
 
-	const { data: unstructuredComments, refetch: refetchComments } =
-		useQueryAllComments({
-			postId,
-			enabled: !!postId,
-		})
+	const { data: unstructuredComments, refetch: refetchComments } = useQueryAllComments({
+		postId,
+		enabled: !!postId,
+	})
 
-	const comments = unstructuredComments
-		? buildCommentTree(unstructuredComments)
-		: null
+	const comments = unstructuredComments ? buildCommentTree(unstructuredComments) : null
 
 	const handleRefetchComments = () => {
 		refetchComments()

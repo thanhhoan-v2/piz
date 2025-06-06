@@ -1,9 +1,6 @@
 import { Button } from "@components/ui/Button"
 
-export default function PostSaveButton({
-	userId,
-	postId,
-}: { userId: string; postId: string }) {
+export default function PostSaveButton({ userId, postId }: { userId: string; postId: string }) {
 	const handleSavePost = () => {}
 
 	return (

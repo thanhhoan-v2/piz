@@ -161,7 +161,7 @@ export default function TeamsPage() {
 				setJoiningTeamId(null)
 			}
 		},
-		[joiningTeamId, router, user, publicTeams],
+		[joiningTeamId, router, user, publicTeams]
 	)
 
 	return (

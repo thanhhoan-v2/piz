@@ -62,7 +62,7 @@ function DeletePostButton({ postId, userId }: DeletePostButtonProps) {
 					setIsDeleting(false)
 					setOpen(false) // Close dialog after completion
 				},
-			},
+			}
 		)
 	}
 

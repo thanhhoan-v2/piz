@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 				error: "Failed to leave team",
 				details: errorMessage,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		)
 	}
 }

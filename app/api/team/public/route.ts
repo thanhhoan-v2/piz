@@ -26,7 +26,7 @@ export async function GET() {
 						console.error(`Error getting team profile for team ${team.id}:`, error)
 						return null
 					}
-				}),
+				})
 			).then((ids) => ids.filter((id): id is string => id !== null))
 		}
 
@@ -53,7 +53,7 @@ export async function GET() {
 					isUserMember,
 					memberCount,
 				}
-			}),
+			})
 		)
 
 		return NextResponse.json(formattedTeams)

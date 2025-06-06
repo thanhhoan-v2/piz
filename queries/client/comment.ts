@@ -51,8 +51,8 @@ export const useQueryCommentReaction = ({
 	})
 
 interface UseQueryAllCommentsParams {
-	postId: string;
-	enabled?: boolean;
+	postId: string
+	enabled?: boolean
 }
 
 export const useQueryAllComments = ({ postId, enabled = true }: UseQueryAllCommentsParams) =>
@@ -61,5 +61,5 @@ export const useQueryAllComments = ({ postId, enabled = true }: UseQueryAllComme
 		queryFn: async () => getAllCommentsByPost({ postId }),
 		enabled: !!postId && enabled,
 		staleTime: 0,
-		refetchOnMount: true
+		refetchOnMount: true,
 	})

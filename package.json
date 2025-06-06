@@ -6,6 +6,11 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
+		"format": "biome format . --write",
+		"format:check": "biome format . --check",
+		"type-check": "tsc --noEmit",
 		"db:generate": "npx prisma generate",
 		"db:pull": "npx prisma db pull && npx prisma generate",
 		"db:push": "npx prisma generate && npx prisma db push",
@@ -94,6 +99,7 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
 		"@faker-js/faker": "^8.4.1",
 		"@mermaid-js/mermaid-cli": "^10.9.1",
 		"@prisma/client": "^6.4.1",

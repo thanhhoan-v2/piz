@@ -129,7 +129,7 @@ export const useDeletePostMutation = () => {
 				if (old.posts && Array.isArray(old.posts)) {
 					return {
 						...old,
-						posts: old.posts.filter((post: any) => post.id !== postId)
+						posts: old.posts.filter((post: any) => post.id !== postId),
 					}
 				}
 				// Handle the case where the data is directly an array of posts

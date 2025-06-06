@@ -74,7 +74,7 @@ export default function PostComment({
 						onClick={handleCommentClick}
 						onKeyUp={handleCommentKeyUp}
 						className={cn(
-							"flex min-h-[100px] w-full cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3",
+							"flex min-h-[100px] w-full cursor-pointer flex-col justify-between rounded-t-lg bg-background-item px-5 py-3"
 						)}
 					>
 						<PostHeader

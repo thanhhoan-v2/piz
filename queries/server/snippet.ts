@@ -55,7 +55,7 @@ export const createSnippet = async ({ id, userId, value, lang }: CreateSnippetPr
 	} catch (error) {
 		console.error(
 			`[SNIPPET] Error creating/updating snippet with ID ${id}:`,
-			JSON.stringify(error, null, 2),
+			JSON.stringify(error, null, 2)
 		)
 		throw error
 	}
@@ -85,7 +85,7 @@ export const getSnippetById = async (id: string | null) => {
 	} catch (error) {
 		console.error(
 			`[SNIPPET] Error retrieving snippet with ID ${id}:`,
-			JSON.stringify(error, null, 2),
+			JSON.stringify(error, null, 2)
 		)
 		return null
 	}

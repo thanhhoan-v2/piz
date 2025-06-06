@@ -134,14 +134,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 				<HeaderBar
 					className={cn(
 						"fixed top-0 right-0 left-0 z-50 flex-between bg-background px-3 py-2 shadow-md transition-transform duration-300 ease-in-out",
-						headerBarIsVisible,
+						headerBarIsVisible
 					)}
 				/>
 
 				<SideBar
 					mobileSideBarClassName={cn(
 						"fixed shadow-md transition-transform duration-300 ease-in-out",
-						sideBarIsVisible,
+						sideBarIsVisible
 					)}
 				/>
 				<main className="flex-center mobile_s:mx-1 ml-[100px] mobile_s:ml-0 mobile_s:w-full h-auto">

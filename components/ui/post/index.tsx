@@ -93,7 +93,7 @@ export default function Post({
 							key={id}
 							className={cn(
 								"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
-								postWidths,
+								postWidths
 							)}
 						>
 							<div className="flex justify-between">
@@ -140,7 +140,7 @@ export default function Post({
 						key={id}
 						className={cn(
 							"mb-0 flex min-h-[100px] w-full bg-cynical-black p-5 transform cursor-pointer flex-col justify-between transition-transform hover:scale-103",
-							postWidths,
+							postWidths
 						)}
 					>
 						<PostHeader

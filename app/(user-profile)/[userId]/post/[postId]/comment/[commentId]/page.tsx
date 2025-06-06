@@ -5,10 +5,7 @@ import PostComment, { type CommentWithChildren } from "@components/ui/comment"
 import Post from "@components/ui/post"
 import { useQueryAllComments, useQueryComment } from "@queries/client/comment"
 import { useQueryPost } from "@queries/client/post"
-import {
-	buildCommentTree,
-	extractFromCommentTreeById,
-} from "@utils/comment-tree.helpers"
+import { buildCommentTree, extractFromCommentTreeById } from "@utils/comment-tree.helpers"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
@@ -29,10 +26,8 @@ export default function CommentPage() {
 
 	const { data: post } = useQueryPost({ postId })
 	const { data: comment } = useQueryComment({ commentId })
-	const {
-		data: unstructuredAllComments,
-		isSuccess: isQueryAllCommentsSuccess,
-	} = useQueryAllComments({ postId })
+	const { data: unstructuredAllComments, isSuccess: isQueryAllCommentsSuccess } =
+		useQueryAllComments({ postId })
 
 	const allCommentsFromPost = unstructuredAllComments
 		? buildCommentTree(unstructuredAllComments)

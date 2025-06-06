@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
 			{
 				error: error instanceof Error ? error.message : `Failed to ${action} team join request`,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		)
 	}
 }

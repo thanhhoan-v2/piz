@@ -35,7 +35,7 @@ export const createComment = async (newComment: CreateCommentProps) => {
 
 		// Get post owner
 		const post = await prisma.post.findUnique({
-			where: { id: newComment.postId }
+			where: { id: newComment.postId },
 		})
 
 		if (post && post.userId !== newComment.userId) {
@@ -46,11 +46,11 @@ export const createComment = async (newComment: CreateCommentProps) => {
 					type: "COMMENT",
 					options: {
 						postId: newComment.postId,
-						commentId: comment.id
-					}
+						commentId: comment.id,
+					},
 				})
 			} catch (error) {
-				console.error('[COMMENT] Error creating notification:', error)
+				console.error("[COMMENT] Error creating notification:", error)
 			}
 		}
 
@@ -155,7 +155,7 @@ export const createCommentReaction = async ({
 				})
 				// Get comment owner
 				const comment = await prisma.comment.findUnique({
-					where: { id: commentId }
+					where: { id: commentId },
 				})
 
 				if (comment && comment.userId !== userId) {
@@ -165,8 +165,8 @@ export const createCommentReaction = async ({
 						type: "COMMENT_REACTION",
 						options: {
 							postId: comment.postId,
-							commentId
-						}
+							commentId,
+						},
 					})
 				}
 				return newCommentReaction
@@ -187,12 +187,11 @@ export const deleteCommentReaction = async ({
 			const existingReaction = await getCommentReaction({ userId, commentId })
 
 			if (existingReaction) {
-				const deletedCommentReaction: CommentReaction =
-					await prisma.commentReaction.delete({
-						where: {
-							id: existingReaction.id,
-						},
-					})
+				const deletedCommentReaction: CommentReaction = await prisma.commentReaction.delete({
+					where: {
+						id: existingReaction.id,
+					},
+				})
 				console.log("<< Comment >> Deleted reaction: ", deletedCommentReaction)
 			} else {
 				console.log("<< Comment >> No existing reaction found to delete")

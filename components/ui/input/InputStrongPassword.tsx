@@ -6,10 +6,7 @@ type StrongPasswordProps = {
 	onSignalStrong: (isSignalStrong: boolean) => void
 }
 
-const InputStrongPassword = ({
-	onPasswordChange,
-	onSignalStrong,
-}: StrongPasswordProps) => {
+const InputStrongPassword = ({ onPasswordChange, onSignalStrong }: StrongPasswordProps) => {
 	const [hintDropdownOpen, setHintDropdownOpen] = useState(false)
 	const [isEyeOpen, setIsEyeOpen] = useState(false)
 	const [passwordValue, setPasswordValue] = useState("")
@@ -22,9 +19,7 @@ const InputStrongPassword = ({
 		strong: false,
 	})
 
-	const handleStrongPasswordChecker = (
-		e: React.ChangeEvent<HTMLInputElement>,
-	) => {
+	const handleStrongPasswordChecker = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const password = e.target.value
 		setPasswordValue(password)
 
@@ -39,12 +34,7 @@ const InputStrongPassword = ({
 			number: hasNumber,
 			symbol: hasSymbol,
 			length: password.length >= 8,
-			strong:
-				hasUpperCase &&
-				hasLowerCase &&
-				hasNumber &&
-				hasSymbol &&
-				password.length >= 8,
+			strong: hasUpperCase && hasLowerCase && hasNumber && hasSymbol && password.length >= 8,
 		})
 
 		onPasswordChange(password)
@@ -75,9 +65,7 @@ const InputStrongPassword = ({
 				<div
 					className={`${hintDropdownOpen ? "z-30 translate-y-0 opacity-100" : "z-[-1] translate-y-[-10px] opacity-0"} absolute top-[60px] left-0 w-full rounded-md bg-white px-4 py-3 shadow-md transition-all duration-300`}
 				>
-					<h3 className="font-[500] text-[1rem] text-gray-900">
-						Your password must contain:
-					</h3>
+					<h3 className="font-[500] text-[1rem] text-gray-900">Your password must contain:</h3>
 
 					<div className="mt-2 flex w-full flex-col gap-[6px]">
 						{/* <div */}

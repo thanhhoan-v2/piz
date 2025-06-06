@@ -1,10 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/Avatar"
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@components/ui/Tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/Tooltip"
 import { cn } from "@utils/cn"
 import { type VariantProps, cva } from "class-variance-authority"
 
@@ -54,7 +49,7 @@ const AvatarStack = ({
 			className={cn(
 				avatarStackVariants({ orientation, spacing }),
 				className,
-				orientation === "horizontal" ? "-space-x-0" : "-space-y-0",
+				orientation === "horizontal" ? "-space-x-0" : "-space-y-0"
 			)}
 			{...props}
 		>
@@ -85,9 +80,7 @@ const AvatarStack = ({
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Avatar key="Excesive avatars">
-								<AvatarFallback>
-									+{avatars.length - shownAvatars.length}
-								</AvatarFallback>
+								<AvatarFallback>+{avatars.length - shownAvatars.length}</AvatarFallback>
 							</Avatar>
 						</TooltipTrigger>
 						<TooltipContent>

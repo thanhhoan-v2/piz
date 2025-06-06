@@ -1,8 +1,4 @@
-import {
-	DrawerDescription,
-	DrawerHeader,
-	DrawerTitle,
-} from "@components/ui/Drawer"
+import { DrawerDescription, DrawerHeader, DrawerTitle } from "@components/ui/Drawer"
 
 export function PostFormHeader() {
 	return (

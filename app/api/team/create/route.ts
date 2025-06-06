@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 		console.log("Setting team admin - User ID:", userId)
 		console.log(
 			"Setting team admin - Existing Metadata:",
-			JSON.stringify(existingMetadata, null, 2),
+			JSON.stringify(existingMetadata, null, 2)
 		)
 		console.log("Setting team admin - Team object keys:", Object.keys(team))
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 		const updatedTeam = await stackServerApp.getTeam(teamId)
 		console.log(
 			"Setting team admin - Updated Metadata:",
-			JSON.stringify(updatedTeam?.clientMetadata, null, 2),
+			JSON.stringify(updatedTeam?.clientMetadata, null, 2)
 		)
 
 		// Return a success response

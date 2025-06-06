@@ -139,7 +139,7 @@ export function NotificationItem({ notification }: { notification: Noti }) {
 		<div
 			className={cn(
 				"flex items-center gap-4 rounded-lg p-4 border bg-cynical-black border-transparent hover:bg-background-item/80 transition-colors relative",
-				!notification.isRead && "bg-cynical-black/60 border-border/50",
+				!notification.isRead && "bg-cynical-black/60 border-border/50"
 			)}
 		>
 			{!notification.isRead && (

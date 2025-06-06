@@ -10,12 +10,7 @@ export default function HeaderBarLogo() {
 	return (
 		<>
 			{/* if URL length has more than 2 items then show in center, else show in leftmost */}
-			<div
-				className={cn(
-					"mobile-only flex-grow",
-					pathSegments.length >= 2 && "flex-center",
-				)}
-			>
+			<div className={cn("mobile-only flex-grow", pathSegments.length >= 2 && "flex-center")}>
 				<Logo />
 			</div>
 		</>

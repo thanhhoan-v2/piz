@@ -105,10 +105,10 @@ export const createPost = async ({
 						senderId: userId,
 						type: "POST",
 						options: {
-							postId: newPost.id
-						}
-					}),
-				),
+							postId: newPost.id,
+						},
+					})
+				)
 			)
 		} catch (error) {
 			console.error("[POST] Error creating notifications:", JSON.stringify(error, null, 2))
@@ -152,11 +152,11 @@ export const getAllPosts = async (limit?: number, cursor?: string) => {
 		take: limit || undefined,
 		...(cursor
 			? {
-				skip: 1, // Skip the cursor
-				cursor: {
-					id: cursor,
-				},
-			}
+					skip: 1, // Skip the cursor
+					cursor: {
+						id: cursor,
+					},
+				}
 			: {}),
 		orderBy: {
 			createdAt: "desc",
@@ -207,11 +207,11 @@ export const getTeamPosts = async (teamId: string, limit?: number, cursor?: stri
 			take: limit || undefined,
 			...(cursor
 				? {
-					skip: 1, // Skip the cursor
-					cursor: {
-						id: cursor,
-					},
-				}
+						skip: 1, // Skip the cursor
+						cursor: {
+							id: cursor,
+						},
+					}
 				: {}),
 			orderBy: {
 				createdAt: "desc",

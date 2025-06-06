@@ -51,22 +51,22 @@ export default function CollabRoomInputModal({ children }: { children: React.Rea
 						</DialogDescription>
 						<div className="relative">
 							<div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 blur-md -z-10" />
-							<Input 
-								type="number" 
+							<Input
+								type="number"
 								placeholder="Enter room code..."
 								className="text-center text-lg py-6 border-2 transition-all duration-300 focus:scale-[1.02]"
-								onChange={(e) => setRoomNumber(Number(e.target.value))} 
+								onChange={(e) => setRoomNumber(Number(e.target.value))}
 							/>
 						</div>
 					</div>
 					<div className="flex-center mt-8">
-						<Button 
-							asChild 
+						<Button
+							asChild
 							className={`
 								relative w-full max-w-[200px] py-6 overflow-hidden
 								bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90
 								transition-all duration-300 transform
-								${isHovered ? 'scale-105' : ''}
+								${isHovered ? "scale-105" : ""}
 							`}
 							onClick={() => toggleModalOpen(false)}
 							onMouseEnter={() => setIsHovered(true)}

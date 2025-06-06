@@ -117,8 +117,8 @@ export function PostFormFooter({
 						className="w-[100px]"
 						onClick={handleSubmitPost}
 						disabled={
-							(isAddingImage && storedPostImageUrl == undefined) ||
-							(isAddingVideo && storedPostVideoUrl == undefined) ||
+							(isAddingImage && storedPostImageUrl === undefined) ||
+							(isAddingVideo && storedPostVideoUrl === undefined) ||
 							(isAddingSnippet && !isSnippetPreviewed)
 						}
 					>

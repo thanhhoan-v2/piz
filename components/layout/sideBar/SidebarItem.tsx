@@ -22,7 +22,7 @@ const sizes =
 
 const sideBarItemClass = cn(
 	"cursor-pointer text-white flex items-center gap-3 rounded-md font-medium text-sm transition-colors hover:bg-muted hover:text-black dark:hover:bg-slate-800 flex-center group",
-	sizes,
+	sizes
 )
 
 export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
@@ -36,7 +36,7 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 	// Icon fill for different pages - always white now, but black on hover
 	const iconFill = pathname === href ? "white" : "none"
 	const iconStroke = "white"
-	const iconClass = "group-hover:stroke-black" + (pathname === href ? " group-hover:fill-black" : "")
+	const iconClass = `group-hover:stroke-black${pathname === href ? " group-hover:fill-black" : ""}`
 
 	// If user is signed in and the href is post
 	if (href === "post" && userId) {
@@ -54,7 +54,11 @@ export default function SideBarItem({ href, icon: Icon }: SideBarItemProps) {
 		return (
 			<Link prefetch={true} href={`/${userId}` as Route} aria-disabled={!userId && true}>
 				<Button variant="ghost" className={cn(sideBarItemClass, !userId && "pointer-events-none")}>
-					{!userId ? <UserRoundX className="w-full" /> : <Icon stroke={iconStroke} className={iconClass} />}
+					{!userId ? (
+						<UserRoundX className="w-full" />
+					) : (
+						<Icon stroke={iconStroke} className={iconClass} />
+					)}
 				</Button>
 			</Link>
 		)

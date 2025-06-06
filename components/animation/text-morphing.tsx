@@ -114,7 +114,7 @@ export function GooeyText({
 					className={cn(
 						"absolute inline-block select-none text-center text-6xl md:text-[60pt]",
 						"text-foreground",
-						textClassName,
+						textClassName
 					)}
 				/>
 				<span
@@ -122,7 +122,7 @@ export function GooeyText({
 					className={cn(
 						"absolute inline-block select-none text-center text-6xl md:text-[60pt]",
 						"text-foreground",
-						textClassName,
+						textClassName
 					)}
 				/>
 			</div>

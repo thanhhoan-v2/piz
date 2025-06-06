@@ -109,7 +109,7 @@ export default function FollowersDialog({
 										<p className="text-muted-foreground text-sm">@{follower.userName}</p>
 									</div>
 									<div onClick={handleFollowAction}>
-										<FollowButton userId={follower.id}  />
+										<FollowButton userId={follower.id} />
 									</div>
 								</div>
 							))}

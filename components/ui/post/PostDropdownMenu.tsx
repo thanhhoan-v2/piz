@@ -57,8 +57,7 @@ export default function PostDropdownMenu({
 	// Dropdown menu
 	const [isDropdownOpen, setOpenDropdown] = React.useState<boolean>(false)
 	// Report dialog
-	const [isReportDialogOpen, setOpenReportDialog] =
-		React.useState<boolean>(false)
+	const [isReportDialogOpen, setOpenReportDialog] = React.useState<boolean>(false)
 	// Report content
 	const [reportContent, setReportContent] = React.useState<string>("")
 	// Alert dialog for discarding report
@@ -113,11 +112,7 @@ export default function PostDropdownMenu({
 				<DropdownMenuContent>
 					{/* save */}
 					<DropdownMenuItem asChild className={dropdownMenuItemClassName}>
-						<Button
-							variant="ghost"
-							className="w-full flex-between"
-							onClick={handleSavePost}
-						>
+						<Button variant="ghost" className="w-full flex-between" onClick={handleSavePost}>
 							<p>Save</p>
 							<BookMarked />
 						</Button>
@@ -155,29 +150,19 @@ export default function PostDropdownMenu({
 
 			{/* report dialog */}
 			<Dialog open={isReportDialogOpen} onOpenChange={setOpenReportDialog}>
-				<DialogContent
-					className="rounded-lg border-none"
-					onPointerDownOutside={handleOpenAlert}
-				>
+				<DialogContent className="rounded-lg border-none" onPointerDownOutside={handleOpenAlert}>
 					<DialogHeader>
 						<DialogTitle>Report</DialogTitle>
-						<DialogDescription>
-							Why are you reporting this post ?
-						</DialogDescription>
+						<DialogDescription>Why are you reporting this post ?</DialogDescription>
 
-						<Textarea
-							value={reportContent}
-							onChange={(e) => setReportContent(e.target.value)}
-						/>
+						<Textarea value={reportContent} onChange={(e) => setReportContent(e.target.value)} />
 					</DialogHeader>
 
 					{/* report button */}
 					<Button
 						onClick={handleReportSubmit}
 						// if charsLimit is reached or value is empty -> disable
-						disabled={
-							reportContent.length > charsLimit || reportContent.length === 0
-						}
+						disabled={reportContent.length > charsLimit || reportContent.length === 0}
 					>
 						Reply
 					</Button>
@@ -192,12 +177,8 @@ export default function PostDropdownMenu({
 						<AlertDialogDescription />
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setOpenReportDialog(true)}>
-							Cancel
-						</AlertDialogCancel>
-						<AlertDialogAction onClick={handleReportDiscard}>
-							Discard
-						</AlertDialogAction>
+						<AlertDialogCancel onClick={() => setOpenReportDialog(true)}>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={handleReportDiscard}>Discard</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>

@@ -86,7 +86,7 @@ export default function SearchBar() {
 				setDebouncedSearchValue(searchValue)
 			}
 		},
-		[searchValue],
+		[searchValue]
 	)
 
 	const [isFocused, setIsFocused] = React.useState(false)
@@ -155,7 +155,7 @@ export default function SearchBar() {
 										id: result.id,
 										userName: result.userName || "Unknown User",
 										avatarUrl: result.userAvatarUrl,
-									}),
+									})
 								)}
 							/>
 						) : (

@@ -48,7 +48,7 @@ export function TeamJoinRequests({ teamId }: { teamId: string }) {
 					}
 					return acc
 				},
-				{} as Record<string, UserInfo>,
+				{} as Record<string, UserInfo>
 			)
 
 			setUsersInfo(usersInfoMap)
@@ -68,7 +68,7 @@ export function TeamJoinRequests({ teamId }: { teamId: string }) {
 			},
 			onError: (error) => {
 				toast.error(
-					`Failed to accept join request: ${error instanceof Error ? error.message : "Unknown error"}`,
+					`Failed to accept join request: ${error instanceof Error ? error.message : "Unknown error"}`
 				)
 			},
 		})
@@ -81,7 +81,7 @@ export function TeamJoinRequests({ teamId }: { teamId: string }) {
 			},
 			onError: (error) => {
 				toast.error(
-					`Failed to reject join request: ${error instanceof Error ? error.message : "Unknown error"}`,
+					`Failed to reject join request: ${error instanceof Error ? error.message : "Unknown error"}`
 				)
 			},
 		})

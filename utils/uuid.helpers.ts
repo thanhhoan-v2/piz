@@ -11,9 +11,7 @@ export const generateBase64uuid = () => {
 		throw new Error("Failed to match hex string")
 	}
 
-	const byteArray = new Uint8Array(
-		matches.map((byte) => Number.parseInt(byte, 16)),
-	)
+	const byteArray = new Uint8Array(matches.map((byte) => Number.parseInt(byte, 16)))
 
 	// Convert the byte array to a binary string
 	let binaryString = ""

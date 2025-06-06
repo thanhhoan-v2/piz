@@ -13,9 +13,11 @@ import { stackServerApp } from "../../../stack"
  * @returns The rendered component.
  */
 export default function Handler(props: unknown) {
-	return <>
-		<div className="w-[300px]">
-			<StackHandler fullPage app={stackServerApp} routeProps={props} />
-		</div>
-	</>
+	return (
+		<>
+			<div className="w-[300px]">
+				<StackHandler fullPage app={stackServerApp} routeProps={props} />
+			</div>
+		</>
+	)
 }

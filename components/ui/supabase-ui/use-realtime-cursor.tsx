@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
  */
 const useThrottleCallback = <Params extends unknown[], Return>(
 	callback: (...args: Params) => Return,
-	delay: number,
+	delay: number
 ) => {
 	const lastCall = useRef(0)
 	const timeout = useRef<NodeJS.Timeout | null>(null)
@@ -33,7 +33,7 @@ const useThrottleCallback = <Params extends unknown[], Return>(
 				}, remainingTime)
 			}
 		},
-		[callback, delay],
+		[callback, delay]
 	)
 }
 
@@ -114,7 +114,7 @@ export const useRealtimeCursors = ({
 					})
 			}
 		},
-		[color, userId, username],
+		[color, userId, username]
 	)
 
 	const handleMouseMove = useThrottleCallback(callback, throttleMs)
