@@ -81,7 +81,7 @@ jobs:
       - name: Run Biome linter
         run: pnpm lint
 
-      - name: Run Biome formatter
+      - name: Check Biome formatting
         run: pnpm format:check
 
   # Type checking

@@ -389,7 +389,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 		try {
 			// Try to get the room first to identify the correct record
-			let collabRoom
+			let collabRoom: any = null
 
 			try {
 				// Try by numeric ID first

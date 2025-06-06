@@ -630,9 +630,11 @@ export const ChatBox: FC<ChatBoxProps> = ({ roomId, userId, userName }): ReactEl
 		// Process known mentioned users first
 		for (const user of mentionedUsers) {
 			const mentionPattern = new RegExp(`@${user.userName}\\b`, "g")
-			let match
+			let match: RegExpExecArray | null = null
 
-			while ((match = mentionPattern.exec(message)) !== null) {
+			while (true) {
+				match = mentionPattern.exec(message)
+				if (match === null) break
 				// Add text before the mention
 				if (match.index > lastIndex) {
 					parts.push(message.substring(lastIndex, match.index))

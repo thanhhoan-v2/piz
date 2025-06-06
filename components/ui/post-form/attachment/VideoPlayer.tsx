@@ -146,7 +146,9 @@ const VideoPlayer = ({
 					onError={(e) => {
 						console.error("[VIDEO] Error loading video:", e)
 					}}
-				/>
+				>
+					<track kind="captions" srcLang="en" label="English captions" />
+				</video>
 			) : (
 				<h3>Cannot find your video</h3>
 			)}
