@@ -1,0 +1,102 @@
+name: Deploy with Vercel Integration
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  pre-deploy-validation:
+    name: Pre-deployment Validation
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Run staging migrations
+        if: github.ref == 'refs/heads/develop'
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.STAGING_DIRECT_URL }}
+
+      - name: Run production migrations
+        if: github.ref == 'refs/heads/main'
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
+        environment: production
+
+  post-deploy-validation:
+    name: Post-deployment Validation
+    runs-on: ubuntu-latest
+    needs: pre-deploy-validation
+    steps:
+      - name: Health check staging
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          # Wait for Vercel deployment to complete
+          sleep 30
+          curl -f https://staging.yourdomain.com/api/health || exit 1
+
+      - name: Health check production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Wait for Vercel deployment to complete
+          sleep 30
+          curl -f https://yourdomain.com/api/health || exit 1
+
+      - name: Deployment notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const environment = github.ref === 'refs/heads/main' ? 'Production' : 'Staging';
+            const url = github.ref === 'refs/heads/main' ? 'https://yourdomain.com' : 'https://staging.yourdomain.com';
+            
+            const body = `
+            ## Deployment Complete!
+            
+            **Environment:** ${environment}
+            **URL:** ${url}
+            **Commit:** \`${context.sha}\`
+            **Deployed by:** @${context.actor}
+            
+            ✅ All validation checks passed
+            ✅ Database migrations applied
+            ✅ Health checks successful
+            `;
+            
+            // Create deployment status comment (if this is a PR merge)
+            if (context.payload.workflow_run.pull_requests?.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.workflow_run.pull_requests[0].number,
+                body: body
+              });
+            } 

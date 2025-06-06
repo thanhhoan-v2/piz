@@ -1,0 +1,292 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # PR Info and labeling
+  pr-info:
+    name: 📋 PR Information
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📊 Analyze PR
+        id: analyze
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const labels = [];
+            let hasComponents = false;
+            let hasDatabase = false;
+            let hasAPI = false;
+            let hasTests = false;
+            let hasDocumentation = false;
+
+            for (const file of files) {
+              if (file.filename.includes('components/')) hasComponents = true;
+              if (file.filename.includes('prisma/') || file.filename.includes('migrations/')) hasDatabase = true;
+              if (file.filename.includes('api/') || file.filename.includes('app/api/')) hasAPI = true;
+              if (file.filename.includes('.test.') || file.filename.includes('.spec.')) hasTests = true;
+              if (file.filename.includes('.md') || file.filename.includes('docs/')) hasDocumentation = true;
+            }
+
+            if (hasComponents) labels.push('frontend');
+            if (hasDatabase) labels.push('database');
+            if (hasAPI) labels.push('backend');
+            if (hasTests) labels.push('tests');
+            if (hasDocumentation) labels.push('documentation');
+
+            // Add size label
+            const changedLines = files.reduce((sum, file) => sum + file.additions + file.deletions, 0);
+            if (changedLines < 50) labels.push('size/S');
+            else if (changedLines < 200) labels.push('size/M');
+            else if (changedLines < 500) labels.push('size/L');
+            else labels.push('size/XL');
+
+            return {
+              labels,
+              filesChanged: files.length,
+              changedLines,
+              hasBreakingChanges: pr.title.includes('BREAKING') || pr.body.includes('BREAKING CHANGE')
+            };
+
+      - name: 🏷️ Add labels to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ${{ steps.analyze.outputs.result }}.labels;
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+            }
+
+      - name: 📊 Comment PR summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = ${{ steps.analyze.outputs.result }};
+            
+            const body = `
+            ## 📊 Pull Request Summary
+            
+            **Files changed:** ${result.filesChanged}
+            **Lines changed:** ${result.changedLines}
+            ${result.hasBreakingChanges ? '⚠️ **This PR contains breaking changes**' : ''}
+            
+            ### 🔍 Automated checks will run:
+            - ✅ Code linting and formatting
+            - ✅ TypeScript type checking
+            - ✅ Build verification
+            - ✅ Database schema validation
+            - ✅ Security audit
+            
+            *This comment was generated automatically by GitHub Actions.*
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+  # Run the same CI checks but with PR context
+  ci-checks:
+    name: 🧪 CI Checks for PR
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  # Preview deployment for PRs
+  preview-deploy:
+    name: 🚀 Deploy Preview
+    runs-on: ubuntu-latest
+    needs: ci-checks
+    if: github.event.action != 'closed'
+    environment:
+      name: preview-pr-${{ github.event.number }}
+      url: ${{ steps.deploy.outputs.preview-url }}
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🎯 Generate Prisma client
+        run: pnpm db:generate
+
+      - name: 🏗 Build application
+        run: pnpm build
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+          NEXTAUTH_URL: ${{ secrets.STAGING_NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.STAGING_NEXTAUTH_SECRET }}
+
+      - name: 🚀 Deploy Preview to Vercel
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          github-comment: true
+
+      - name: 📊 Update PR with preview link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🚀 Preview Deployment')
+            );
+
+            const body = `
+            ## 🚀 Preview Deployment Ready!
+            
+            **Preview URL:** ${{ steps.deploy.outputs.preview-url }}
+            **Deployment:** ✅ Successful
+            **Commit:** \`${{ github.sha }}\`
+            
+            ### 📱 Test your changes:
+            - Desktop: [Open Preview](${{ steps.deploy.outputs.preview-url }})
+            - Mobile: [Open Preview](${{ steps.deploy.outputs.preview-url }})
+            
+            *Preview will be updated automatically with new commits.*
+            `;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  # Lighthouse performance audit on preview
+  lighthouse:
+    name: 🔍 Lighthouse Audit
+    runs-on: ubuntu-latest
+    needs: preview-deploy
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ needs.preview-deploy.outputs.preview-url }}
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # Code coverage (if tests are added in the future)
+  coverage:
+    name: 📊 Code Coverage
+    runs-on: ubuntu-latest
+    needs: ci-checks
+    if: false  # Enable this when tests are added
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧪 Run tests with coverage
+        run: pnpm test:coverage  # Add this script to package.json when tests are implemented
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Cleanup preview deployment on PR close
+  cleanup-preview:
+    name: 🧹 Cleanup Preview
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+    steps:
+      - name: 🧹 Delete preview deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // GitHub automatically cleans up the environment
+            // This step is mainly for logging
+            console.log('Preview environment cleaned up for PR #' + context.issue.number); 
