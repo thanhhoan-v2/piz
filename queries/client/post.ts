@@ -123,9 +123,21 @@ export const useDeletePostMutation = () => {
 			const previousPosts = queryClient.getQueryData(queryKey.post.all)
 
 			// Optimistically remove the post from the cache
-			queryClient.setQueryData(queryKey.post.all, (old: Post[] | undefined) => {
+			queryClient.setQueryData(queryKey.post.all, (old: any) => {
 				if (!old) return []
-				return old.filter((post) => post.id !== postId)
+				// Handle the case where the data is an object with posts property (paginated)
+				if (old.posts && Array.isArray(old.posts)) {
+					return {
+						...old,
+						posts: old.posts.filter((post: any) => post.id !== postId)
+					}
+				}
+				// Handle the case where the data is directly an array of posts
+				if (Array.isArray(old)) {
+					return old.filter((post) => post.id !== postId)
+				}
+				// Return unchanged if structure is unexpected
+				return old
 			})
 
 			// Return the snapshots so we can rollback if something goes wrong

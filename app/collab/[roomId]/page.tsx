@@ -263,7 +263,7 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 	const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null) // Use useRef to hold the channel
 	const presenceCheckIntervalRef = useRef<NodeJS.Timeout | null>(null) // Ref for the presence check interval
 	// Store collabInfo to access the BigInt id for the chat
-	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string; room_id?: string } | null>(null)
+	const [collabInfo, setCollabInfo] = useState<{ id?: bigint; content?: string; room_id?: string; metadata?: any } | null>(null)
 	// Store joined users for tagging
 	const [joinedUsers, setJoinedUsers] = useState<JoinedUser[]>([])
 
@@ -769,61 +769,59 @@ export default function CollabPage({ params }: { params: Promise<{ roomId: strin
 
 	// useEffect to initialize room data when roomId is ready
 	useEffect(() => {
-		if (!roomId) return
+		if (!roomId) return;
 
-		// Get collabInfo and initialize joined users
-		const initializeRoom = async () => {
+		const fetchRoomInfo = async () => {
 			try {
-				// First attempt to get the room by its numeric ID
-				let data;
-				let error;
+				let idToQuery = roomId;
 
-				try {
-					// Try convert to BigInt if possible (might be internal ID)
-					if (roomId.match(/^\d+$/)) {
-						const roomIdBigInt = BigInt(roomId);
-						const result = await supabase.from("Collab").select("*").eq("id", roomIdBigInt.toString()).single();
-						data = result.data;
-						error = result.error;
-					} else {
-						throw new Error("Not a numeric ID, try room_id lookup");
-					}
-				} catch (e) {
-					// If BigInt conversion fails, try by room_id
-					console.log("Attempting room lookup by room_id field instead of ID");
-					const result = await supabase.from("Collab").select("*").eq("room_id", roomId).single();
-					data = result.data;
-					error = result.error;
-				}
+				// Try to determine if this is a numeric ID or a room_id string
+				const isNumericId = !isNaN(Number(roomId));
+
+				const { data, error } = await supabase
+					.from('Collab')
+					.select('*')
+					.eq(isNumericId ? 'id' : 'room_id', roomId)
+					.single();
 
 				if (error) {
-					console.error("Error fetching collab info:", error);
-
-					// As a fallback, try both ways
-					console.log("Trying fallback lookup methods for room ID:", roomId);
-
-					// Try with a more general query to debug the issue
-					const allRooms = await supabase.from("Collab").select("*").limit(5);
-					console.log("Available rooms:", allRooms.data?.map(r => ({
-						id: r.id.toString(),
-						room_id: r.room_id
-					})));
-
+					console.error('Error fetching room info:', error);
 					return;
 				}
 
-				console.log("Fetched collab info:", data);
-				setCollabInfo(data);
+				if (data) {
+					console.log('Room info retrieved:', {
+						id: data.id.toString(),
+						room_id: data.room_id,
+						metadata: data.metadata
+					});
+
+					setCollabInfo({
+						id: data.id,
+						content: data.content,
+						room_id: data.room_id,
+						metadata: data.metadata || {}
+					});
+
+					// Update joined users from database
+					if (data.joined_users) {
+						try {
+							const parsedUsers = Array.isArray(data.joined_users)
+								? data.joined_users
+								: JSON.parse(data.joined_users);
+							setJoinedUsers(parsedUsers);
+						} catch (e) {
+							console.error('Error parsing joined users:', e);
+						}
+					}
+				}
 			} catch (err) {
-				console.error("Failed to fetch collab info:", err);
+				console.error('Failed to fetch room info:', err);
 			}
+		};
 
-			// Fetch joined users
-			fetchJoinedUsers();
-		}
-
-		initializeRoom();
-	}, [roomId, supabase, fetchJoinedUsers]);
+		fetchRoomInfo();
+	}, [roomId, supabase]);
 
 	return (
 		<CollabUI

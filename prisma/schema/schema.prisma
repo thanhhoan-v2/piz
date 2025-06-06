@@ -159,6 +159,7 @@ model Collab {
   version           String?
   room_id           String?
   joined_users      Json?        @default("[]")
+  metadata          Json?
   chatMessages      CollabChat[]
 }
 

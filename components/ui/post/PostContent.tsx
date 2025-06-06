@@ -50,27 +50,31 @@ export default function PostContent({
 		try {
 			setIsCreatingRoom(true)
 
-			// Create a new collab room in the database
-			const { data, error } = await supabase
-				.from("Collab")
-				.insert({
+			// Use the API endpoint instead of direct Supabase call for better tracking
+			const response = await fetch("/api/collab/create-room", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
 					content: snippet.value,
-					updated_at: new Date().toISOString(),
-					version: "1.0.0",
-					room_id: Math.floor(100000 + Math.random() * 900000).toString(), // 6-digit random number
-					joined_users: [],
-				})
-				.select()
-				.single()
+					userId: userId,
+					sourceType: "post",
+					sourceId: postId,
+					snippetId: snippetId
+				}),
+			})
 
-			if (error) {
-				console.error("Error creating collab room:", error)
+			const data = await response.json()
+
+			if (!response.ok) {
+				console.error("Error creating collab room:", data)
 				toast.error("Failed to create collaboration room")
 				return
 			}
 
 			// Navigate to the new collab room
-			const roomId = data.id.toString()
+			const roomId = data.room.id
 			toast.success("Collaboration room created! Redirecting...")
 
 			// Give the toast time to show before redirecting
@@ -169,7 +173,7 @@ export default function PostContent({
 		<>
 			<div className="flex flex-col gap-4" onClick={handlePostClick} onKeyUp={handlePostKeyUp}>
 				<div>
-					<p className="text-white">{content}</p>
+					<p className="text-white whitespace-pre-line">{content}</p>
 
 					<div className="my-2" />
 

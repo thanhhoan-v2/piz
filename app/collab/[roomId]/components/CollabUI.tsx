@@ -14,9 +14,10 @@ import {
 import { Input } from "@components/ui/Input"
 import { RealtimeCursors } from "@components/ui/supabase-ui/realtime-cursor"
 import { Editor } from "@monaco-editor/react"
-import { CheckCircle, Clock, CopyIcon, InfoIcon, Loader2, MessageSquare, Search, UserIcon, UserPlus, X } from "lucide-react"
+import { CheckCircle, Clock, CopyIcon, InfoIcon, Loader2, MessageSquare, Search, UserIcon, UserPlus, X, Sparkles, Link2, Code } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export type PresenceUser = {
 	userId: string
@@ -35,7 +36,7 @@ interface CollabUIProps {
 	saveStatus: "saving" | "saved"
 	userId?: string
 	userName: string
-	collabInfo: { id?: bigint; content?: string; room_id?: string } | null
+	collabInfo: { id?: bigint; content?: string; room_id?: string; metadata?: any } | null
 	handleCodeChange: (value: string | undefined) => void
 }
 
@@ -65,13 +66,13 @@ export function CollabUI({
 	const [isSearching, setIsSearching] = useState(false)
 	const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null)
 	const [isInviting, setIsInviting] = useState(false)
+	const [copied, setCopied] = useState(false)
+	const [isCreatingEnhanced, setIsCreatingEnhanced] = useState(false)
+	const router = useRouter()
 
 	// For accessing the actual room IDs
 	const actualRoomId = collabInfo?.id?.toString() || roomId
 	const displayRoomId = collabInfo?.room_id || roomId
-
-	// For copying room ID
-	const [copied, setCopied] = useState(false)
 
 	// Debounce search
 	const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -172,6 +173,45 @@ export function CollabUI({
 		setSearchResults([])
 	}
 
+	const createEnhancedVersion = async () => {
+		if (!code || !userId) return;
+
+		setIsCreatingEnhanced(true);
+		try {
+			// Call the API to create a post from the collab room
+			const response = await fetch("/api/collab/create-post-from-room", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					code: code,
+					userId: userId,
+					userName: userName,
+					userAvatarUrl: null, // We don't have this info in the current context
+					roomId: roomId,
+					roomDisplayId: displayRoomId,
+					language: "typescript" // Default language for Monaco editor
+				}),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success("Enhanced version posted to your profile!");
+				// No need to redirect - we stay in the same room
+			} else {
+				toast.error("Failed to create enhanced version");
+				console.error("Error creating enhanced version:", data);
+			}
+		} catch (error) {
+			toast.error("Something went wrong");
+			console.error("Failed to create enhanced version:", error);
+		} finally {
+			setIsCreatingEnhanced(false);
+		}
+	};
+
 	return (
 		<div className="flex flex-col w-full mt-[100px] h-screen">
 			<div className="flex flex-col mx-auto px-4 pt-10 w-full max-w-6xl h-[80vh]">
@@ -190,6 +230,25 @@ export function CollabUI({
 							</button>
 						</div>
 						<div className="flex items-center gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								className="bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-800/50"
+								onClick={createEnhancedVersion}
+								disabled={isCreatingEnhanced}
+							>
+								{isCreatingEnhanced ? (
+									<>
+										<Loader2 size={14} className="mr-1.5 animate-spin" />
+										<span>Creating...</span>
+									</>
+								) : (
+									<>
+										<Sparkles size={14} className="mr-1.5" />
+										<span>Post as enhanced version</span>
+									</>
+								)}
+							</Button>
 							<Button
 								variant="outline"
 								size="sm"
@@ -348,6 +407,26 @@ export function CollabUI({
 								<p className="mt-1 text-lg font-mono">{actualRoomId}</p>
 							</div>
 
+							{collabInfo?.metadata && (
+								<div>
+									<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Source</h3>
+									<div className="mt-1">
+										{(collabInfo.metadata as any)?.sourcePost && (
+											<Badge variant="outline" className="mr-2 bg-blue-900/20 border-blue-800 text-blue-400">
+												<Link2 size={14} className="mr-1.5" />
+												<span>From Post</span>
+											</Badge>
+										)}
+										{(collabInfo.metadata as any)?.sourceSnippet && (
+											<Badge variant="outline" className="bg-purple-900/20 border-purple-800 text-purple-400">
+												<Code size={14} className="mr-1.5" />
+												<span>From Snippet</span>
+											</Badge>
+										)}
+									</div>
+								</div>
+							)}
+
 							<div>
 								<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Users</h3>
 								<div className="mt-1 flex flex-wrap gap-2">
@@ -428,8 +507,8 @@ export function CollabUI({
 											<button
 												onClick={() => setSelectedUser(user)}
 												className={`flex items-center gap-3 w-full p-2 rounded-md transition-colors ${selectedUser?.id === user.id
-														? "bg-primary/10 text-primary"
-														: "hover:bg-gray-100/10"
+													? "bg-primary/10 text-primary"
+													: "hover:bg-gray-100/10"
 													}`}
 											>
 												<div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
