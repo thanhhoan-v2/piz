@@ -89,7 +89,7 @@
 		"typesense": "^1.8.2",
 		"typesense-instantsearch-adapter": "^2.8.0",
 		"use-dehydrated-state": "^0.1.0",
-		"uuid": "^10.0.0",
+		"uuid": "^11.1.0",
 		"vaul": "^0.9.9",
 		"zod": "^3.24.2"
 	},
