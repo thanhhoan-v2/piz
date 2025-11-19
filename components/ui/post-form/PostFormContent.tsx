@@ -12,7 +12,7 @@ import { VideoUploadForm } from "./attachment/VideoUploadForm"
 type PostFormContentProps = {
 	mentionedUsers: IMentionedResult[]
 	postContent: string
-	textareaRef: React.RefObject<HTMLTextAreaElement>
+	textareaRef: React.RefObject<HTMLTextAreaElement | null>
 	handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
 	isAddingSnippet: boolean
 	setIsAddingSnippet: (value: boolean) => void
