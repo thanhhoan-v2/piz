@@ -1,5 +1,8 @@
 {
 	"private": true,
+	"engines": {
+		"node": ">=22.0.0"
+	},
 	"scripts": {
 		"postinstall": "echo 'Skipping prisma generate - run manually when CDN is available'",
 		"vercel-build": "prisma generate && node scripts/fix-migrations.js && next build",
